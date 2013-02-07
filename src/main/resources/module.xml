@@ -1,0 +1,64 @@
+<module>
+    <manifestVersion>1.0.0</manifestVersion>
+    <symbolicName>beam-diversity-auxdata</symbolicName>
+    <version>1.0</version>
+    <name>Diversity Auxdata</name>
+
+    <description>
+        <![CDATA[
+            <p>todo</p>
+            <p>Software: O.Danne of Brockmann Consult</p>
+    ]]>
+    </description>
+
+    <vendor>Brockmann Consult GmbH</vendor>
+    <contactAddress>Max Planck Str.2, 21502 Geesthacht (Germany)</contactAddress>
+    <copyright>(C) 2013 by Brockmann Consult GmbH</copyright>
+    <url>http://envisat.esa.int/beam</url>
+    <licenseUrl>http://www.gnu.org/licenses/gpl.html</licenseUrl>
+
+    <changelog>
+        <![CDATA[
+        <p>Changes in version 1.0<br/>
+        - Initial version
+        </p>
+        ]]>
+    </changelog>
+
+    <dependency>
+        <module>beam-gpf</module>
+    </dependency>
+    <dependency>
+        <module>beam-netcdf</module>
+    </dependency>
+    <dependency>
+        <module>beam-modis-reader</module>
+    </dependency>
+    <dependency>
+        <module>beam-visat-rcp</module>
+        <optional>true</optional>
+    </dependency>
+   
+    <categories>Processor</categories>
+
+    <extension point="beam-ui:actions">
+        <action>
+            <id>correctAtmosphereModis</id>
+            <class>org.esa.beam.operator.ui.DiversityAuxdataAction</class>
+            <text>Diversity Auxdata...</text>
+            <shortDescr>Prepares various Diversity drylands auxdata sets</shortDescr>
+            <longDescr>Prepares various Diversity drylands auxdata sets</longDescr>
+            <mnemonic/>
+            <parent>tools</parent>
+            <helpId>diversityAuxdata</helpId>
+        </action>
+    </extension>
+
+    <!--<extension point="beam-ui:helpSets">-->
+        <!--<helpSet>-->
+            <!--<parent>beam-help</parent>-->
+            <!--<path>doc/help/diversity-auxdata.hs</path>-->
+        <!--</helpSet>-->
+    <!--</extension>-->
+
+</module>
