@@ -49,6 +49,54 @@ public class DiversityAuxdataUtils {
         targetProduct.setAutoGrouping(stringPattern);
     }
 
+    /**
+     * Sorts an array of products by month. Products must have same name except their month indicator (MMM_a or MMM_b)
+     *
+     * @param products - the unsorted array
+     * @param filter - a filter substring which the product name must contain
+     * @param monthCharPos  - position where MMM starts in product name (e.g. 24 for the 'j' in 'DIVERSITY_TRMM_BIWEEKLY_jan_b')
+     * @param halfMonthCharPos  - position where month suffix 'a' or 'b' starts in product name
+     *                          (e.g. 27 for the 'b' in 'DIVERSITY_TRMM_BIWEEKLY_jan_b')
+     * @return  the sorted array
+     */
+    public static Product[] sortProductsByMonth(Product[] products, String filter, int monthCharPos, int halfMonthCharPos) {
+        List<Product> sortedProductsList = new ArrayList<Product>();
+        for (int i = 0; i < 2*Constants.MONTHS.length; i++) {
+            sortedProductsList.add(new Product("dummy", "dummy", 0, 0));
+        }
+
+        for (Product product : products) {
+            if (product != null && (filter == null || product.getName().contains(filter))) {
+                final String monthNameSubstring = product.getName().substring(monthCharPos, monthCharPos+3);  // e.g. "jan"
+                final char monthHalfChar = product.getName().charAt(halfMonthCharPos);  // 'a' or 'b'
+                for (int i = 0; i < Constants.MONTHS.length; i++) {
+                    if (monthNameSubstring.equals(Constants.MONTHS[i])) {
+                        if (monthHalfChar == 'a') {
+                            sortedProductsList.set(2 * i, product);
+                        } else if (monthHalfChar == 'b') {
+                            sortedProductsList.set(2 * i + 1, product);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = sortedProductsList.size()-1; i>=0; i--) {
+            Product product = sortedProductsList.get(i);
+            if (product.getName().equals("dummy")) {
+                sortedProductsList.remove(product);
+            }
+        }
+
+        return sortedProductsList.toArray(new Product[sortedProductsList.size()]);
+    }
+
+    /**
+     *
+     * @param products
+     * @param filter
+     * @return
+     */
     public static Product[] sortNdviProductsByMonth(Product[] products, String filter) {
         // we have e.g.
 //        06apr15a.n17-VIg
@@ -131,9 +179,56 @@ public class DiversityAuxdataUtils {
         return sortedProductsList.toArray(new Product[sortedProductsList.size()]);
     }
 
+    public static Product[] sortTrmmProductsByMonth(Product[] products, String filter) {
+        // we have e.g.
+//        DIVERSITY_SM_BIWEEKLY_jan_b
+//        DIVERSITY_SM_BIWEEKLY_feb_b
+//        DIVERSITY_SM_BIWEEKLY_jan_a
+        // we want
+//        DIVERSITY_SM_BIWEEKLY_jan_a
+//        DIVERSITY_SM_BIWEEKLY_jan_b
+//        DIVERSITY_SM_BIWEEKLY_feb_a
+//        etc.
+        List<Product> sortedProductsList = new ArrayList<Product>();
+        for (int i = 0; i < 2*Constants.MONTHS.length; i++) {
+            sortedProductsList.add(new Product("dummy", "dummy", 0, 0));
+        }
+
+        for (Product product : products) {
+            if (product != null && (filter == null || product.getName().contains(filter))) {
+                final String monthNameSubstring = product.getName().substring(24, 25);  // e.g. "jan"
+                final char monthHalfChar = product.getName().charAt(28);  // 'a' or 'b'
+                for (int i = 0; i < Constants.MONTHS.length; i++) {
+                    if (monthNameSubstring.equals(Constants.MONTHS[i])) {
+                        if (monthHalfChar == 'a') {
+                            sortedProductsList.set(2 * i, product);
+                        } else if (monthHalfChar == 'b') {
+                            sortedProductsList.set(2 * i + 1, product);
+                        }
+                    }
+                }
+            }
+        }
+
+        for (int i = sortedProductsList.size()-1; i>=0; i--) {
+            Product product = sortedProductsList.get(i);
+            if (product.getName().equals("dummy")) {
+                sortedProductsList.remove(product);
+            }
+        }
+
+        return sortedProductsList.toArray(new Product[sortedProductsList.size()]);
+    }
+
 
     public static boolean isDateWithinPeriod(Date startDate, Date endDate, Date dateToCheck) {
         return !(dateToCheck.before(startDate) || dateToCheck.after(endDate));
     }
 
+    public static double[] getGet8DayProductFractionsForBiweeklyPeriods(String biweeklyStartDate) {
+
+
+
+        return new double[0];  //To change body of created methods use File | Settings | File Templates.
+    }
 }

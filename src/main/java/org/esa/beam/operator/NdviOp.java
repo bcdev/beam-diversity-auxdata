@@ -42,7 +42,7 @@ public class NdviOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         final String sourceProductFilter = writeFlags ? "_flag" : "_data";
-        sortedSourceProducts = DiversityAuxdataUtils.sortNdviProductsByMonth(sourceProducts, sourceProductFilter);
+        sortedSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, sourceProductFilter, 2, 7);
         createTargetProduct();
 
         if (writeFlags) {

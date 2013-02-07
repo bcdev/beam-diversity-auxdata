@@ -44,7 +44,7 @@ public class SoilMoistureOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        sortedSourceProducts = DiversityAuxdataUtils.sortSoilMoistureProductsByMonth(sourceProducts, null);
+        sortedSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, null, 22, 26);
 
         // create target product and copy the biweekly bands
         final Product yearlySmProduct = createYearlyProduct();

@@ -62,8 +62,8 @@ public class NdviMaxCompositOp extends Operator {
     public void initialize() throws OperatorException {
         final String sourceDataProductFilter = "_data";
         final String sourceFlagProductFilter = "_flag";
-        sortedDataSourceProducts = DiversityAuxdataUtils.sortNdviProductsByMonth(sourceProducts, sourceDataProductFilter);
-        sortedFlagSourceProducts = DiversityAuxdataUtils.sortNdviProductsByMonth(sourceProducts, sourceFlagProductFilter);
+        sortedDataSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, sourceDataProductFilter, 2, 7);
+        sortedFlagSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, sourceFlagProductFilter, 2, 7);
 
         createTargetProduct();
 

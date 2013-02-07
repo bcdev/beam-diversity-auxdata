@@ -1,9 +1,8 @@
 package org.esa.beam.operator;
 
+import org.esa.beam.AuxdataSourcesProvider;
 import org.esa.beam.Constants;
 import org.esa.beam.DataCategory;
-import org.esa.beam.DiversityAuxdataUtils;
-import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -12,11 +11,8 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 
 import java.io.File;
-import java.io.FileFilter;
-import java.io.IOException;
 import java.text.ParseException;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -49,95 +45,29 @@ public class MasterOp extends Operator {
     private DataCategory category;
 
 
-    public static final String CMAP_INPUT_FILE_NAME = "precip.mon.mean.nc";
-
     @Override
     public void initialize() throws OperatorException {
         Product[] ndviSourceProducts;
         switch (category) {
             case NDVI:
-                ndviSourceProducts = getNdviSourceProducts(inputDataDir, year);
-                NdviOp ndviOp = new NdviOp();
-                ndviOp.setSourceProducts(ndviSourceProducts);
-                ndviOp.setParameter("year", year);
-                ndviOp.setParameter("writeFlags", writeNdviFlags);
-
-                final Product ndviProduct = ndviOp.getTargetProduct();
+                final Product ndviProduct = getNdviProduct();
                 setTargetProduct(ndviProduct);
                 break;
             case NDVI_MAXCOMPOSIT:
-                ndviSourceProducts = getNdviSourceProducts(inputDataDir, year);
-                NdviMaxCompositOp ndviMaxCompositOp = new NdviMaxCompositOp();
-                ndviMaxCompositOp.setSourceProducts(ndviSourceProducts);
-                ndviMaxCompositOp.setParameter("year", year);
-                ndviMaxCompositOp.setParameter("writeFlags", writeNdviFlags);
-
-                final Product ndviMaxCompositProduct = ndviMaxCompositOp.getTargetProduct();
+                final Product ndviMaxCompositProduct = getNdviMaxcompositProduct();
                 setTargetProduct(ndviMaxCompositProduct);
                 break;
             case TRMM:
-                TrmmOp trmmOp;
-                for (int i = 0; i < Constants.BIWEEKLY_START_DATES.length; i++) {
-                    String startdateString = year + Constants.BIWEEKLY_START_DATES[i];
-                    String enddateString = year + Constants.BIWEEKLY_END_DATES[i];
-                    trmmOp = new TrmmOp();
-                    Product[] trmmBiweeklySourceProducts = null;
-                    try {
-                        trmmBiweeklySourceProducts = getTrmm3HrSourceProducts(inputDataDir, startdateString, enddateString);
-                        trmmOp.setSourceProducts(trmmBiweeklySourceProducts);
-                        trmmOp.setParameter("year", year);
-                        trmmOp.setParameter("outputDataDir", outputDataDir);
-                        trmmOp.setParameter("startdateString", startdateString);
-                    } catch (ParseException e) {
-                        // todo
-                        e.printStackTrace();
-                    }
-
-                    setTargetProduct(trmmOp.getTargetProduct());
-
-                    for (Product sourceProduct : trmmBiweeklySourceProducts) {
-                        sourceProduct.dispose();
-                    }
-                }
+                final Product trmmProduct = getTrmmProduct();
+                setTargetProduct(trmmProduct);
                 break;
             case CMAP:
-                Product cmapSourceProduct = getCmapSourceProduct(inputDataDir);
+                Product cmapSourceProduct = AuxdataSourcesProvider.getCmapSourceProduct(inputDataDir);
                 // todo: continue
                 break;
             case SOIL_MOISTURE:
-                List<Product> biweeklyAverageProductList = new ArrayList<Product>();
-                // 1. per biweekly period, get daily single products and compute average products
-                SoilMoistureBiweeklyAverageOp smAveOp;
-                for (int i = 0; i < Constants.BIWEEKLY_START_DATES.length; i++) {
-                    String startdateString = year + Constants.BIWEEKLY_START_DATES[i];
-                    String enddateString = year + Constants.BIWEEKLY_END_DATES[i];
-                    smAveOp = new SoilMoistureBiweeklyAverageOp();
-                    Product[] smDailySourceProducts;
-                    try {
-                        smDailySourceProducts = getSmDailySourceProducts(inputDataDir, startdateString, enddateString);
-                        if (smDailySourceProducts != null && smDailySourceProducts.length > 0) {
-                            smAveOp.setSourceProducts(smDailySourceProducts);
-                            smAveOp.setParameter("year", year);
-                            smAveOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
-                            biweeklyAverageProductList.add(smAveOp.getTargetProduct());
-                        }
-                    } catch (ParseException e) {
-                        // todo
-                        e.printStackTrace();
-                    }
-
-                }
-                Product[] biweeklyAverageProducts = biweeklyAverageProductList.toArray(new Product[biweeklyAverageProductList.size()]);
-
-                // 2. for all biweekly periods, collect average products and add as single bands in final yearly product
-                SoilMoistureOp smOp = new SoilMoistureOp();
-                smOp.setSourceProducts(biweeklyAverageProducts);
-                smOp.setParameter("year", year);
-
-
-                final Product soilMoistureProduct = smOp.getTargetProduct();
+                final Product soilMoistureProduct = getSoilMoistureProduct();
                 setTargetProduct(soilMoistureProduct);
-
                 break;
             case ACTUAL_EVAPOTRANSPIRATION:
                 break;
@@ -146,158 +76,107 @@ public class MasterOp extends Operator {
         }
     }
 
-    private Product[] getSmDailySourceProducts(File inputDataDir, String startDateString, String endDateString) throws ParseException {
-        final FileFilter smProductFilter = new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isFile() &&
-                        file.getName().startsWith("ESACCI-L3S_SOILMOISTURE-SSMV-MERGED-") &&
-                        file.getName().toLowerCase().endsWith(".nc");
-            }
-        };
+    private Product getNdviMaxcompositProduct() {
+        Product[] ndviSourceProducts;
+        ndviSourceProducts = AuxdataSourcesProvider.getNdviSourceProducts(inputDataDir,
+                                                                          year,
+                                                                          category,
+                                                                          writeNdviFlags);
+        NdviMaxCompositOp ndviMaxCompositOp = new NdviMaxCompositOp();
+        ndviMaxCompositOp.setSourceProducts(ndviSourceProducts);
+        ndviMaxCompositOp.setParameter("year", year);
+        ndviMaxCompositOp.setParameter("writeFlags", writeNdviFlags);
 
-        Date startDate = SoilMoistureOp.sdfSM.parse(startDateString);
-        Date endDate = SoilMoistureOp.sdfSM.parse(endDateString);
+        return ndviMaxCompositOp.getTargetProduct();
+    }
 
-        final String smDir = inputDataDir + File.separator + year;
-        final File[] smSourceProductFiles = (new File(smDir)).listFiles(smProductFilter);
+    private Product getNdviProduct() {
+        Product[] ndviSourceProducts;
+        ndviSourceProducts = AuxdataSourcesProvider.getNdviSourceProducts(inputDataDir,
+                                                                          year,
+                                                                          category,
+                                                                          writeNdviFlags);
+        NdviOp ndviOp = new NdviOp();
+        ndviOp.setSourceProducts(ndviSourceProducts);
+        ndviOp.setParameter("year", year);
+        ndviOp.setParameter("writeFlags", writeNdviFlags);
 
-        List<Product> smSourceProductsList = new ArrayList<Product>();
+        return ndviOp.getTargetProduct();
+    }
 
-        int productIndex = 0;
-        for (File smSourceProductFile : smSourceProductFiles) {
-            // e.g. ESACCI-L3S_SOILMOISTURE-SSMV-MERGED-20100105000000-fv00.1.nc
-            final String productDateString = smSourceProductFile.getName().substring(36, 44);   // 20100105
+    private Product getSoilMoistureProduct() {
+        List<Product> biweeklyAverageProductList = new ArrayList<Product>();
+        // 1. per biweekly period, get daily single products and compute average products
+        SoilMoistureBiweeklyAverageOp smAveOp;
+        for (int i = 0; i < Constants.BIWEEKLY_START_DATES.length; i++) {
+            String startdateString = year + Constants.BIWEEKLY_START_DATES[i];
+            String enddateString = year + Constants.BIWEEKLY_END_DATES[i];
+            smAveOp = new SoilMoistureBiweeklyAverageOp();
+            Product[] smDailySourceProducts;
             try {
-                Date productDate = SoilMoistureOp.sdfSM.parse(productDateString);
-                if (DiversityAuxdataUtils.isDateWithinPeriod(startDate, endDate, productDate)) {
-                    final Product product = ProductIO.readProduct(smSourceProductFile.getAbsolutePath());
-                    if (product != null) {
-                        smSourceProductsList.add(product);
-                        productIndex++;
-                    }
+                smDailySourceProducts = AuxdataSourcesProvider.getSmDailySourceProducts(inputDataDir,
+                                                                                        year,
+                                                                                        startdateString,
+                                                                                        enddateString);
+                if (smDailySourceProducts != null && smDailySourceProducts.length > 0) {
+                    smAveOp.setSourceProducts(smDailySourceProducts);
+                    smAveOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
+                    biweeklyAverageProductList.add(smAveOp.getTargetProduct());
                 }
-            } catch (IOException e) {
-                System.err.println("WARNING: Soil Moisture netCDF file '" +
-                                           smSourceProductFile.getName() + "' could not be read - skipping.");
+            } catch (ParseException e) {
+                // todo
+                e.printStackTrace();
             }
-        }
 
-        if (productIndex == 0) {
-            System.out.println("WARNING: No Soil Moisture netCDF source products found for biweekly period " +
-                                       startDateString + " - nothing to do.");
         }
+        Product[] biweeklyAverageProducts = biweeklyAverageProductList.toArray(new Product[biweeklyAverageProductList.size()]);
 
-        return smSourceProductsList.toArray(new Product[smSourceProductsList.size()]);
+        // 2. for all biweekly periods, collect average products and add as single bands in final yearly product
+        SoilMoistureOp smOp = new SoilMoistureOp();
+        smOp.setSourceProducts(biweeklyAverageProducts);
+        smOp.setParameter("year", year);
+
+
+        return smOp.getTargetProduct();
     }
 
-    private Product[] getNdviSourceProducts(File inputDataDir, String year) {
-        final FileFilter ndviHalfmonthlyDirsFilter = new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isDirectory() && file.getName().endsWith("-VIg");
-            }
-        };
-
-        final String ndviDir = inputDataDir + File.separator + year;
-        final File[] ndviHalfmonthlyDirs = (new File(ndviDir)).listFiles(ndviHalfmonthlyDirsFilter);
-
-        List<Product> ndviSourceProductsList = new ArrayList<Product>();
-
-        int productIndex = 0;
-        for (File ndviHalfmonthlyDir : ndviHalfmonthlyDirs) {
-            if (!(writeNdviFlags && category == DataCategory.NDVI)) {
-                String ndviInputFileName = ndviHalfmonthlyDir.getAbsolutePath() + File.separator +
-                        ndviHalfmonthlyDir.getName() + "_data.tif";
-                try {
-                    final Product product = ProductIO.readProduct(ndviInputFileName);
-                    if (product != null) {
-                        ndviSourceProductsList.add(product);
-                        productIndex++;
-                    }
-                } catch (IOException e) {
-                    System.err.println("Warning: NDVI tif file in halfmonthly directory '" +
-                                               ndviHalfmonthlyDir.getName() + "' missing or could not be read - skipping.");
-                }
-            }
-
-            if (writeNdviFlags || category == DataCategory.NDVI_MAXCOMPOSIT) {
-                String ndviFlagInputFileName = ndviHalfmonthlyDir.getAbsolutePath() + File.separator +
-                        ndviHalfmonthlyDir.getName() + "_flag.tif";
-                try {
-                    final Product product = ProductIO.readProduct(ndviFlagInputFileName);
-                    if (product != null) {
-                        ndviSourceProductsList.add(product);
-                        productIndex++;
-                    }
-                } catch (IOException e) {
-                    System.err.println("Warning: NDVI flag tif file in halfmonthly directory '" +
-                                               ndviHalfmonthlyDir.getName() + "' missing or could not be read - skipping.");
-                }
-            }
-        }
-
-        if (productIndex == 0) {
-            System.out.println("No NDVI source products found for year " + year + " - nothing to do.");
-        }
-
-        return ndviSourceProductsList.toArray(new Product[ndviSourceProductsList.size()]);
-    }
-
-    private Product[] getTrmm3HrSourceProducts(File inputDataDir, String startDateString, String endDateString) throws ParseException {
-        final FileFilter trmm3B42ProductFilter = new FileFilter() {
-            @Override
-            public boolean accept(File file) {
-                return file.isFile() &&
-                        file.getName().toLowerCase().startsWith("3b42") &&
-                        file.getName().toLowerCase().endsWith(".nc");
-            }
-        };
-
-        Date startDate = TrmmOp.sdfTrmm.parse(startDateString);
-        Date endDate = TrmmOp.sdfTrmm.parse(endDateString);
-
-        final String trmmDir = inputDataDir + File.separator + year;
-        final File[] trmmSourceProductFiles = (new File(trmmDir)).listFiles(trmm3B42ProductFilter);
-
-        List<Product> trmmSourceProductsList = new ArrayList<Product>();
-
-        int productIndex = 0;
-        for (File trmmSourceProductFile : trmmSourceProductFiles) {
-            final String productDateString = trmmSourceProductFile.getName().substring(5, 13);
+    private Product getTrmmProduct() {
+        List<Product> biweeklyAverageProductList = new ArrayList<Product>();
+        // 1. per biweekly period, get daily single products and compute average products
+        TrmmBiweeklySumOp trmmSumOp;
+        Product[] trmmBiweeklySourceProducts = null;
+        for (int i = 0; i < Constants.BIWEEKLY_START_DATES.length; i++) {
+//        for (int i = 2; i < 3; i++) {
+            String startdateString = year + Constants.BIWEEKLY_START_DATES[i];
+            String enddateString = year + Constants.BIWEEKLY_END_DATES[i];
+            trmmSumOp = new TrmmBiweeklySumOp();
             try {
-                Date productDate = TrmmOp.sdfTrmm.parse(productDateString);
-                if (DiversityAuxdataUtils.isDateWithinPeriod(startDate, endDate, productDate)) {
-                    final Product product = ProductIO.readProduct(trmmSourceProductFile.getAbsolutePath());
-                    if (product != null) {
-                        trmmSourceProductsList.add(product);
-                        productIndex++;
-                    }
+                trmmBiweeklySourceProducts = AuxdataSourcesProvider.getTrmm3HrSourceProducts(inputDataDir,
+                                                                                             year,
+                                                                                             startdateString,
+                                                                                             enddateString);
+                if (trmmBiweeklySourceProducts != null && trmmBiweeklySourceProducts.length > 0) {
+                    sumTrmm(biweeklyAverageProductList, trmmSumOp, i, trmmBiweeklySourceProducts);
                 }
-            } catch (IOException e) {
-                System.err.println("WARNING: TRMM netCDF file '" +
-                                           trmmSourceProductFile.getName() + "' could not be read - skipping.");
+            } catch (ParseException e) {
+                // todo
+                e.printStackTrace();
             }
         }
+        Product[] biweeklyAverageProducts = biweeklyAverageProductList.toArray(new Product[biweeklyAverageProductList.size()]);
 
-        if (productIndex == 0) {
-            System.out.println("WARNING: No TRMM netCDF source products found for biweekly period " + startDateString + " - nothing to do.");
-        }
+        // 2. for all biweekly periods, collect average products and add as single bands in final yearly product
+        TrmmOp trmmOp = new TrmmOp();
+        trmmOp.setSourceProducts(biweeklyAverageProducts);
+        trmmOp.setParameter("year", year);
 
-        return trmmSourceProductsList.toArray(new Product[trmmSourceProductsList.size()]);
+        return trmmOp.getTargetProduct();
     }
 
-    private Product getCmapSourceProduct(File inputDataDir) {
-        Product product = null;
-        try {
-            // todo: make sure 180deg problem is handled!
-            product = ProductIO.readProduct(inputDataDir + File.separator + CMAP_INPUT_FILE_NAME);
-        } catch (IOException e) {
-            System.err.println("Warning: CMAP source file in directory '" +
-                                       inputDataDir.getName() + "' missing or could not be read - skipping.");
-        }
-
-        return product;
+    private void sumTrmm(List<Product> biweeklyAverageProductList, TrmmBiweeklySumOp trmmSumOp, int i, Product[] trmmBiweeklySourceProducts) {
+        trmmSumOp.setSourceProducts(trmmBiweeklySourceProducts);
+        trmmSumOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
+        biweeklyAverageProductList.add(trmmSumOp.getTargetProduct());
     }
 
 
