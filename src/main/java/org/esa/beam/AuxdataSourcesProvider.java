@@ -120,7 +120,7 @@ public class AuxdataSourcesProvider {
         return ndviSourceProductsList.toArray(new Product[ndviSourceProductsList.size()]);
     }
 
-    public static Product[] getTrmm3HrSourceProducts(File inputDataDir, String year, String startDateString, String endDateString) throws ParseException {
+    public static Product[] getTrmm3HrSourceProducts(File inputDataDir, String startDateString, String endDateString) throws ParseException {
         final FileFilter trmm3B42ProductFilter = new FileFilter() {
             @Override
             public boolean accept(File file) {
@@ -133,7 +133,7 @@ public class AuxdataSourcesProvider {
         Date startDate = TrmmBiweeklySumOp.sdfTrmm.parse(startDateString);
         Date endDate = TrmmBiweeklySumOp.sdfTrmm.parse(endDateString);
 
-        final String trmmDir = inputDataDir + File.separator + year;
+        final String trmmDir = inputDataDir.getAbsolutePath();
         final File[] trmmSourceProductFiles = (new File(trmmDir)).listFiles(trmm3B42ProductFilter);
 
         List<Product> trmmSourceProductsList = new ArrayList<Product>();
@@ -160,6 +160,44 @@ public class AuxdataSourcesProvider {
 
         if (productIndex == 0) {
             System.out.println("WARNING: No TRMM netCDF source products found for biweekly period " + startDateString + " - nothing to do.");
+        }
+
+        return trmmSourceProductsList.toArray(new Product[trmmSourceProductsList.size()]);
+    }
+
+    public static Product[] getTrmmBiweeklySourceProducts(File inputDataDir) throws ParseException {
+        final FileFilter trmm3B42ProductFilter = new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return file.isFile() &&
+                        file.getName().startsWith("TRMM") &&
+                        (file.getName().endsWith("_a.tif") || file.getName().endsWith("_b.tif"));
+            }
+        };
+
+        final String trmmDir = inputDataDir.getAbsolutePath();
+        final File[] trmmSourceProductFiles = (new File(trmmDir)).listFiles(trmm3B42ProductFilter);
+
+        List<Product> trmmSourceProductsList = new ArrayList<Product>();
+
+        int productIndex = 0;
+        if (trmmSourceProductFiles != null && trmmSourceProductFiles.length > 0) {
+            for (File trmmSourceProductFile : trmmSourceProductFiles) {
+                try {
+                    final Product product = ProductIO.readProduct(trmmSourceProductFile.getAbsolutePath());
+                    if (product != null) {
+                        trmmSourceProductsList.add(product);
+                        productIndex++;
+                    }
+                } catch (IOException e) {
+                    System.err.println("WARNING: TRMM netCDF file '" +
+                                               trmmSourceProductFile.getName() + "' could not be read - skipping.");
+                }
+            }
+        }
+
+        if (productIndex == 0) {
+            System.out.println("WARNING: No TRMM biweekly products found in " + trmmDir + " - nothing to do.");
         }
 
         return trmmSourceProductsList.toArray(new Product[trmmSourceProductsList.size()]);

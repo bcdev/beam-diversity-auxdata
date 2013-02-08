@@ -21,7 +21,7 @@ import org.esa.beam.util.ProductUtils;
                   authors = "Olaf Danne",
                   copyright = "(c) 2013 Brockmann Consult",
                   internal = true,
-                  description = "Operator for preparation/modification of Diversity TRMM auxdata.")
+                  description = "Operator for preparation/modification of Diversity TRMM auxdata: merges biweekly data into yearly product")
 public class TrmmOp extends Operator {
 
     @SourceProducts(description = "TRMM biweekly source products")
@@ -37,7 +37,7 @@ public class TrmmOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        sortedSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, null, 24, 28);
+        sortedSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, null, 9, 13);
 
         // create target product and copy the biweekly bands
         final Product yearlyTrmmProduct = createYearlyProduct();

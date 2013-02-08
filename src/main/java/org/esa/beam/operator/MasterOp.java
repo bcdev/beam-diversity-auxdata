@@ -40,7 +40,7 @@ public class MasterOp extends Operator {
     private boolean writeNdviFlags;
 
     @Parameter(defaultValue = "NDVI",
-               valueSet = {"NDVI", "NDVI_MAXCOMPOSIT", "TRMM", "CMAP", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
+               valueSet = {"NDVI", "NDVI_MAXCOMPOSIT", "TRMM_YEARLY", "TRMM_BIWEEKLY", "CMAP", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
                description = "Processing mode (i.e. the data to process")
     private DataCategory category;
 
@@ -57,9 +57,20 @@ public class MasterOp extends Operator {
                 final Product ndviMaxCompositProduct = getNdviMaxcompositProduct();
                 setTargetProduct(ndviMaxCompositProduct);
                 break;
-            case TRMM:
-                final Product trmmProduct = getTrmmProduct();
-                setTargetProduct(trmmProduct);
+            case TRMM_BIWEEKLY:
+                writeTrmmBiweeklyProducts();
+                break;
+            case TRMM_YEARLY:
+                TrmmOp trmmOp = new TrmmOp();
+                try {
+                    Product[] trmmBiweeklySourceProducts = AuxdataSourcesProvider.getTrmmBiweeklySourceProducts(inputDataDir);
+                    trmmOp.setSourceProducts(trmmBiweeklySourceProducts);
+                    trmmOp.setParameter("year", year);
+                    setTargetProduct(trmmOp.getTargetProduct());
+                } catch (ParseException e) {
+                    // todo
+                    e.printStackTrace();
+                }
                 break;
             case CMAP:
                 Product cmapSourceProduct = AuxdataSourcesProvider.getCmapSourceProduct(inputDataDir);
@@ -73,6 +84,32 @@ public class MasterOp extends Operator {
                 break;
             case AIR_TEMPERATURE:
                 break;
+        }
+    }
+
+    private void writeTrmmBiweeklyProducts() {
+        TrmmBiweeklySumOp trmmSummOp;
+        for (int i = 0; i < Constants.BIWEEKLY_START_DATES.length; i++) {
+            String startdateString = year + Constants.BIWEEKLY_START_DATES[i];
+            String enddateString = year + Constants.BIWEEKLY_END_DATES[i];
+            trmmSummOp = new TrmmBiweeklySumOp();
+            Product[] trmm3HrSourceProducts = null;
+            try {
+                trmm3HrSourceProducts = AuxdataSourcesProvider.getTrmm3HrSourceProducts(inputDataDir, startdateString, enddateString);
+                trmmSummOp.setSourceProducts(trmm3HrSourceProducts);
+                trmmSummOp.setParameter("year", year);
+                trmmSummOp.setParameter("outputDataDir", outputDataDir);
+                trmmSummOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
+            } catch (ParseException e) {
+                // todo
+                e.printStackTrace();
+            }
+
+            setTargetProduct(trmmSummOp.getTargetProduct());
+
+            for (Product sourceProduct : trmm3HrSourceProducts) {
+                sourceProduct.dispose();
+            }
         }
     }
 
@@ -139,46 +176,6 @@ public class MasterOp extends Operator {
 
         return smOp.getTargetProduct();
     }
-
-    private Product getTrmmProduct() {
-        List<Product> biweeklyAverageProductList = new ArrayList<Product>();
-        // 1. per biweekly period, get daily single products and compute average products
-        TrmmBiweeklySumOp trmmSumOp;
-        Product[] trmmBiweeklySourceProducts = null;
-        for (int i = 0; i < Constants.BIWEEKLY_START_DATES.length; i++) {
-//        for (int i = 2; i < 3; i++) {
-            String startdateString = year + Constants.BIWEEKLY_START_DATES[i];
-            String enddateString = year + Constants.BIWEEKLY_END_DATES[i];
-            trmmSumOp = new TrmmBiweeklySumOp();
-            try {
-                trmmBiweeklySourceProducts = AuxdataSourcesProvider.getTrmm3HrSourceProducts(inputDataDir,
-                                                                                             year,
-                                                                                             startdateString,
-                                                                                             enddateString);
-                if (trmmBiweeklySourceProducts != null && trmmBiweeklySourceProducts.length > 0) {
-                    sumTrmm(biweeklyAverageProductList, trmmSumOp, i, trmmBiweeklySourceProducts);
-                }
-            } catch (ParseException e) {
-                // todo
-                e.printStackTrace();
-            }
-        }
-        Product[] biweeklyAverageProducts = biweeklyAverageProductList.toArray(new Product[biweeklyAverageProductList.size()]);
-
-        // 2. for all biweekly periods, collect average products and add as single bands in final yearly product
-        TrmmOp trmmOp = new TrmmOp();
-        trmmOp.setSourceProducts(biweeklyAverageProducts);
-        trmmOp.setParameter("year", year);
-
-        return trmmOp.getTargetProduct();
-    }
-
-    private void sumTrmm(List<Product> biweeklyAverageProductList, TrmmBiweeklySumOp trmmSumOp, int i, Product[] trmmBiweeklySourceProducts) {
-        trmmSumOp.setSourceProducts(trmmBiweeklySourceProducts);
-        trmmSumOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
-        biweeklyAverageProductList.add(trmmSumOp.getTargetProduct());
-    }
-
 
     public static class Spi extends OperatorSpi {
 

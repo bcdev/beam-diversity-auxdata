@@ -4,21 +4,21 @@ import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.Constants;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.Tile;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.gpf.operators.standard.WriteOp;
 import org.esa.beam.util.ProductUtils;
 
 import javax.media.jai.JAI;
 import javax.media.jai.operator.AddDescriptor;
 import java.awt.image.RenderedImage;
 import java.awt.image.renderable.ParameterBlock;
+import java.io.File;
 import java.text.SimpleDateFormat;
 
 /**
@@ -39,30 +39,45 @@ public class TrmmBiweeklySumOp extends Operator {
     @TargetProduct(description = "The target product.")
     private Product targetProduct;
 
+    @Parameter(defaultValue = "", description = "Output data directory")
+    private File outputDataDir;
+
     @Parameter(defaultValue = "", description = "The start date string")
     private String startdateString;
 
-    private static final String THREE_HR_PRECIP_BAND_NAME = "pcp";
-    private static final String TOTAL_PRECIP_BAND_NAME = "total_pcp";
+    @Parameter(defaultValue = "", description = "The year to process")
+    private String year;
 
     public static final SimpleDateFormat sdfTrmm = new SimpleDateFormat("yyyyMMdd");
 
+    private static final String PRECIP_BAND_NAME = "pcp";
+    private static final String TOTAL_PRECIP_BAND_NAME = "total_pcp";
+
+    private String biweeklyBandName;
 
     @Override
     public void initialize() throws OperatorException {
-        createTargetProduct();
-
         // do biweekly summation
-        final Band precipBand0 = sourceProducts[0].getBand(THREE_HR_PRECIP_BAND_NAME);
-        RenderedImage precipImageSum = precipBand0.getSourceImage();
-        for (int j = 1; j < sourceProducts.length; j++) {
-            final Band precipBandJ = sourceProducts[j].getBand(THREE_HR_PRECIP_BAND_NAME);
-            RenderedImage precipImageJ = precipBandJ.getSourceImage();
-            precipImageSum = AddDescriptor.create(precipImageSum, precipImageJ, null);
-        }
-        RenderedImage finalPrecipImageSum = filterNegativePrecip(precipImageSum);
+        if (sourceProducts != null && sourceProducts.length > 0) {
+            final Band precipBand0 = sourceProducts[0].getBand(PRECIP_BAND_NAME);
+            RenderedImage precipImageSum = precipBand0.getSourceImage();
+            for (int j = 1; j < sourceProducts.length; j++) {
+                final Band precipBandJ = sourceProducts[j].getBand(PRECIP_BAND_NAME);
+                RenderedImage precipImageJ = precipBandJ.getSourceImage();
+                precipImageSum = AddDescriptor.create(precipImageSum, precipImageJ, null);
+            }
+            RenderedImage finalPrecipImageSum = filterNegativePrecip(precipImageSum);
 
-        targetProduct.getBand(TOTAL_PRECIP_BAND_NAME + "_" + startdateString).setSourceImage(finalPrecipImageSum);
+            Product biweeklyProduct = createBiweeklyProduct();
+            biweeklyProduct.getBand(biweeklyBandName).setSourceImage(finalPrecipImageSum);
+            // do reprojection
+            Product biweeklyReprojectedProduct = ReferenceReprojection.reproject(biweeklyProduct);
+
+            // write final, biweekly, reprojected product with total precip band
+            writeReprojectedBiweeklyProduct(biweeklyReprojectedProduct);
+        }
+
+        setDummyTargetProduct();
     }
 
     private RenderedImage filterNegativePrecip(RenderedImage precipImageSum) {
@@ -80,22 +95,37 @@ public class TrmmBiweeklySumOp extends Operator {
         return JAI.create("threshold", pb);
     }
 
-    private void createTargetProduct() {
+
+    private void writeReprojectedBiweeklyProduct(Product product) {
+        final String outputFilename = "TRMM_pcp_" + startdateString + ".tif";
+        final File file = new File(outputDataDir, outputFilename);
+        WriteOp writeOp = new WriteOp(product, file, "GeoTIFF");
+        writeOp.writeProduct(ProgressMonitor.NULL);
+        System.out.println("Written biweekly TRMM file '" + file.getAbsolutePath() + "'.");
+    }
+
+    private Product createBiweeklyProduct() {
         final int width = sourceProducts[0].getSceneRasterWidth();
         final int height = sourceProducts[0].getSceneRasterHeight();
 
-        targetProduct = new Product("DIVERSITY_TRMM_BIWEEKLY_" + startdateString,
-                                    "DIVERSITY_TRMM_BIWEEKLY",
-                                    width,
-                                    height);
-        ProductUtils.copyGeoCoding(sourceProducts[0], targetProduct);
+        Product biweeklyProduct = new Product("DIVERSITY_TRMM_BIWEEKLY_" + startdateString,
+                                              "DIVERSITY_TRMM_BIWEEKLY",
+                                              width,
+                                              height);
+        ProductUtils.copyGeoCoding(sourceProducts[0], biweeklyProduct);
 
-        Band targetBand = new Band(TOTAL_PRECIP_BAND_NAME + "_" + startdateString, ProductData.TYPE_FLOAT32, width, height);
-        targetBand.setNoDataValue(Constants.TRMM_INVALID_VALUE);
-        targetBand.setNoDataValueUsed(true);
-        targetProduct.addBand(targetBand);
+        Band precipSourceBand = sourceProducts[0].getBand(PRECIP_BAND_NAME);
+        biweeklyBandName = TOTAL_PRECIP_BAND_NAME + "_" + startdateString;
+        ProductUtils.copyBand(precipSourceBand.getName(), sourceProducts[0], biweeklyBandName, biweeklyProduct, true);
+        biweeklyProduct.getBand(biweeklyBandName).setNoDataValue(Constants.NDVI_INVALID_VALUE);
+        biweeklyProduct.getBand(biweeklyBandName).setNoDataValueUsed(true);
+        biweeklyProduct.getBand(biweeklyBandName).setDescription("Total precipitation (mm)");
 
-        setTargetProduct(targetProduct);
+        return biweeklyProduct;
+    }
+
+    private void setDummyTargetProduct() {
+        setTargetProduct(new Product("dummy", "dummy", 0, 0));
     }
 
     public static class Spi extends OperatorSpi {
