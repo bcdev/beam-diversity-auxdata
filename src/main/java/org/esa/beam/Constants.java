@@ -54,6 +54,7 @@ public class Constants {
 
     public static final double TRMM_INVALID_VALUE = -10000.0;
     public static final double SM_INVALID_VALUE = -1.0;
+    public static final double AE_INVALID_VALUE = Short.MAX_VALUE;
 
 
 }

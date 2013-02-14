@@ -2,7 +2,7 @@ package org.esa.beam.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.Constants;
-import org.esa.beam.DiversityAuxdataUtils;
+import org.esa.beam.util.DiversityAuxdataUtils;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Product;

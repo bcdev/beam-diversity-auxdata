@@ -1,7 +1,7 @@
 package org.esa.beam.operator;
 
 import org.esa.beam.Constants;
-import org.esa.beam.DiversityAuxdataUtils;
+import org.esa.beam.util.DiversityAuxdataUtils;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;

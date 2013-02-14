@@ -2,8 +2,11 @@ package org.esa.beam;
 
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.operator.ActualEvapoOp;
 import org.esa.beam.operator.SoilMoistureOp;
 import org.esa.beam.operator.TrmmBiweeklySumOp;
+import org.esa.beam.util.BiweeklyProductFraction;
+import org.esa.beam.util.DiversityAuxdataUtils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -21,6 +24,57 @@ import java.util.List;
 public class AuxdataSourcesProvider {
 
     private static final String CMAP_INPUT_FILE_NAME = "precip.mon.mean.nc";
+
+    public static Product[] getAe8DaySourceProducts(File inputDataDir,
+                                                    String year,
+                                                    BiweeklyProductFraction eightDayProductFractions,
+                                                    String startDateString,
+                                                    String endDateString) throws ParseException {
+        final FileFilter aeProductFilter = new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return file.isFile() &&
+                        file.getName().startsWith("MOD16A2_ET_0.05deg_GEO_") &&
+                        file.getName().toLowerCase().endsWith(".tif");
+            }
+        };
+
+        Date startDate = ActualEvapoOp.sdfAE.parse(startDateString);
+        Date endDate = ActualEvapoOp.sdfAE.parse(endDateString);
+
+        final String aeDir = inputDataDir + File.separator + year;
+        final File[] aeSourceProductFiles = (new File(aeDir)).listFiles(aeProductFilter);
+
+        List<Product> aeSourceProductsList = new ArrayList<Product>();
+
+        int productIndex = 0;
+        for (File aeSourceProductFile : aeSourceProductFiles) {
+            // e.g. MOD16A2_ET_0.05deg_GEO_2000017.tif
+            final String productDoY = aeSourceProductFile.getName().substring(28, 30);   // here 017
+            if (DiversityAuxdataUtils.hasBiweeklyOverlap(productDoY, eightDayProductFractions)) {
+                try {
+                    Date productDate = SoilMoistureOp.sdfSM.parse(productDoY);
+                    if (DiversityAuxdataUtils.isDateWithinPeriod(startDate, endDate, productDate)) {
+                        final Product product = ProductIO.readProduct(aeSourceProductFile.getAbsolutePath());
+                        if (product != null) {
+                            aeSourceProductsList.add(product);
+                            productIndex++;
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("WARNING: Actual Evapo TIF file '" +
+                                               aeSourceProductFile.getName() + "' could not be read - skipping.");
+                }
+            }
+        }
+
+        if (productIndex == 0) {
+            System.out.println("WARNING: No Actual Evapo TIF source products found for biweekly period " +
+                                       startDateString + " - nothing to do.");
+        }
+
+        return aeSourceProductsList.toArray(new Product[aeSourceProductsList.size()]);
+    }
 
     public static Product[] getSmDailySourceProducts(File inputDataDir, String year, String startDateString, String endDateString) throws ParseException {
         final FileFilter smProductFilter = new FileFilter() {
@@ -66,6 +120,7 @@ public class AuxdataSourcesProvider {
 
         return smSourceProductsList.toArray(new Product[smSourceProductsList.size()]);
     }
+
 
     public static Product[] getNdviSourceProducts(File inputDataDir, String year, DataCategory category, boolean writeNdviFlags) {
         final FileFilter ndviHalfmonthlyDirsFilter = new FileFilter() {
