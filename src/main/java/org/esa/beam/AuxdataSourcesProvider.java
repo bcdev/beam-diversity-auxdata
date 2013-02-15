@@ -5,7 +5,7 @@ import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.operator.ActualEvapoOp;
 import org.esa.beam.operator.SoilMoistureOp;
 import org.esa.beam.operator.TrmmBiweeklySumOp;
-import org.esa.beam.util.BiweeklyProductFraction;
+import org.esa.beam.util.SubBiweeklyProductFraction;
 import org.esa.beam.util.DiversityAuxdataUtils;
 
 import java.io.File;
@@ -27,7 +27,7 @@ public class AuxdataSourcesProvider {
 
     public static Product[] getAe8DaySourceProducts(File inputDataDir,
                                                     String year,
-                                                    BiweeklyProductFraction eightDayProductFractions,
+                                                    SubBiweeklyProductFraction eightDayProductFractions,
                                                     String startDateString,
                                                     String endDateString) throws ParseException {
         final FileFilter aeProductFilter = new FileFilter() {
@@ -39,9 +39,6 @@ public class AuxdataSourcesProvider {
             }
         };
 
-        Date startDate = ActualEvapoOp.sdfAE.parse(startDateString);
-        Date endDate = ActualEvapoOp.sdfAE.parse(endDateString);
-
         final String aeDir = inputDataDir + File.separator + year;
         final File[] aeSourceProductFiles = (new File(aeDir)).listFiles(aeProductFilter);
 
@@ -50,16 +47,13 @@ public class AuxdataSourcesProvider {
         int productIndex = 0;
         for (File aeSourceProductFile : aeSourceProductFiles) {
             // e.g. MOD16A2_ET_0.05deg_GEO_2000017.tif
-            final String productDoY = aeSourceProductFile.getName().substring(28, 30);   // here 017
+            final String productDoY = aeSourceProductFile.getName().substring(27, 30);   // here 017
             if (DiversityAuxdataUtils.hasBiweeklyOverlap(productDoY, eightDayProductFractions)) {
                 try {
-                    Date productDate = SoilMoistureOp.sdfSM.parse(productDoY);
-                    if (DiversityAuxdataUtils.isDateWithinPeriod(startDate, endDate, productDate)) {
-                        final Product product = ProductIO.readProduct(aeSourceProductFile.getAbsolutePath());
-                        if (product != null) {
-                            aeSourceProductsList.add(product);
-                            productIndex++;
-                        }
+                    final Product product = ProductIO.readProduct(aeSourceProductFile.getAbsolutePath());
+                    if (product != null) {
+                        aeSourceProductsList.add(product);
+                        productIndex++;
                     }
                 } catch (IOException e) {
                     System.err.println("WARNING: Actual Evapo TIF file '" +
@@ -270,5 +264,46 @@ public class AuxdataSourcesProvider {
 
         return product;
     }
+
+    public static Product[] getAirTempSourceProducts(File inputDataDir, final String year) {
+        final FileFilter airTempMonthlyProductFilter = new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                // e.g. 't012006.tif'
+                return file.isFile() &&
+                        file.getName().contains(year) &&
+                        file.getName().toLowerCase().startsWith("t") &&
+                        file.getName().toLowerCase().endsWith(".tif");
+            }
+        };
+
+        final String airTempDir = inputDataDir.getAbsolutePath();
+        final File[] airTempSourceProductFiles = (new File(airTempDir)).listFiles(airTempMonthlyProductFilter);
+
+        List<Product> airTempSourceProductsList = new ArrayList<Product>();
+
+        int productIndex = 0;
+        for (File airTempSourceProductFile : airTempSourceProductFiles) {
+            // e.g. 't012006.tif'
+            try {
+                final Product product = ProductIO.readProduct(airTempSourceProductFile.getAbsolutePath());
+                if (product != null) {
+                    airTempSourceProductsList.add(product);
+                    productIndex++;
+                }
+            } catch (IOException e) {
+                System.err.println("WARNING: Actual Air temperature TIF file '" +
+                                           airTempSourceProductFile.getName() + "' could not be read - skipping.");
+            }
+        }
+
+        if (productIndex == 0) {
+            System.out.println("WARNING: No Actual Evapo TIF source products found for year " +
+                                       year + " - nothing to do.");
+        }
+
+        return airTempSourceProductsList.toArray(new Product[airTempSourceProductsList.size()]);
+    }
+
 
 }

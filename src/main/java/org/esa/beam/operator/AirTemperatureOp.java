@@ -12,22 +12,21 @@ import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.DiversityAuxdataUtils;
 import org.esa.beam.util.ProductUtils;
 
-import java.text.SimpleDateFormat;
+import java.util.Arrays;
 
 /**
- * Operator for preparation/modification of Diversity Actual Evapotranspiration auxdata
+ * Operator for preparation/modification of Diversity air temperature auxdata
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Diversity.Auxdata.Evapo", version = "1.0",
+@OperatorMetadata(alias = "Diversity.Auxdata.airtemp", version = "1.0",
                   authors = "Olaf Danne",
                   copyright = "(c) 2013 Brockmann Consult",
                   internal = true,
-                  description = "Operator for preparation/modification of Diversity Actual Evapotranspiration auxdata.")
-public class ActualEvapoOp extends Operator
-{
+                  description = "Operator for preparation/modification of Diversity air temperature auxdata.")
+public class AirTemperatureOp extends Operator {
 
-    @SourceProducts(description = "Actual Evapotranspiration biweekly source products")
+    @SourceProducts(description = "Air temperature monthly source products")
     private Product[] sourceProducts;
 
     @TargetProduct(description = "The target product.")
@@ -36,31 +35,26 @@ public class ActualEvapoOp extends Operator
     @Parameter(defaultValue = "", description = "The year to process")
     private String year;
 
-
-    public static final SimpleDateFormat sdfAE = new SimpleDateFormat("yyyyMMdd");
-
-    public static final String AE_TARGET_BAND_PREFIX = "ae";
-
     private Product[] sortedSourceProducts;
 
     @Override
     public void initialize() throws OperatorException {
-        sortedSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, null, 22, 26);
+        sortedSourceProducts = DiversityAuxdataUtils.sortAirTempProductsByMonthIndex(sourceProducts);
 
         // create target product and copy the biweekly bands
-        final Product yearlyAeProduct = createYearlyProduct();
+        final Product yearlyAirTempProduct = createYearlyProduct();
 
         // reproject to NDVI grid
-        final Product yearlyAeReprojectedProduct = ReferenceReprojection.reproject(yearlyAeProduct);
-        setTargetProduct(yearlyAeReprojectedProduct);
+        final Product yearlyAirTempReprojectedProduct = ReferenceReprojection.reproject(yearlyAirTempProduct);
+        setTargetProduct(yearlyAirTempReprojectedProduct);
     }
 
     private Product createYearlyProduct() {
         final int width = sourceProducts[0].getSceneRasterWidth();
         final int height = sourceProducts[0].getSceneRasterHeight();
 
-        Product yearlyProduct = new Product("DIVERSITY_AE_" + year,
-                                            "DIVERSITY_AE",
+        Product yearlyProduct = new Product("DIVERSITY_AIRTEMP_" + year,
+                                            "DIVERSITY_AIRTEMP",
                                             width,
                                             height);
 
@@ -71,19 +65,19 @@ public class ActualEvapoOp extends Operator
     }
 
     private void copyBands(Product yearlyProduct) {
-        for (Product sourceProduct : sortedSourceProducts) {
-            final String sourceBandName = sourceProduct.getBandAt(0).getName();
-            ProductUtils.copyBand(sourceBandName, sourceProduct, yearlyProduct, true);
-            yearlyProduct.getBand(sourceBandName).setNoDataValue(Constants.AE_INVALID_VALUE);
-            yearlyProduct.getBand(sourceBandName).setNoDataValueUsed(true);
+        for (int i = 0; i < sortedSourceProducts.length; i++) {
+            final String targetBandName = "air_temp_" + Constants.MONTHS[i];
+            ProductUtils.copyBand("band_1", sortedSourceProducts[i], targetBandName, yearlyProduct, true);
+            yearlyProduct.getBand(targetBandName).setNoDataValue(Constants.AIR_TEMP_INVALID_VALUE);
+            yearlyProduct.getBand(targetBandName).setNoDataValueUsed(true);
         }
+        DiversityAuxdataUtils.addPatternToAutoGrouping(yearlyProduct, "air_temp");
     }
-
 
     public static class Spi extends OperatorSpi {
 
         public Spi() {
-            super(ActualEvapoOp.class);
+            super(AirTemperatureOp.class);
         }
     }
 }

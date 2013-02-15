@@ -13,7 +13,7 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
-import org.esa.beam.util.BiweeklyProductFraction;
+import org.esa.beam.util.SubBiweeklyProductFraction;
 import org.esa.beam.util.DiversityAuxdataUtils;
 import org.esa.beam.util.ProductUtils;
 
@@ -42,7 +42,7 @@ public class ActualEvapoBiweeklyFrom8DayOp extends Operator {
     private String startdateString;
 
     @Parameter(defaultValue = "", description = "The 8-day product fraction object")
-    private BiweeklyProductFraction eightDayProductFractions;
+    private SubBiweeklyProductFraction eightDayProductFractions;
 
 
     @Override
@@ -61,7 +61,7 @@ public class ActualEvapoBiweeklyFrom8DayOp extends Operator {
 
         for (int i = 0; i < sourceProducts.length; i++) {
             final Product sourceProduct = sourceProducts[i];
-            final Band aeBand = sourceProduct.getBand("band_1");  // todo: check this!
+            final Band aeBand = sourceProduct.getBand("band_1");
             if (aeBand != null) {
                 sourceTiles[i] = getSourceTile(aeBand, targetRectangle);
             }
@@ -99,7 +99,7 @@ public class ActualEvapoBiweeklyFrom8DayOp extends Operator {
     }
 
     private static boolean isSampleInvalid(double sampleDouble) {
-        return sampleDouble == Short.MAX_VALUE;
+        return sampleDouble == Constants.AE_INVALID_VALUE;
     }
 
     private double[] getSourceProductFractions() {
@@ -107,7 +107,7 @@ public class ActualEvapoBiweeklyFrom8DayOp extends Operator {
 
         for (int i = 0; i < sourceProducts.length; i++) {
             Product sourceProduct = sourceProducts[i];
-            final String sourceProductDoY = sourceProduct.getName().substring(28, 30);
+            final String sourceProductDoY = sourceProduct.getName().substring(27, 30);
             final double fraction = DiversityAuxdataUtils.get8DayProductFraction(sourceProductDoY, eightDayProductFractions);
             sourceProductFractions[i] = fraction;
         }

@@ -1,6 +1,5 @@
 package org.esa.beam.util;
 
-import org.esa.beam.Constants;
 import org.esa.beam.framework.datamodel.Product;
 import org.junit.Test;
 
@@ -74,30 +73,63 @@ public class DiversityAuxdataUtilsTest {
     }
 
     @Test
+    public void testSortAirTempByMonthIndex() {
+        Product[] unsortedAirTempProducts = new Product[12];
+        unsortedAirTempProducts[0] = new Product("t042006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[1] = new Product("t112006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[2] = new Product("t102006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[3] = new Product("t092006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[4] = new Product("t032006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[5] = new Product("t082006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[6] = new Product("t072006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[7] = new Product("t062006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[8] = new Product("t012006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[9] = new Product("t122006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[10] = new Product("t022006.tif", "bla", 0, 0);
+        unsortedAirTempProducts[11] = new Product("t052006.tif", "bla", 0, 0);
+
+        final Product[] sortedAirTempProducts = DiversityAuxdataUtils.sortAirTempProductsByMonthIndex(unsortedAirTempProducts);
+        assertNotNull(sortedAirTempProducts);
+        assertEquals(12, sortedAirTempProducts.length);
+        assertEquals("t012006.tif", sortedAirTempProducts[0].getName());
+        assertEquals("t022006.tif", sortedAirTempProducts[1].getName());
+        assertEquals("t032006.tif", sortedAirTempProducts[2].getName());
+        assertEquals("t042006.tif", sortedAirTempProducts[3].getName());
+        assertEquals("t052006.tif", sortedAirTempProducts[4].getName());
+        assertEquals("t062006.tif", sortedAirTempProducts[5].getName());
+        assertEquals("t072006.tif", sortedAirTempProducts[6].getName());
+        assertEquals("t082006.tif", sortedAirTempProducts[7].getName());
+        assertEquals("t092006.tif", sortedAirTempProducts[8].getName());
+        assertEquals("t102006.tif", sortedAirTempProducts[9].getName());
+        assertEquals("t112006.tif", sortedAirTempProducts[10].getName());
+        assertEquals("t122006.tif", sortedAirTempProducts[11].getName());
+    }
+
+    @Test
     public void testGet8DayProductFractionsForBiweeklyPeriods_doubleOverlap() {
         String biweeklyStartDate = "20060116";
         String biweeklyEndDate = "20060131";
 
-        BiweeklyProductFraction bpf = DiversityAuxdataUtils.getGet8DayProductFractionsForBiweeklyPeriods(biweeklyStartDate,
+        SubBiweeklyProductFraction bpf = DiversityAuxdataUtils.get8DayProductFractionsForBiweeklyPeriods(biweeklyStartDate,
                                                                                                          biweeklyEndDate);
         assertNotNull(bpf);
-        assertNotNull(bpf.getBiweeklyPeriodFractions());
-        assertNotNull(bpf.getEightDayPeriodIdentifiers());
-        assertEquals(3, bpf.getBiweeklyPeriodFractions().length);
-        assertEquals(3, bpf.getEightDayPeriodIdentifiers().length);
+        assertNotNull(bpf.getFractionsOfBiweeklyPeriod());
+        assertNotNull(bpf.getSubPeriodStartDoys());
+        assertEquals(3, bpf.getFractionsOfBiweeklyPeriod().length);
+        assertEquals(3, bpf.getSubPeriodStartDoys().length);
 
         // we have the periods 009 (1 of 8 days: Jan 16), 017 (8 of 8 days), 025 (7 of 8 days, Jan 25-31)
-        assertEquals("009", bpf.getEightDayPeriodIdentifiers()[0]);
-        assertEquals("017", bpf.getEightDayPeriodIdentifiers()[1]);
-        assertEquals("025", bpf.getEightDayPeriodIdentifiers()[2]);
+        assertEquals("009", bpf.getSubPeriodStartDoys()[0]);
+        assertEquals("017", bpf.getSubPeriodStartDoys()[1]);
+        assertEquals("025", bpf.getSubPeriodStartDoys()[2]);
 
-        final double sumFrac = bpf.getBiweeklyPeriodFractions()[0] +
-                bpf.getBiweeklyPeriodFractions()[1] +
-                bpf.getBiweeklyPeriodFractions()[2];
+        final double sumFrac = bpf.getFractionsOfBiweeklyPeriod()[0] +
+                bpf.getFractionsOfBiweeklyPeriod()[1] +
+                bpf.getFractionsOfBiweeklyPeriod()[2];
         assertEquals(1.0, sumFrac, 1.E-6);
-        assertEquals(0.0625, bpf.getBiweeklyPeriodFractions()[0], 1.E-6); // 1/16
-        assertEquals(0.5, bpf.getBiweeklyPeriodFractions()[1], 1.E-6);    // 8/16
-        assertEquals(0.4375, bpf.getBiweeklyPeriodFractions()[2], 1.E-6); // 7/16
+        assertEquals(0.0625, bpf.getFractionsOfBiweeklyPeriod()[0], 1.E-6); // 1/16
+        assertEquals(0.5, bpf.getFractionsOfBiweeklyPeriod()[1], 1.E-6);    // 8/16
+        assertEquals(0.4375, bpf.getFractionsOfBiweeklyPeriod()[2], 1.E-6); // 7/16
     }
 
     @Test
@@ -105,22 +137,22 @@ public class DiversityAuxdataUtilsTest {
         String biweeklyStartDate = "20060117";
         String biweeklyEndDate = "20060131";
 
-        BiweeklyProductFraction bpf = DiversityAuxdataUtils.getGet8DayProductFractionsForBiweeklyPeriods(biweeklyStartDate,
+        SubBiweeklyProductFraction bpf = DiversityAuxdataUtils.get8DayProductFractionsForBiweeklyPeriods(biweeklyStartDate,
                                                                                                          biweeklyEndDate);
         assertNotNull(bpf);
-        assertNotNull(bpf.getBiweeklyPeriodFractions());
-        assertNotNull(bpf.getEightDayPeriodIdentifiers());
-        assertEquals(2, bpf.getBiweeklyPeriodFractions().length);
-        assertEquals(2, bpf.getEightDayPeriodIdentifiers().length);
+        assertNotNull(bpf.getFractionsOfBiweeklyPeriod());
+        assertNotNull(bpf.getSubPeriodStartDoys());
+        assertEquals(2, bpf.getFractionsOfBiweeklyPeriod().length);
+        assertEquals(2, bpf.getSubPeriodStartDoys().length);
 
         // we have the periods 017 (8 of 8 days), 025 (7 of 8 days, Jan 25-31)
-        assertEquals("017", bpf.getEightDayPeriodIdentifiers()[0]);
-        assertEquals("025", bpf.getEightDayPeriodIdentifiers()[1]);
+        assertEquals("017", bpf.getSubPeriodStartDoys()[0]);
+        assertEquals("025", bpf.getSubPeriodStartDoys()[1]);
 
-        final double sumFrac = bpf.getBiweeklyPeriodFractions()[0] + bpf.getBiweeklyPeriodFractions()[1];
+        final double sumFrac = bpf.getFractionsOfBiweeklyPeriod()[0] + bpf.getFractionsOfBiweeklyPeriod()[1];
         assertEquals(1.0, sumFrac, 1.E-6);
-        assertEquals(0.533333, bpf.getBiweeklyPeriodFractions()[0], 1.E-6); // 8/15
-        assertEquals(0.466667, bpf.getBiweeklyPeriodFractions()[1], 1.E-6);    // 7/15
+        assertEquals(0.533333, bpf.getFractionsOfBiweeklyPeriod()[0], 1.E-6); // 8/15
+        assertEquals(0.466667, bpf.getFractionsOfBiweeklyPeriod()[1], 1.E-6);    // 7/15
     }
 
     @Test
@@ -128,22 +160,22 @@ public class DiversityAuxdataUtilsTest {
         String biweeklyStartDate = "20060118";
         String biweeklyEndDate = "20060201";
 
-        BiweeklyProductFraction bpf = DiversityAuxdataUtils.getGet8DayProductFractionsForBiweeklyPeriods(biweeklyStartDate,
+        SubBiweeklyProductFraction bpf = DiversityAuxdataUtils.get8DayProductFractionsForBiweeklyPeriods(biweeklyStartDate,
                                                                                                          biweeklyEndDate);
         assertNotNull(bpf);
-        assertNotNull(bpf.getBiweeklyPeriodFractions());
-        assertNotNull(bpf.getEightDayPeriodIdentifiers());
-        assertEquals(2, bpf.getBiweeklyPeriodFractions().length);
-        assertEquals(2, bpf.getEightDayPeriodIdentifiers().length);
+        assertNotNull(bpf.getFractionsOfBiweeklyPeriod());
+        assertNotNull(bpf.getSubPeriodStartDoys());
+        assertEquals(2, bpf.getFractionsOfBiweeklyPeriod().length);
+        assertEquals(2, bpf.getSubPeriodStartDoys().length);
 
         // we have the periods 017 (7 of 8 days), 025 (8 of 8 days, Jan 25 - Feb 01)
-        assertEquals("017", bpf.getEightDayPeriodIdentifiers()[0]);
-        assertEquals("025", bpf.getEightDayPeriodIdentifiers()[1]);
+        assertEquals("017", bpf.getSubPeriodStartDoys()[0]);
+        assertEquals("025", bpf.getSubPeriodStartDoys()[1]);
 
-        final double sumFrac = bpf.getBiweeklyPeriodFractions()[0] + bpf.getBiweeklyPeriodFractions()[1];
+        final double sumFrac = bpf.getFractionsOfBiweeklyPeriod()[0] + bpf.getFractionsOfBiweeklyPeriod()[1];
         assertEquals(1.0, sumFrac, 1.E-6);
-        assertEquals(0.466667, bpf.getBiweeklyPeriodFractions()[0], 1.E-6);    // 7/15
-        assertEquals(0.533333, bpf.getBiweeklyPeriodFractions()[1], 1.E-6); // 8/15
+        assertEquals(0.466667, bpf.getFractionsOfBiweeklyPeriod()[0], 1.E-6);    // 7/15
+        assertEquals(0.533333, bpf.getFractionsOfBiweeklyPeriod()[1], 1.E-6); // 8/15
     }
 
     @Test
@@ -151,22 +183,22 @@ public class DiversityAuxdataUtilsTest {
         String biweeklyStartDate = "20060117";
         String biweeklyEndDate = "20060201";
 
-        BiweeklyProductFraction bpf = DiversityAuxdataUtils.getGet8DayProductFractionsForBiweeklyPeriods(biweeklyStartDate,
+        SubBiweeklyProductFraction bpf = DiversityAuxdataUtils.get8DayProductFractionsForBiweeklyPeriods(biweeklyStartDate,
                                                                                                          biweeklyEndDate);
         assertNotNull(bpf);
-        assertNotNull(bpf.getBiweeklyPeriodFractions());
-        assertNotNull(bpf.getEightDayPeriodIdentifiers());
-        assertEquals(2, bpf.getBiweeklyPeriodFractions().length);
-        assertEquals(2, bpf.getEightDayPeriodIdentifiers().length);
+        assertNotNull(bpf.getFractionsOfBiweeklyPeriod());
+        assertNotNull(bpf.getSubPeriodStartDoys());
+        assertEquals(2, bpf.getFractionsOfBiweeklyPeriod().length);
+        assertEquals(2, bpf.getSubPeriodStartDoys().length);
 
         // we have the periods 017 (8 of 8 days), 025 (8 of 8 days, Jan 25 - Feb 01)
-        assertEquals("017", bpf.getEightDayPeriodIdentifiers()[0]);
-        assertEquals("025", bpf.getEightDayPeriodIdentifiers()[1]);
+        assertEquals("017", bpf.getSubPeriodStartDoys()[0]);
+        assertEquals("025", bpf.getSubPeriodStartDoys()[1]);
 
-        final double sumFrac = bpf.getBiweeklyPeriodFractions()[0] + bpf.getBiweeklyPeriodFractions()[1];
+        final double sumFrac = bpf.getFractionsOfBiweeklyPeriod()[0] + bpf.getFractionsOfBiweeklyPeriod()[1];
         assertEquals(1.0, sumFrac, 1.E-6);
-        assertEquals(0.5, bpf.getBiweeklyPeriodFractions()[0], 1.E-6);    // 8/16
-        assertEquals(0.5, bpf.getBiweeklyPeriodFractions()[1], 1.E-6); // 8/16
+        assertEquals(0.5, bpf.getFractionsOfBiweeklyPeriod()[0], 1.E-6);    // 8/16
+        assertEquals(0.5, bpf.getFractionsOfBiweeklyPeriod()[1], 1.E-6); // 8/16
     }
 
 }

@@ -32,6 +32,8 @@ import java.util.List;
                   description = "Operator for preparation/modification of Diversity CMAP auxdata.")
 public class CmapOp extends Operator {
 
+    // todo: adapt - should basically the same as ActualEvapoOp, just using pentads instead of 8-day periods
+
     @SourceProduct
     private Product sourceProduct;
     @Parameter(defaultValue = "", description = "Input data directory")
