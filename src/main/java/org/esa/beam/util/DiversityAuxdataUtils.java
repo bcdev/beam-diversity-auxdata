@@ -23,26 +23,26 @@ public class DiversityAuxdataUtils {
         FlagCoding ndviFC = new FlagCoding(Constants.NDVI_FLAG_NAME);
 
         ndviFC.addFlag(Constants.NDVI_GOOD_VALUE_FLAG_NAME,
-                       Constants.GOOD_VALUE,
-                       "Good value");
+                Constants.GOOD_VALUE,
+                "Good value");
         ndviFC.addFlag(Constants.NDVI_GOOD_VALUE_POSSIBLY_SNOW_FLAG_NAME,
-                       Constants.GOOD_VALUE_POSSIBLY_SNOW,
-                       "Good value, possibly snow");
+                Constants.GOOD_VALUE_POSSIBLY_SNOW,
+                "Good value, possibly snow");
         ndviFC.addFlag(Constants.NDVI_NDVI_FROM_SPLINE_FLAG_NAME,
-                       Constants.NDVI_FROM_SPLINE,
-                       "NDVI retrived from spline interpolation");
+                Constants.NDVI_FROM_SPLINE,
+                "NDVI retrived from spline interpolation");
         ndviFC.addFlag(Constants.NDVI_NDVI_FROM_SPLINE_POSSIBLY_SNOW_FLAG_NAME,
-                       Constants.NDVI_FROM_SPLINE_POSSIBLY_SNOW,
-                       "NDVI retrived from spline interpolation, possibly snow");
+                Constants.NDVI_FROM_SPLINE_POSSIBLY_SNOW,
+                "NDVI retrived from spline interpolation, possibly snow");
         ndviFC.addFlag(Constants.NDVI_NDVI_FROM_AVERAGE_SEASONAL_PROFILE_FLAG_NAME,
-                       Constants.NDVI_FROM_AVERAGE_SEASONAL_PROFILE,
-                       "NDVI retrieved from average seasonal profile");
+                Constants.NDVI_FROM_AVERAGE_SEASONAL_PROFILE,
+                "NDVI retrieved from average seasonal profile");
         ndviFC.addFlag(Constants.NDVI_NDVI_FROM_AVERAGE_SEASONAL_PROFILE_POSSIBLY_SNOW_FLAG_NAME,
-                       Constants.NDVI_FROM_AVERAGE_SEASONAL_PROFILE_POSSIBLY_SNOW,
-                       "NDVI retrieved from average seasonal profile, possibly snow");
+                Constants.NDVI_FROM_AVERAGE_SEASONAL_PROFILE_POSSIBLY_SNOW,
+                "NDVI retrieved from average seasonal profile, possibly snow");
         ndviFC.addFlag(Constants.NDVI_MISSING_DATA_FLAG_NAME,
-                       Constants.MISSING_DATA,
-                       "missing data");
+                Constants.MISSING_DATA,
+                "missing data");
 
         return ndviFC;
     }
@@ -114,7 +114,7 @@ public class DiversityAuxdataUtils {
             }
         }
 
-        for (int i = sortedProductsList.size()-1; i >= 0; i--) {
+        for (int i = sortedProductsList.size() - 1; i >= 0; i--) {
             Product product = sortedProductsList.get(i);
             if (product.getName().equals("dummy")) {
                 sortedProductsList.remove(product);
@@ -132,11 +132,11 @@ public class DiversityAuxdataUtils {
     public static SubBiweeklyProductFraction get8DayProductFractionsForBiweeklyPeriods(String biweeklyStartDate,
                                                                                        String biweeklyEndDate) {
 
-        Calendar cal = getCalendar(biweeklyStartDate, biweeklyEndDate);
+        Calendar calStart = getCalendarStart(biweeklyStartDate, biweeklyEndDate);
+        int startDayOfYear = calStart.get(Calendar.DAY_OF_YEAR);
 
-        int startDayOfYear = cal.get(Calendar.DAY_OF_YEAR);
-        int endDayOfYear = cal.get(Calendar.DAY_OF_YEAR);
-
+        Calendar calEnd = getCalendarEnd(biweeklyStartDate, biweeklyEndDate);
+        int endDayOfYear = calEnd.get(Calendar.DAY_OF_YEAR);
 
         SubBiweeklyProductFraction result = new SubBiweeklyProductFraction();
         List<String> product8DayIdentifiers = new ArrayList<String>();
@@ -192,13 +192,12 @@ public class DiversityAuxdataUtils {
     // todo: if we need CMAP, use this in the same way as get8DayProductFractionsForBiweeklyPeriods for the AE products
     // todo: test this method!!!
     public static SubBiweeklyProductFraction getPentadProductFractionsForBiweeklyPeriods(String biweeklyStartDate,
-                                                                                          String biweeklyEndDate) {
+                                                                                         String biweeklyEndDate) {
+        Calendar calStart = getCalendarStart(biweeklyStartDate, biweeklyEndDate);
+        int startDayOfYear = calStart.get(Calendar.DAY_OF_YEAR);
 
-        Calendar cal = getCalendar(biweeklyStartDate, biweeklyEndDate);
-
-        int startDayOfYear = cal.get(Calendar.DAY_OF_YEAR);
-        int endDayOfYear = cal.get(Calendar.DAY_OF_YEAR);
-
+        Calendar calEnd = getCalendarEnd(biweeklyStartDate, biweeklyEndDate);
+        int endDayOfYear = calEnd.get(Calendar.DAY_OF_YEAR);
 
         SubBiweeklyProductFraction result = new SubBiweeklyProductFraction();
         List<String> productPentadIdentifiers = new ArrayList<String>();
@@ -286,7 +285,7 @@ public class DiversityAuxdataUtils {
         return 0.0;
     }
 
-    private static Calendar getCalendar(String biweeklyStartDate, String biweeklyEndDate) {
+    private static Calendar getCalendarStart(String biweeklyStartDate, String biweeklyEndDate) {
         Calendar cal = Calendar.getInstance();
 
         int startDateYear = Integer.parseInt(biweeklyStartDate.substring(0, 4));      // yyyyMMdd
@@ -294,10 +293,17 @@ public class DiversityAuxdataUtils {
         int startDateDay = Integer.parseInt(biweeklyStartDate.substring(6, 8));
         cal.set(startDateYear, startDateMonth, startDateDay);
 
+        return cal;
+    }
+
+    private static Calendar getCalendarEnd(String biweeklyStartDate, String biweeklyEndDate) {
+        Calendar cal = Calendar.getInstance();
+
         int endDateYear = Integer.parseInt(biweeklyStartDate.substring(0, 4));
         int endDateMonth = Integer.parseInt(biweeklyEndDate.substring(4, 6)) - 1;
         int endDateDay = Integer.parseInt(biweeklyEndDate.substring(6, 8));
         cal.set(endDateYear, endDateMonth, endDateDay);
+
         return cal;
     }
 
