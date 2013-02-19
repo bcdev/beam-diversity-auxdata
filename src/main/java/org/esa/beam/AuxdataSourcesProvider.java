@@ -1,10 +1,12 @@
 package org.esa.beam;
 
 import org.esa.beam.framework.dataio.ProductIO;
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.operator.ActualEvapoOp;
 import org.esa.beam.operator.SoilMoistureOp;
 import org.esa.beam.operator.TrmmBiweeklySumOp;
+import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.SubBiweeklyProductFraction;
 import org.esa.beam.util.DiversityAuxdataUtils;
 
@@ -305,5 +307,54 @@ public class AuxdataSourcesProvider {
         return airTempSourceProductsList.toArray(new Product[airTempSourceProductsList.size()]);
     }
 
+    public static Product[] getCmapPentadSplittedSourceProducts(File inputFile, String year) {
+        final Product cmapPentadSourceProduct = getCmapPentadSourceProduct(inputFile);
 
+        // first step: band renaming and yearly splitting: 1-12 --> 1979; 13-24 --> 1980, etc.
+        List<Product> splittedProductList = new ArrayList<Product>();
+
+        int halfmonthIndex = 0;
+        for (int i = 1; i <= 395; i++) {
+            final Band sourceBand = cmapPentadSourceProduct.getBand(Constants.PRECIP_BAND_NAME_PREFIX + i);
+            if (sourceBand != null) {
+                final String startDateString = year + Constants.BIWEEKLY_START_DATES[halfmonthIndex];
+                final int startDoy = DiversityAuxdataUtils.getDoyFromDate(startDateString);
+                Product splittedProduct = createCmapSplittedProduct(cmapPentadSourceProduct, year, startDoy);
+                String targetBandName = Constants.PRECIP_BAND_NAME_PREFIX;
+                ProductUtils.copyBand(sourceBand.getName(), cmapPentadSourceProduct, targetBandName, splittedProduct, true);
+                splittedProductList.add(splittedProduct);
+                halfmonthIndex++;
+                if (halfmonthIndex == 24) {
+                    break;
+                }
+            }
+        }
+
+        return splittedProductList.toArray(new Product[splittedProductList.size()]);
+    }
+
+    private static Product getCmapPentadSourceProduct(File inputDataDir) {
+        final String filePath = inputDataDir + File.separator + "precip.pentad.mean.nc";
+        Product product = null;
+        try {
+            product = ProductIO.readProduct(filePath);
+        } catch (IOException e) {
+            System.err.println("WARNING: Actual CMAP file '" +
+                                       filePath + "' missing or could not be read - skipping.");
+        }
+        return product;
+    }
+
+    private static Product createCmapSplittedProduct(Product sourceProduct, String year, int startDoy) {
+        final int width = sourceProduct.getSceneRasterWidth();
+        final int height = sourceProduct.getSceneRasterHeight();
+
+        Product splittedProduct = new Product(String.format("DIVERSITY_CMAP_%s%03d", year, startDoy),
+                                              String.format("DIVERSITY_CMAP_%s%03d", year, startDoy),
+                                              width,
+                                              height);
+        ProductUtils.copyGeoCoding(sourceProduct, splittedProduct);
+
+        return splittedProduct;
+    }
 }

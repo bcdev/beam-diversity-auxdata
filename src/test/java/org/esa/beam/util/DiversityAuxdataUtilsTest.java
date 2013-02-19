@@ -201,4 +201,123 @@ public class DiversityAuxdataUtilsTest {
         assertEquals(0.5, bpf.getFractionsOfBiweeklyPeriod()[1], 1.E-6); // 8/16
     }
 
+
+    @Test
+    public void testGetPentadProductFractionsForBiweeklyPeriods_exactlyFitting() {
+        String biweeklyStartDate = "20060116";
+        String biweeklyEndDate = "20060130";
+
+        SubBiweeklyProductFraction bpf = DiversityAuxdataUtils.getPentadProductFractionsForBiweeklyPeriods(biweeklyStartDate,
+                                                                                                           biweeklyEndDate);
+        assertNotNull(bpf);
+        assertNotNull(bpf.getFractionsOfBiweeklyPeriod());
+        assertNotNull(bpf.getSubPeriodStartDoys());
+        assertEquals(3, bpf.getFractionsOfBiweeklyPeriod().length);
+        assertEquals(3, bpf.getSubPeriodStartDoys().length);
+
+        // we have the periods 016 (5 of 5 days), 021 (5 of 5 days), 026 (5 of 5 days))
+        assertEquals("016", bpf.getSubPeriodStartDoys()[0]);
+        assertEquals("021", bpf.getSubPeriodStartDoys()[1]);
+        assertEquals("026", bpf.getSubPeriodStartDoys()[2]);
+
+        final double sumFrac = bpf.getFractionsOfBiweeklyPeriod()[0] +
+                bpf.getFractionsOfBiweeklyPeriod()[1] +
+                bpf.getFractionsOfBiweeklyPeriod()[2];
+        assertEquals(1.0, sumFrac, 1.E-5);
+        assertEquals(0.333333, bpf.getFractionsOfBiweeklyPeriod()[0], 1.E-6);    // 5/15
+        assertEquals(0.333333, bpf.getFractionsOfBiweeklyPeriod()[1], 1.E-6); // 5/15
+        assertEquals(0.333333, bpf.getFractionsOfBiweeklyPeriod()[2], 1.E-6); // 5/15
+    }
+
+    @Test
+    public void testGetPentadProductFractionsForBiweeklyPeriods_rightOverlap() {
+        String biweeklyStartDate = "20060116";
+        String biweeklyEndDate = "20060131";
+
+        SubBiweeklyProductFraction bpf = DiversityAuxdataUtils.getPentadProductFractionsForBiweeklyPeriods(biweeklyStartDate,
+                                                                                                         biweeklyEndDate);
+        assertNotNull(bpf);
+        assertNotNull(bpf.getFractionsOfBiweeklyPeriod());
+        assertNotNull(bpf.getSubPeriodStartDoys());
+        assertEquals(4, bpf.getFractionsOfBiweeklyPeriod().length);
+        assertEquals(4, bpf.getSubPeriodStartDoys().length);
+
+        // we have the periods 016 (5 of 5 days), 021 (5 of 5 days), 026 (5 of 5 days)), 031 (1 of 5 days)
+        assertEquals("016", bpf.getSubPeriodStartDoys()[0]);
+        assertEquals("021", bpf.getSubPeriodStartDoys()[1]);
+        assertEquals("026", bpf.getSubPeriodStartDoys()[2]);
+        assertEquals("031", bpf.getSubPeriodStartDoys()[3]);
+
+        final double sumFrac = bpf.getFractionsOfBiweeklyPeriod()[0] +
+                bpf.getFractionsOfBiweeklyPeriod()[1] +
+                bpf.getFractionsOfBiweeklyPeriod()[2] +
+                bpf.getFractionsOfBiweeklyPeriod()[3];
+        assertEquals(1.0, sumFrac, 1.E-5);
+        assertEquals(0.3125, bpf.getFractionsOfBiweeklyPeriod()[0], 1.E-6);    // 5/16
+        assertEquals(0.3125, bpf.getFractionsOfBiweeklyPeriod()[1], 1.E-6);    // 5/16
+        assertEquals(0.3125, bpf.getFractionsOfBiweeklyPeriod()[2], 1.E-6);    // 5/16
+        assertEquals(0.0625, bpf.getFractionsOfBiweeklyPeriod()[3], 1.E-6);    // 1/16
+    }
+
+    @Test
+    public void testGetPentadProductFractionsForBiweeklyPeriods_leftOverlap() {
+        String biweeklyStartDate = "20060115";
+        String biweeklyEndDate = "20060130";
+
+        SubBiweeklyProductFraction bpf = DiversityAuxdataUtils.getPentadProductFractionsForBiweeklyPeriods(biweeklyStartDate,
+                                                                                                         biweeklyEndDate);
+        assertNotNull(bpf);
+        assertNotNull(bpf.getFractionsOfBiweeklyPeriod());
+        assertNotNull(bpf.getSubPeriodStartDoys());
+        assertEquals(4, bpf.getFractionsOfBiweeklyPeriod().length);
+        assertEquals(4, bpf.getSubPeriodStartDoys().length);
+
+        // we have the periods 011 (1 of 5 days), 016 (5 of 5 days), 021 (5 of 5 days), 026 (5 of 5 days))
+        assertEquals("011", bpf.getSubPeriodStartDoys()[0]);
+        assertEquals("016", bpf.getSubPeriodStartDoys()[1]);
+        assertEquals("021", bpf.getSubPeriodStartDoys()[2]);
+        assertEquals("026", bpf.getSubPeriodStartDoys()[3]);
+
+        final double sumFrac = bpf.getFractionsOfBiweeklyPeriod()[0] +
+                bpf.getFractionsOfBiweeklyPeriod()[1] +
+                bpf.getFractionsOfBiweeklyPeriod()[2] +
+                bpf.getFractionsOfBiweeklyPeriod()[3];
+        assertEquals(1.0, sumFrac, 1.E-6);
+        assertEquals(0.0625, bpf.getFractionsOfBiweeklyPeriod()[0], 1.E-6);    // 1/16
+        assertEquals(0.3125, bpf.getFractionsOfBiweeklyPeriod()[1], 1.E-6);    // 5/16
+        assertEquals(0.3125, bpf.getFractionsOfBiweeklyPeriod()[2], 1.E-6);    // 5/16
+        assertEquals(0.3125, bpf.getFractionsOfBiweeklyPeriod()[3], 1.E-6);    // 5/16
+    }
+
+    @Test
+    public void testGetPentadProductFractionsForBiweeklyPeriods_doubleOverlap() {
+        String biweeklyStartDate = "20061016";
+        String biweeklyEndDate = "20061031";
+
+        SubBiweeklyProductFraction bpf = DiversityAuxdataUtils.getPentadProductFractionsForBiweeklyPeriods(biweeklyStartDate,
+                                                                                                         biweeklyEndDate);
+        assertNotNull(bpf);
+        assertNotNull(bpf.getFractionsOfBiweeklyPeriod());
+        assertNotNull(bpf.getSubPeriodStartDoys());
+        assertEquals(4, bpf.getFractionsOfBiweeklyPeriod().length);
+        assertEquals(4, bpf.getSubPeriodStartDoys().length);
+
+        // we have the periods 286 (2 of 5 days), 018 (5 of 5 days), 023 (5 of 5 days), 028 (4 of 5 days))
+        // (Oct 13, 18, 23, 28)
+        assertEquals("286", bpf.getSubPeriodStartDoys()[0]);
+        assertEquals("291", bpf.getSubPeriodStartDoys()[1]);
+        assertEquals("296", bpf.getSubPeriodStartDoys()[2]);
+        assertEquals("301", bpf.getSubPeriodStartDoys()[3]);
+
+        final double sumFrac = bpf.getFractionsOfBiweeklyPeriod()[0] +
+                bpf.getFractionsOfBiweeklyPeriod()[1] +
+                bpf.getFractionsOfBiweeklyPeriod()[2] +
+                bpf.getFractionsOfBiweeklyPeriod()[3];
+        assertEquals(1.0, sumFrac, 1.E-6);
+        assertEquals(0.125, bpf.getFractionsOfBiweeklyPeriod()[0], 1.E-6);    // 2/16
+        assertEquals(0.3125, bpf.getFractionsOfBiweeklyPeriod()[1], 1.E-6);    // 5/16
+        assertEquals(0.3125, bpf.getFractionsOfBiweeklyPeriod()[2], 1.E-6);    // 5/16
+        assertEquals(0.25, bpf.getFractionsOfBiweeklyPeriod()[3], 1.E-6);    // 4/16
+    }
+
 }

@@ -48,8 +48,6 @@ public class ActualEvapoBiweeklyFrom8DayOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         createTargetProduct();
-
-
     }
 
     @Override

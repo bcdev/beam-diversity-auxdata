@@ -184,47 +184,36 @@ public class MasterOp extends Operator {
     }
 
     private Product getActualCmapProduct() {
+
+        // 1. take full input product (all years), split into pentad products with one band each
+        Product[] cmapPentadSplittedSourceProducts = AuxdataSourcesProvider.getCmapPentadSplittedSourceProducts(inputDataDir, year);
+
+        // 2. per biweekly period of the year, get overlapping 8-day products and compute fractional average products  (as for AE)
         List<Product> biweeklyAverageProductList = new ArrayList<Product>();
-        // 1. per biweekly period, get overlapping pentad products and compute fractional average products
         CmapBiweeklyFromPentadOp cmapAveOp;
-
-        // todo: adapt to pentads, analog to 8-days for AE
-
         for (int i = 0; i < Constants.BIWEEKLY_START_DATES.length; i++) {
             String startDateString = year + Constants.BIWEEKLY_START_DATES[i];
             String endDateString = year + Constants.BIWEEKLY_END_DATES[i];
             cmapAveOp = new CmapBiweeklyFromPentadOp();
-            Product[] ae8DaySourceProducts;
 
-            final SubBiweeklyProductFraction eightDayProductFractions =
-                    DiversityAuxdataUtils.get8DayProductFractionsForBiweeklyPeriods(startDateString,
-                                                                                    endDateString);
-
-            try {
-                ae8DaySourceProducts = AuxdataSourcesProvider.getAe8DaySourceProducts(inputDataDir,
-                                                                                      year,
-                                                                                      eightDayProductFractions,
-                                                                                      startDateString,
+            final SubBiweeklyProductFraction pentadProductFractions =
+                    DiversityAuxdataUtils.getPentadProductFractionsForBiweeklyPeriods(startDateString,
                                                                                       endDateString);
-                if (ae8DaySourceProducts != null && ae8DaySourceProducts.length > 0) {
-                    cmapAveOp.setSourceProducts(ae8DaySourceProducts);
-                    cmapAveOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
-                    cmapAveOp.setParameter("eightDayProductFractions", eightDayProductFractions);
-                    biweeklyAverageProductList.add(cmapAveOp.getTargetProduct());
-                }
-            } catch (ParseException e) {
-                // todo
-                e.printStackTrace();
+
+            if (cmapPentadSplittedSourceProducts != null && cmapPentadSplittedSourceProducts.length > 0) {
+                cmapAveOp.setSourceProducts(cmapPentadSplittedSourceProducts);
+                cmapAveOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
+                cmapAveOp.setParameter("pentadProductFractions", pentadProductFractions);
+                biweeklyAverageProductList.add(cmapAveOp.getTargetProduct());
             }
 
         }
         Product[] biweeklyAverageProducts = biweeklyAverageProductList.toArray(new Product[biweeklyAverageProductList.size()]);
 
-        // 2. for all biweekly periods, collect average products and add as single bands in final yearly product
+        // 3. for all biweekly periods, collect average products and add as single bands in final yearly product (as for AE)
         CmapOp cmapOp = new CmapOp();
         cmapOp.setSourceProducts(biweeklyAverageProducts);
         cmapOp.setParameter("year", year);
-
 
         return cmapOp.getTargetProduct();
     }
@@ -242,7 +231,6 @@ public class MasterOp extends Operator {
             final SubBiweeklyProductFraction eightDayProductFractions =
                     DiversityAuxdataUtils.get8DayProductFractionsForBiweeklyPeriods(startDateString,
                                                                                     endDateString);
-
             try {
                 ae8DaySourceProducts = AuxdataSourcesProvider.getAe8DaySourceProducts(inputDataDir,
                                                                                       year,
@@ -259,7 +247,6 @@ public class MasterOp extends Operator {
                 // todo
                 e.printStackTrace();
             }
-
         }
         Product[] biweeklyAverageProducts = biweeklyAverageProductList.toArray(new Product[biweeklyAverageProductList.size()]);
 
@@ -267,7 +254,6 @@ public class MasterOp extends Operator {
         ActualEvapoOp aeOp = new ActualEvapoOp();
         aeOp.setSourceProducts(biweeklyAverageProducts);
         aeOp.setParameter("year", year);
-
 
         return aeOp.getTargetProduct();
     }

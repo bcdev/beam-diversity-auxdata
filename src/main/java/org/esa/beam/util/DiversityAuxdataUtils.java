@@ -132,11 +132,8 @@ public class DiversityAuxdataUtils {
     public static SubBiweeklyProductFraction get8DayProductFractionsForBiweeklyPeriods(String biweeklyStartDate,
                                                                                        String biweeklyEndDate) {
 
-        Calendar calStart = getCalendarStart(biweeklyStartDate, biweeklyEndDate);
-        int startDayOfYear = calStart.get(Calendar.DAY_OF_YEAR);
-
-        Calendar calEnd = getCalendarEnd(biweeklyStartDate, biweeklyEndDate);
-        int endDayOfYear = calEnd.get(Calendar.DAY_OF_YEAR);
+        int startDayOfYear = getDoyFromDate(biweeklyStartDate);
+        int endDayOfYear = getDoyFromDate(biweeklyEndDate);
 
         SubBiweeklyProductFraction result = new SubBiweeklyProductFraction();
         List<String> product8DayIdentifiers = new ArrayList<String>();
@@ -190,14 +187,10 @@ public class DiversityAuxdataUtils {
     }
 
     // todo: if we need CMAP, use this in the same way as get8DayProductFractionsForBiweeklyPeriods for the AE products
-    // todo: test this method!!!
     public static SubBiweeklyProductFraction getPentadProductFractionsForBiweeklyPeriods(String biweeklyStartDate,
                                                                                          String biweeklyEndDate) {
-        Calendar calStart = getCalendarStart(biweeklyStartDate, biweeklyEndDate);
-        int startDayOfYear = calStart.get(Calendar.DAY_OF_YEAR);
-
-        Calendar calEnd = getCalendarEnd(biweeklyStartDate, biweeklyEndDate);
-        int endDayOfYear = calEnd.get(Calendar.DAY_OF_YEAR);
+        int startDayOfYear = getDoyFromDate(biweeklyStartDate);
+        int endDayOfYear = getDoyFromDate(biweeklyEndDate);
 
         SubBiweeklyProductFraction result = new SubBiweeklyProductFraction();
         List<String> productPentadIdentifiers = new ArrayList<String>();
@@ -217,9 +210,9 @@ public class DiversityAuxdataUtils {
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 10));
                 productFractions.add(0.333333);
                 break;
-            } else if (startDiff == 0 && endDiff > 0) {
+            } else if (startDiff == 0 && endDiff < 0 && endDiff > -5) {
                 // only right overlap, 4 fractions
-                final double norm = 15.0 + (5.0 - endDiff);
+                final double norm = 15.0 - endDiff;
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod));
                 productFractions.add(5.0 / norm);
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 5));
@@ -227,9 +220,9 @@ public class DiversityAuxdataUtils {
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 10));
                 productFractions.add(5.0 / norm);
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 15));
-                productFractions.add((5.0 - endDiff) / norm);
+                productFractions.add(-1.0*endDiff / norm);
                 break;
-            } else if (startDiff > 0 && endDiff == 0) {
+            } else if (startDiff > 0 && startDiff < 5 && endDiff == -5) {
                 // only left overlap, 4 fractions
                 final double norm = (5.0 - startDiff) + 15.0;
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod));
@@ -241,17 +234,17 @@ public class DiversityAuxdataUtils {
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 15));
                 productFractions.add(5.0 / norm);
                 break;
-            } else if (startDiff < 0 && startDiff > -5 && endDiff > 0 && endDiff < 5) {
+            } else if (startDiff > 0 && startDiff < 5 && endDiff < 0 && endDiff > -5) {
                 // left and right overlap, 4 fractions
                 final double norm = 15.0 - startDiff - endDiff;
-                productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod - 5));
-                productFractions.add(-startDiff / norm);
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod));
-                productFractions.add(5.0 / norm);
-                productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod));
-                productFractions.add(5.0 / norm);
+                productFractions.add((5.0 - startDiff) / norm);
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 5));
-                productFractions.add((5.0 - endDiff) / norm);
+                productFractions.add(5.0 / norm);
+                productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 10));
+                productFractions.add(5.0 / norm);
+                productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 15));
+                productFractions.add(-1.0*endDiff / norm);
                 break;
             }
         }
@@ -285,26 +278,15 @@ public class DiversityAuxdataUtils {
         return 0.0;
     }
 
-    private static Calendar getCalendarStart(String biweeklyStartDate, String biweeklyEndDate) {
+    public static int getDoyFromDate(String theDate) {
         Calendar cal = Calendar.getInstance();
 
-        int startDateYear = Integer.parseInt(biweeklyStartDate.substring(0, 4));      // yyyyMMdd
-        int startDateMonth = Integer.parseInt(biweeklyStartDate.substring(4, 6)) - 1;
-        int startDateDay = Integer.parseInt(biweeklyStartDate.substring(6, 8));
+        int startDateYear = Integer.parseInt(theDate.substring(0, 4));      // yyyyMMdd
+        int startDateMonth = Integer.parseInt(theDate.substring(4, 6)) - 1;
+        int startDateDay = Integer.parseInt(theDate.substring(6, 8));
         cal.set(startDateYear, startDateMonth, startDateDay);
 
-        return cal;
-    }
-
-    private static Calendar getCalendarEnd(String biweeklyStartDate, String biweeklyEndDate) {
-        Calendar cal = Calendar.getInstance();
-
-        int endDateYear = Integer.parseInt(biweeklyStartDate.substring(0, 4));
-        int endDateMonth = Integer.parseInt(biweeklyEndDate.substring(4, 6)) - 1;
-        int endDateDay = Integer.parseInt(biweeklyEndDate.substring(6, 8));
-        cal.set(endDateYear, endDateMonth, endDateDay);
-
-        return cal;
+        return cal.get(Calendar.DAY_OF_YEAR);
     }
 
 }
