@@ -186,7 +186,6 @@ public class DiversityAuxdataUtils {
         return result;
     }
 
-    // todo: if we need CMAP, use this in the same way as get8DayProductFractionsForBiweeklyPeriods for the AE products
     public static SubBiweeklyProductFraction getPentadProductFractionsForBiweeklyPeriods(String biweeklyStartDate,
                                                                                          String biweeklyEndDate) {
         int startDayOfYear = getDoyFromDate(biweeklyStartDate);
@@ -266,10 +265,9 @@ public class DiversityAuxdataUtils {
         return false;
     }
 
-
-    public static double get8DayProductFraction(String doy, SubBiweeklyProductFraction eightDayProductFractions) {
-        final String[] productDoys = eightDayProductFractions.getSubPeriodStartDoys();
-        final Double[] productFractions = eightDayProductFractions.getFractionsOfBiweeklyPeriod();
+    public static double getSubPeriodProductFraction(String doy, SubBiweeklyProductFraction subPeriodProductFractions) {
+        final String[] productDoys = subPeriodProductFractions.getSubPeriodStartDoys();
+        final Double[] productFractions = subPeriodProductFractions.getFractionsOfBiweeklyPeriod();
         for (int i = 0; i < productDoys.length; i++) {
             if (productDoys[i].equalsIgnoreCase(doy)) {
                 return productFractions[i];

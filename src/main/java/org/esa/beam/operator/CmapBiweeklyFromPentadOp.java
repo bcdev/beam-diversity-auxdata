@@ -14,10 +14,12 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.util.DiversityAuxdataUtils;
+import org.esa.beam.util.ProductNameComparator;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.SubBiweeklyProductFraction;
 
 import java.awt.*;
+import java.util.Arrays;
 
 /**
  * Operator for preparation/modification of Diversity Cmap auxdata
@@ -46,6 +48,7 @@ public class CmapBiweeklyFromPentadOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
+        Arrays.sort(sourceProducts, new ProductNameComparator());
         createTargetProduct();
     }
 
@@ -81,7 +84,8 @@ public class CmapBiweeklyFromPentadOp extends Operator {
                 final double sample = sourceTiles[i].getSampleDouble(x, y);
                 final boolean isSampleInvalid = isSampleInvalid(sample);
                 if (!isSampleInvalid) {
-                    sampleSum += sourceProductFractions[i]*sample;
+                    final double fraction = sourceProductFractions[i];
+                    sampleSum += fraction *sample;
                     numSamples++;
                 }
             }
@@ -105,7 +109,7 @@ public class CmapBiweeklyFromPentadOp extends Operator {
         for (int i = 0; i < sourceProducts.length; i++) {
             Product sourceProduct = sourceProducts[i];
             final String sourceProductDoY = sourceProduct.getName().substring(19, 22);   // todo: check char position
-            final double fraction = DiversityAuxdataUtils.get8DayProductFraction(sourceProductDoY, pentadProductFractions);
+            final double fraction = DiversityAuxdataUtils.getSubPeriodProductFraction(sourceProductDoY, pentadProductFractions);
             sourceProductFractions[i] = fraction;
         }
 

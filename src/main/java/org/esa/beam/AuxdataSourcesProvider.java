@@ -3,12 +3,11 @@ package org.esa.beam;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.operator.ActualEvapoOp;
 import org.esa.beam.operator.SoilMoistureOp;
 import org.esa.beam.operator.TrmmBiweeklySumOp;
+import org.esa.beam.util.DiversityAuxdataUtils;
 import org.esa.beam.util.ProductUtils;
 import org.esa.beam.util.SubBiweeklyProductFraction;
-import org.esa.beam.util.DiversityAuxdataUtils;
 
 import java.io.File;
 import java.io.FileFilter;
@@ -254,19 +253,6 @@ public class AuxdataSourcesProvider {
         return trmmSourceProductsList.toArray(new Product[trmmSourceProductsList.size()]);
     }
 
-    public static Product getCmapSourceProduct(File inputDataDir) {
-        Product product = null;
-        try {
-            // todo: make sure 180deg problem is handled!
-            product = ProductIO.readProduct(inputDataDir + File.separator + CMAP_INPUT_FILE_NAME);
-        } catch (IOException e) {
-            System.err.println("Warning: CMAP source file in directory '" +
-                                       inputDataDir.getName() + "' missing or could not be read - skipping.");
-        }
-
-        return product;
-    }
-
     public static Product[] getAirTempSourceProducts(File inputDataDir, final String year) {
         final FileFilter airTempMonthlyProductFilter = new FileFilter() {
             @Override
@@ -310,23 +296,19 @@ public class AuxdataSourcesProvider {
     public static Product[] getCmapPentadSplittedSourceProducts(File inputFile, String year) {
         final Product cmapPentadSourceProduct = getCmapPentadSourceProduct(inputFile);
 
-        // first step: band renaming and yearly splitting: 1-12 --> 1979; 13-24 --> 1980, etc.
+        // get bands from yearly splitting: 1-73 --> 1979; 74-146 --> 1980, etc.
         List<Product> splittedProductList = new ArrayList<Product>();
 
-        int halfmonthIndex = 0;
-        for (int i = 1; i <= 395; i++) {
+        final int iYear = Integer.parseInt(year);
+        final int startIndex = (iYear - Constants.CMAP_START_YEAR) * Constants.CMAP_NUM_PENTADS_PER_YEAR + 1;
+        for (int i = startIndex; i < startIndex + Constants.CMAP_NUM_PENTADS_PER_YEAR; i++) {
             final Band sourceBand = cmapPentadSourceProduct.getBand(Constants.PRECIP_BAND_NAME_PREFIX + i);
             if (sourceBand != null) {
-                final String startDateString = year + Constants.BIWEEKLY_START_DATES[halfmonthIndex];
-                final int startDoy = DiversityAuxdataUtils.getDoyFromDate(startDateString);
-                Product splittedProduct = createCmapSplittedProduct(cmapPentadSourceProduct, year, startDoy);
+                final int doy = 5*(i - startIndex) + 1;
+                Product splittedProduct = createCmapSplittedProduct(cmapPentadSourceProduct, year, doy);
                 String targetBandName = Constants.PRECIP_BAND_NAME_PREFIX;
                 ProductUtils.copyBand(sourceBand.getName(), cmapPentadSourceProduct, targetBandName, splittedProduct, true);
                 splittedProductList.add(splittedProduct);
-                halfmonthIndex++;
-                if (halfmonthIndex == 24) {
-                    break;
-                }
             }
         }
 

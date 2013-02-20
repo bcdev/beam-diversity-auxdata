@@ -45,7 +45,7 @@ public class Constants {
              "0701", "0716", "0801", "0816", "0901", "0916", "1001", "1016", "1101", "1116", "1201", "1216"};
 
     public static final String[] BIWEEKLY_END_DATES =
-            {"0115", "0131", "0214", "0229", "0315", "0331", "0415", "0430", "0515", "0531", "0615", "0630",
+            {"0115", "0131", "0215", "0229", "0315", "0331", "0415", "0430", "0515", "0531", "0615", "0630",
                     "0715", "0731", "0815", "0831", "0915", "0930", "1015", "1031", "1115", "1130", "1215", "1231"};
 
     public static final String[] HALFMONTHS =
@@ -60,4 +60,7 @@ public class Constants {
 
     public static final String CMAP_OUTPUT_FILE_PREFIX = "precip.mean.";
     public static final String PRECIP_BAND_NAME_PREFIX = "precip_time";
+
+    public static final int CMAP_NUM_PENTADS_PER_YEAR = 73;
+    public static final int CMAP_START_YEAR = 1979;
 }

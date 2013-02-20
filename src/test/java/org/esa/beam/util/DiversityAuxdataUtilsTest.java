@@ -3,6 +3,8 @@ package org.esa.beam.util;
 import org.esa.beam.framework.datamodel.Product;
 import org.junit.Test;
 
+import java.util.Arrays;
+
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 

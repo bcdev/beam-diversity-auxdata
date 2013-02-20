@@ -9,8 +9,8 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
-import org.esa.beam.util.SubBiweeklyProductFraction;
 import org.esa.beam.util.DiversityAuxdataUtils;
+import org.esa.beam.util.SubBiweeklyProductFraction;
 
 import java.io.File;
 import java.text.ParseException;
@@ -49,7 +49,6 @@ public class MasterOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        Product[] ndviSourceProducts;
         switch (category) {
             case NDVI:
                 final Product ndviProduct = getNdviProduct();

@@ -106,7 +106,7 @@ public class ActualEvapoBiweeklyFrom8DayOp extends Operator {
         for (int i = 0; i < sourceProducts.length; i++) {
             Product sourceProduct = sourceProducts[i];
             final String sourceProductDoY = sourceProduct.getName().substring(27, 30);
-            final double fraction = DiversityAuxdataUtils.get8DayProductFraction(sourceProductDoY, eightDayProductFractions);
+            final double fraction = DiversityAuxdataUtils.getSubPeriodProductFraction(sourceProductDoY, eightDayProductFractions);
             sourceProductFractions[i] = fraction;
         }
 

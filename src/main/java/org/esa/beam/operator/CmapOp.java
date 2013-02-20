@@ -59,6 +59,7 @@ public class CmapOp extends Operator {
         // reproject to NDVI grid
         final Product yearlyCmapReprojectedProduct = ReferenceReprojection.reproject(yearlyCmapProduct);
         setTargetProduct(yearlyCmapReprojectedProduct);
+//        setTargetProduct(yearlyCmapProduct);
     }
 
     private Product createYearlyProduct() {
