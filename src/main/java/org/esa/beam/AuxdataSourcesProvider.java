@@ -170,6 +170,42 @@ public class AuxdataSourcesProvider {
         return ndviSourceProductsList.toArray(new Product[ndviSourceProductsList.size()]);
     }
 
+    public static Product[] getNewNdviSourceProducts(File inputDataDir, final String year, DataCategory category, boolean writeNdviFlags) {
+        final FileFilter ndviProductsFilter = new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return file.isFile() && file.getName().startsWith("NDVI_"+ year) && file.getName().endsWith(".tif");
+            }
+        };
+
+        final String ndviDir = inputDataDir + File.separator + year;
+
+        final File[] ndviSourceProductFiles = (new File(ndviDir)).listFiles(ndviProductsFilter);
+        List<Product> ndviSourceProductsList = new ArrayList<Product>();
+
+        int productIndex = 0;
+        if (ndviSourceProductFiles != null && ndviSourceProductFiles.length > 0) {
+            for (File ndviSourceProductFile : ndviSourceProductFiles) {
+                try {
+                        final Product product = ProductIO.readProduct(ndviSourceProductFile.getAbsolutePath());
+                        if (product != null) {
+                            ndviSourceProductsList.add(product);
+                            productIndex++;
+                        }
+                } catch (IOException e) {
+                    System.err.println("WARNING: new NDVI tif file '" +
+                                               ndviSourceProductFile.getName() + "' could not be read - skipping.");
+                }
+            }
+        }
+
+        if (productIndex == 0) {
+            System.out.println("No NDVI source products found for year " + year + " - nothing to do.");
+        }
+
+        return ndviSourceProductsList.toArray(new Product[ndviSourceProductsList.size()]);
+    }
+
     public static Product[] getTrmm3HrSourceProducts(File inputDataDir, String startDateString, String endDateString) throws ParseException {
         final FileFilter trmm3B42ProductFilter = new FileFilter() {
             @Override

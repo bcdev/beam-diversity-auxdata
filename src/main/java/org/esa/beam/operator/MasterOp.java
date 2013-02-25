@@ -42,7 +42,8 @@ public class MasterOp extends Operator {
     private boolean writeNdviFlags;
 
     @Parameter(defaultValue = "NDVI",
-               valueSet = {"NDVI", "NDVI_MAXCOMPOSIT", "TRMM_YEARLY", "TRMM_BIWEEKLY", "CMAP", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
+               valueSet = {"NDVI", "NDVI_NEW", "NDVI_MAXCOMPOSIT", "NDVI_MAXCOMPOSIT_NEW", "TRMM_YEARLY",
+                       "TRMM_BIWEEKLY", "CMAP", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
                description = "Processing mode (i.e. the data to process")
     private DataCategory category;
 
@@ -54,9 +55,17 @@ public class MasterOp extends Operator {
                 final Product ndviProduct = getNdviProduct();
                 setTargetProduct(ndviProduct);
                 break;
+            case NDVI_NEW:
+                final Product ndviNewProduct = getNewNdviProduct();
+                setTargetProduct(ndviNewProduct);
+                break;
             case NDVI_MAXCOMPOSIT:
                 final Product ndviMaxCompositProduct = getNdviMaxcompositProduct();
                 setTargetProduct(ndviMaxCompositProduct);
+                break;
+            case NDVI_MAXCOMPOSIT_NEW:
+                final Product ndviNewMaxCompositProduct = getNewNdviMaxcompositProduct();
+                setTargetProduct(ndviNewMaxCompositProduct);
                 break;
             case TRMM_BIWEEKLY:
                 writeTrmmBiweeklyProducts();
@@ -132,6 +141,21 @@ public class MasterOp extends Operator {
         return ndviMaxCompositOp.getTargetProduct();
     }
 
+    private Product getNewNdviMaxcompositProduct() {
+        Product[] ndviSourceProducts;
+        ndviSourceProducts = AuxdataSourcesProvider.getNewNdviSourceProducts(inputDataDir,
+                                                                          year,
+                                                                          category,
+                                                                          writeNdviFlags);
+        NdviMaxCompositOp ndviMaxCompositOp = new NdviMaxCompositOp();
+        ndviMaxCompositOp.setSourceProducts(ndviSourceProducts);
+        ndviMaxCompositOp.setParameter("year", year);
+        ndviMaxCompositOp.setParameter("writeFlags", writeNdviFlags);
+
+        return ndviMaxCompositOp.getTargetProduct();
+    }
+
+
     private Product getNdviProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNdviSourceProducts(inputDataDir,
@@ -145,6 +169,21 @@ public class MasterOp extends Operator {
 
         return ndviOp.getTargetProduct();
     }
+
+    private Product getNewNdviProduct() {
+        Product[] ndviSourceProducts;
+        ndviSourceProducts = AuxdataSourcesProvider.getNewNdviSourceProducts(inputDataDir,
+                                                                          year,
+                                                                          category,
+                                                                          writeNdviFlags);
+        NdviOp ndviOp = new NdviOp();
+        ndviOp.setSourceProducts(ndviSourceProducts);
+        ndviOp.setParameter("year", year);
+        ndviOp.setParameter("writeFlags", writeNdviFlags);
+
+        return ndviOp.getTargetProduct();
+    }
+
 
     private Product getSoilMoistureProduct() {
         List<Product> biweeklyAverageProductList = new ArrayList<Product>();

@@ -7,7 +7,9 @@ package org.esa.beam;
  */
 public enum DataCategory {
     NDVI("NDVI"),
+    NDVI_NEW("NDVI_NEW"),
     NDVI_MAXCOMPOSIT("NDVI_MAXCOMPOSIT"),
+    NDVI_MAXCOMPOSIT_NEW("NDVI_MAXCOMPOSIT_NEW"),
     TRMM_BIWEEKLY("TRMM_BIWEEKLY"),
     TRMM_YEARLY("TRMM_YEARLY"),
     CMAP("CMAP"),

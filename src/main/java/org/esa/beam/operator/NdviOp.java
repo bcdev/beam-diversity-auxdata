@@ -42,6 +42,9 @@ public class NdviOp extends Operator {
     @Override
     public void initialize() throws OperatorException {
         final String sourceProductFilter = writeFlags ? "_flag" : "_data";
+
+        // Arrays.sort(sourceProducts, new ProductNameComparator()); // todo: for new NDVI, just sort by name
+
         sortedSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, sourceProductFilter, 2, 7);
         createTargetProduct();
 
