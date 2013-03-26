@@ -2,6 +2,7 @@ package org.esa.beam.operator;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.Constants;
+import org.esa.beam.DataCategory;
 import org.esa.beam.util.DiversityAuxdataUtils;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
@@ -15,13 +16,12 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
+import org.esa.beam.util.ProductNameComparator;
 import org.esa.beam.util.ProductUtils;
 
 import java.awt.*;
-import java.util.ArrayList;
-import java.util.HashMap;
+import java.util.*;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Operator for computing a Diversity monthly 'NDVI max' composite from two halfmonthly datasets
@@ -49,6 +49,12 @@ public class NdviMaxCompositOp extends Operator {
     @Parameter(defaultValue = "false", description = "if set to true, flags are written instead of NDVIs")
     private boolean writeFlags;
 
+    @Parameter(defaultValue = "NDVI",
+               valueSet = {"NDVI", "NDVI_NEW", "NDVI_MAXCOMPOSIT", "NDVI_MAXCOMPOSIT_NEW", "TRMM_YEARLY",
+                       "TRMM_BIWEEKLY", "CMAP", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
+               description = "Processing mode (i.e. the data to process")
+    private DataCategory category;
+
     private String TARGET_BAND_PREFIX = "ndvi_max_";
 
     private int width;
@@ -60,39 +66,55 @@ public class NdviMaxCompositOp extends Operator {
 
     @Override
     public void initialize() throws OperatorException {
-        final String sourceDataProductFilter = "_data";
-        final String sourceFlagProductFilter = "_flag";
-        sortedDataSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, sourceDataProductFilter, 2, 7);
-        sortedFlagSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, sourceFlagProductFilter, 2, 7);
+        if (category == DataCategory.NDVI_MAXCOMPOSIT_NEW) {
+            Arrays.sort(sourceProducts, new ProductNameComparator());
+            sortedDataSourceProducts = sourceProducts;
+        } else {
+            final String sourceDataProductFilter = "_data";
+            final String sourceFlagProductFilter = "_flag";
+            sortedDataSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, sourceDataProductFilter, 2, 7);
+            sortedFlagSourceProducts = DiversityAuxdataUtils.sortProductsByMonth(sourceProducts, sourceFlagProductFilter, 2, 7);
+        }
 
-        createTargetProduct();
+
+        final Product yearlyNdviProduct = createYearlyProduct();
 
         if (writeFlags) {
             final FlagCoding ndviFlagCoding = DiversityAuxdataUtils.createNdviFlagCoding();
-            targetProduct.getFlagCodingGroup().add(ndviFlagCoding);
+            yearlyNdviProduct.getFlagCodingGroup().add(ndviFlagCoding);
             TARGET_BAND_PREFIX += "flag_";
-            DiversityAuxdataUtils.addPatternToAutoGrouping(targetProduct, "ndvi_max_flag");
+            DiversityAuxdataUtils.addPatternToAutoGrouping(yearlyNdviProduct, "ndvi_max_flag");
         } else {
-            DiversityAuxdataUtils.addPatternToAutoGrouping(targetProduct, "ndvi_max");
+            DiversityAuxdataUtils.addPatternToAutoGrouping(yearlyNdviProduct, "ndvi_max");
         }
 
         halfmonthlyDataProductsMap = new HashMap<String, List<Product>>();
         halfmonthlyFlagProductsMap = new HashMap<String, List<Product>>();
 
-        for (String month : Constants.MONTHS) {
+        for (int i = 0; i < Constants.MONTHS.length; i++) {
+            final String month = Constants.MONTHS[i];
             List<Product> thisMonthDataProducts = new ArrayList<Product>();
             List<Product> thisMonthFlagProducts = new ArrayList<Product>();
             for (Product product : sortedDataSourceProducts) {
-                if (product.getName().contains(month)) {
-                    thisMonthDataProducts.add(product);
+                if (category == DataCategory.NDVI_MAXCOMPOSIT_NEW) {
+                    if (product.getName().contains(String.format("_%02d_", i+1))) {
+                        thisMonthDataProducts.add(product);
+                    }
+                } else {
+                    if (product.getName().contains(month)) {
+                        thisMonthDataProducts.add(product);
+                    }
                 }
             }
-            for (Product product : sortedFlagSourceProducts) {
-                if (product.getName().contains(month)) {
-                    thisMonthFlagProducts.add(product);
+            if (category == DataCategory.NDVI_MAXCOMPOSIT) {
+                for (Product product : sortedFlagSourceProducts) {
+                    if (product.getName().contains(month)) {
+                        thisMonthFlagProducts.add(product);
+                    }
                 }
             }
-            if (thisMonthDataProducts.size() == 2 && thisMonthFlagProducts.size() == 2) {
+            if (thisMonthDataProducts.size() == 2 &&
+                    (thisMonthFlagProducts.size() == 2 || category == DataCategory.NDVI_MAXCOMPOSIT_NEW)) {
                 // the normal case
                 halfmonthlyDataProductsMap.put(month, thisMonthDataProducts);
                 halfmonthlyFlagProductsMap.put(month, thisMonthFlagProducts);
@@ -100,12 +122,13 @@ public class NdviMaxCompositOp extends Operator {
                 Band targetBand = new Band(TARGET_BAND_PREFIX + month, ProductData.TYPE_FLOAT32, width, height);
                 targetBand.setNoDataValue(Constants.NDVI_INVALID_VALUE);
                 targetBand.setNoDataValueUsed(true);
-                targetProduct.addBand(targetBand);
+                yearlyNdviProduct.addBand(targetBand);
             } else {
                 System.err.println("Warning: NDVI products for '" + month + "' missing or incomplete - skipping.");
             }
         }
 
+        setTargetProduct(yearlyNdviProduct);
     }
 
     @Override
@@ -196,17 +219,17 @@ public class NdviMaxCompositOp extends Operator {
                 secondNdviTile.getSampleInt(x, y) == Constants.NDVI_MISSING_DATA_VALUE);
     }
 
-    private void createTargetProduct() {
+    private Product createYearlyProduct() {
         width = sortedDataSourceProducts[0].getSceneRasterWidth();
         height = sortedDataSourceProducts[0].getSceneRasterHeight();
 
-        targetProduct = new Product("DIVERSITY_NDVI_MAX",
-                                    "DIVERSITY_NDVI_MAX",
-                                    width,
-                                    height);
-        ProductUtils.copyGeoCoding(sortedDataSourceProducts[0], targetProduct);
+        Product yearlyProduct = new Product("DIVERSITY_NDVI_MAX",
+                                            "DIVERSITY_NDVI_MAX",
+                                            width,
+                                            height);
+        ProductUtils.copyGeoCoding(sortedDataSourceProducts[0], yearlyProduct);
 
-        setTargetProduct(targetProduct);
+        return yearlyProduct;
     }
 
     public static class Spi extends OperatorSpi {

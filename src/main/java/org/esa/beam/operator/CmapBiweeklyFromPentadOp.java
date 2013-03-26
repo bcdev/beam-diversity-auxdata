@@ -108,7 +108,7 @@ public class CmapBiweeklyFromPentadOp extends Operator {
 
         for (int i = 0; i < sourceProducts.length; i++) {
             Product sourceProduct = sourceProducts[i];
-            final String sourceProductDoY = sourceProduct.getName().substring(19, 22);   // todo: check char position
+            final String sourceProductDoY = sourceProduct.getName().substring(19, 22);
             final double fraction = DiversityAuxdataUtils.getSubPeriodProductFraction(sourceProductDoY, pentadProductFractions);
             sourceProductFractions[i] = fraction;
         }

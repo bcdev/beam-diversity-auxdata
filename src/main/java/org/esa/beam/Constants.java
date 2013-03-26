@@ -28,9 +28,6 @@ public class Constants {
     public static final String[] MONTHS =
             {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
 
-    public static final String[] CMAP_MONTHS =
-            {"jan", "feb", "mar", "apr", "may", "jun", "jul", "aug", "sep", "oct", "nov", "dec"};
-
     public static final int NDVI_INVALID_VALUE = -10000;
     public static final int NDVI_MISSING_DATA_VALUE = -199;
 
@@ -58,7 +55,6 @@ public class Constants {
     public static final double AE_INVALID_VALUE = (double) Short.MAX_VALUE;
     public static final double AIR_TEMP_INVALID_VALUE = -9.99E8;
 
-    public static final String CMAP_OUTPUT_FILE_PREFIX = "precip.mean.";
     public static final String PRECIP_BAND_NAME_PREFIX = "precip_time";
 
     public static final int CMAP_NUM_PENTADS_PER_YEAR = 73;

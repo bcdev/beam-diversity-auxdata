@@ -78,8 +78,7 @@ public class MasterOp extends Operator {
                     trmmOp.setParameter("year", year);
                     setTargetProduct(trmmOp.getTargetProduct());
                 } catch (ParseException e) {
-                    // todo
-                    e.printStackTrace();
+                    throw new OperatorException("Problems while parsing TRMM input - cannot proceed: " + e.getMessage());
                 }
                 break;
             case CMAP:
@@ -107,7 +106,7 @@ public class MasterOp extends Operator {
             String startdateString = year + Constants.BIWEEKLY_START_DATES[i];
             String enddateString = year + Constants.BIWEEKLY_END_DATES[i];
             trmmSummOp = new TrmmBiweeklySumOp();
-            Product[] trmm3HrSourceProducts = null;
+            Product[] trmm3HrSourceProducts;
             try {
                 trmm3HrSourceProducts = AuxdataSourcesProvider.getTrmm3HrSourceProducts(inputDataDir, startdateString, enddateString);
                 trmmSummOp.setSourceProducts(trmm3HrSourceProducts);
@@ -115,8 +114,7 @@ public class MasterOp extends Operator {
                 trmmSummOp.setParameter("outputDataDir", outputDataDir);
                 trmmSummOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
             } catch (ParseException e) {
-                // todo
-                e.printStackTrace();
+                throw new OperatorException("Problems while parsing TRMM input - cannot proceed: " + e.getMessage());
             }
 
             setTargetProduct(trmmSummOp.getTargetProduct());
@@ -137,6 +135,7 @@ public class MasterOp extends Operator {
         ndviMaxCompositOp.setSourceProducts(ndviSourceProducts);
         ndviMaxCompositOp.setParameter("year", year);
         ndviMaxCompositOp.setParameter("writeFlags", writeNdviFlags);
+        ndviMaxCompositOp.setParameter("category", category);
 
         return ndviMaxCompositOp.getTargetProduct();
     }
@@ -144,15 +143,23 @@ public class MasterOp extends Operator {
     private Product getNewNdviMaxcompositProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNewNdviSourceProducts(inputDataDir,
-                                                                          year,
-                                                                          category,
-                                                                          writeNdviFlags);
+                                                                             year,
+                                                                             category,
+                                                                             writeNdviFlags);
         NdviMaxCompositOp ndviMaxCompositOp = new NdviMaxCompositOp();
         ndviMaxCompositOp.setSourceProducts(ndviSourceProducts);
         ndviMaxCompositOp.setParameter("year", year);
         ndviMaxCompositOp.setParameter("writeFlags", writeNdviFlags);
+        ndviMaxCompositOp.setParameter("category", category);
 
-        return ndviMaxCompositOp.getTargetProduct();
+        final Product ndviMaxCompositProduct = ndviMaxCompositOp.getTargetProduct();
+
+        Product ndviReprojectedMaxCompositProduct = ndviMaxCompositProduct;
+        if (category == DataCategory.NDVI_MAXCOMPOSIT_NEW) {
+            ndviReprojectedMaxCompositProduct = ReferenceReprojection.reproject(ndviMaxCompositProduct);
+        }
+
+        return ndviReprojectedMaxCompositProduct;
     }
 
 
@@ -166,6 +173,7 @@ public class MasterOp extends Operator {
         ndviOp.setSourceProducts(ndviSourceProducts);
         ndviOp.setParameter("year", year);
         ndviOp.setParameter("writeFlags", writeNdviFlags);
+        ndviOp.setParameter("category", category);
 
         return ndviOp.getTargetProduct();
     }
@@ -173,13 +181,14 @@ public class MasterOp extends Operator {
     private Product getNewNdviProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNewNdviSourceProducts(inputDataDir,
-                                                                          year,
-                                                                          category,
-                                                                          writeNdviFlags);
+                                                                             year,
+                                                                             category,
+                                                                             writeNdviFlags);
         NdviOp ndviOp = new NdviOp();
         ndviOp.setSourceProducts(ndviSourceProducts);
         ndviOp.setParameter("year", year);
         ndviOp.setParameter("writeFlags", writeNdviFlags);
+        ndviOp.setParameter("category", category);
 
         return ndviOp.getTargetProduct();
     }
@@ -205,8 +214,7 @@ public class MasterOp extends Operator {
                     biweeklyAverageProductList.add(smAveOp.getTargetProduct());
                 }
             } catch (ParseException e) {
-                // todo
-                e.printStackTrace();
+                throw new OperatorException("Problems while parsing Soil Moisture input - cannot proceed: " + e.getMessage());
             }
 
         }
@@ -282,8 +290,8 @@ public class MasterOp extends Operator {
                     biweeklyAverageProductList.add(aeAveOp.getTargetProduct());
                 }
             } catch (ParseException e) {
-                // todo
-                e.printStackTrace();
+                throw new OperatorException("Problems while parsing Actual Evapotranspiration input - cannot proceed: " +
+                                                    e.getMessage());
             }
         }
         Product[] biweeklyAverageProducts = biweeklyAverageProductList.toArray(new Product[biweeklyAverageProductList.size()]);
