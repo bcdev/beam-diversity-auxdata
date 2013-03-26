@@ -41,4 +41,35 @@ public class ReferenceReprojection {
         return reprojectedProduct;
     }
 
+    public static Product reproject(Product sourceProduct,
+                                    double easting,
+                                    double northing,
+                                    double pixelSizeX,
+                                    double pixelSizeY,
+                                    int numPixelsX,
+                                    int numPixelsY) {
+        ReprojectionOp repro = new ReprojectionOp();
+
+        repro.setParameter("easting", easting);
+        repro.setParameter("northing", northing);
+        repro.setParameter("crs", "EPSG:4326");
+        repro.setParameter("resampling", "Nearest");
+        repro.setParameter("includeTiePointGrids", false);
+        repro.setParameter("referencePixelX", numPixelsX/2.0 + 0.5);
+        repro.setParameter("referencePixelY", numPixelsY/2.0 + 0.5);
+        repro.setParameter("orientation", 0.0);
+        repro.setParameter("pixelSizeX", pixelSizeX);
+        repro.setParameter("pixelSizeY", pixelSizeY);
+        repro.setParameter("width", numPixelsX);
+        repro.setParameter("height", numPixelsY);
+        repro.setParameter("orthorectify", true);
+        repro.setSourceProduct(sourceProduct);
+
+        final Product reprojectedProduct = repro.getTargetProduct();
+        reprojectedProduct.setName(sourceProduct.getName());
+        reprojectedProduct.setProductType(sourceProduct.getProductType());
+
+        return reprojectedProduct;
+    }
+
 }

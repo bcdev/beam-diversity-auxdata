@@ -9,6 +9,7 @@ import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.beam.operator.globveg.GlobvegOp;
 import org.esa.beam.util.DiversityAuxdataUtils;
 import org.esa.beam.util.SubBiweeklyProductFraction;
 
@@ -42,11 +43,17 @@ public class MasterOp extends Operator {
     private boolean writeNdviFlags;
 
     @Parameter(defaultValue = "NDVI",
-               valueSet = {"NDVI", "NDVI_NEW", "NDVI_MAXCOMPOSIT", "NDVI_MAXCOMPOSIT_NEW", "TRMM_YEARLY",
+               valueSet = {"NDVI", "NDVI_NEW", "GLOBVEG", "NDVI_MAXCOMPOSIT", "NDVI_MAXCOMPOSIT_NEW", "TRMM_YEARLY",
                        "TRMM_BIWEEKLY", "CMAP", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
                description = "Processing mode (i.e. the data to process")
     private DataCategory category;
 
+    @Parameter(valueSet = {"10-iberia", "12-southafrica", "13-west-sudanian-savanna", "15-caatinga", "20-australia"},
+        description = "The site to process in 'Globveg' mode (to be given as 'hYYvXX')")
+    private String globvegSite;
+
+    @Parameter(description = "The tile to process in 'Globveg' mode (to be given as 'hYYvXX')")
+    private String globvegTile;
 
     @Override
     public void initialize() throws OperatorException {
@@ -58,6 +65,10 @@ public class MasterOp extends Operator {
             case NDVI_NEW:
                 final Product ndviNewProduct = getNewNdviProduct();
                 setTargetProduct(ndviNewProduct);
+                break;
+            case GLOBVEG:
+                final Product globvegProduct = getGlobvegProduct();
+                setTargetProduct(globvegProduct);
                 break;
             case NDVI_MAXCOMPOSIT:
                 final Product ndviMaxCompositProduct = getNdviMaxcompositProduct();
@@ -191,6 +202,19 @@ public class MasterOp extends Operator {
         ndviOp.setParameter("category", category);
 
         return ndviOp.getTargetProduct();
+    }
+
+    private Product getGlobvegProduct() {
+        Product[] globvegSourceProducts;
+        globvegSourceProducts = AuxdataSourcesProvider.getGlobvegSourceProducts(inputDataDir,
+                                                                                year,
+                                                                                globvegSite,
+                                                                                globvegTile);
+        GlobvegOp globvegOp = new GlobvegOp();
+        globvegOp.setSourceProducts(globvegSourceProducts);
+        globvegOp.setParameter("globvegTile", globvegTile);
+
+        return globvegOp.getTargetProduct();
     }
 
 

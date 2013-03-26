@@ -174,7 +174,7 @@ public class AuxdataSourcesProvider {
         final FileFilter ndviProductsFilter = new FileFilter() {
             @Override
             public boolean accept(File file) {
-                return file.isFile() && file.getName().startsWith("NDVI_"+ year) && file.getName().endsWith(".tif");
+                return file.isFile() && file.getName().startsWith("NDVI_" + year) && file.getName().endsWith(".tif");
             }
         };
 
@@ -187,11 +187,11 @@ public class AuxdataSourcesProvider {
         if (ndviSourceProductFiles != null && ndviSourceProductFiles.length > 0) {
             for (File ndviSourceProductFile : ndviSourceProductFiles) {
                 try {
-                        final Product product = ProductIO.readProduct(ndviSourceProductFile.getAbsolutePath());
-                        if (product != null) {
-                            ndviSourceProductsList.add(product);
-                            productIndex++;
-                        }
+                    final Product product = ProductIO.readProduct(ndviSourceProductFile.getAbsolutePath());
+                    if (product != null) {
+                        ndviSourceProductsList.add(product);
+                        productIndex++;
+                    }
                 } catch (IOException e) {
                     System.err.println("WARNING: new NDVI tif file '" +
                                                ndviSourceProductFile.getName() + "' could not be read - skipping.");
@@ -204,6 +204,43 @@ public class AuxdataSourcesProvider {
         }
 
         return ndviSourceProductsList.toArray(new Product[ndviSourceProductsList.size()]);
+    }
+
+    public static Product[] getGlobvegSourceProducts(File inputDataDir, final String year, final String globvegSite, final String globvegTile) {
+        final FileFilter globvegHalfmonthlyDirsFilter = new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return file.isDirectory() && file.getName().startsWith(year) && file.getName().endsWith("-nc");
+            }
+        };
+
+        final String globvegDir = inputDataDir + File.separator + globvegSite + File.separator + year;
+        final File[] globvegHalfmonthlyDirs = (new File(globvegDir)).listFiles(globvegHalfmonthlyDirsFilter);
+
+        List<Product> globvegSourceProductsList = new ArrayList<Product>();
+
+        int productIndex = 0;
+        for (File globvegHalfmonthlyDir : globvegHalfmonthlyDirs) {
+            String globvegInputFileName = globvegHalfmonthlyDir.getAbsolutePath() + File.separator +
+                    "meris-globveg-" + globvegHalfmonthlyDir.getName().substring(0, 8) + "-" + globvegTile + "-1.0.nc";
+            try {
+                final Product product = ProductIO.readProduct(globvegInputFileName);
+                if (product != null) {
+                    globvegSourceProductsList.add(product);
+                    productIndex++;
+                }
+            } catch (IOException e) {
+                System.err.println("Warning: Globveg netcdf file in halfmonthly directory '" +
+                                           globvegHalfmonthlyDir.getName() + "' missing or could not be read - skipping.");
+            }
+        }
+
+        if (productIndex == 0) {
+            System.out.println("No GlobVeg source products found for region " + globvegSite +
+                                       ", year " + year + ", tile " + globvegTile + " - nothing to do.");
+        }
+
+        return globvegSourceProductsList.toArray(new Product[globvegSourceProductsList.size()]);
     }
 
     public static Product[] getTrmm3HrSourceProducts(File inputDataDir, String startDateString, String endDateString) throws ParseException {
@@ -340,7 +377,7 @@ public class AuxdataSourcesProvider {
         for (int i = startIndex; i < startIndex + Constants.CMAP_NUM_PENTADS_PER_YEAR; i++) {
             final Band sourceBand = cmapPentadSourceProduct.getBand(Constants.PRECIP_BAND_NAME_PREFIX + i);
             if (sourceBand != null) {
-                final int doy = 5*(i - startIndex) + 1;
+                final int doy = 5 * (i - startIndex) + 1;
                 Product splittedProduct = createCmapSplittedProduct(cmapPentadSourceProduct, year, doy);
                 String targetBandName = Constants.PRECIP_BAND_NAME_PREFIX;
                 ProductUtils.copyBand(sourceBand.getName(), cmapPentadSourceProduct, targetBandName, splittedProduct, true);
