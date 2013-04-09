@@ -50,6 +50,7 @@ public class Constants {
                     "jul_a", "jul_b", "aug_a", "aug_b", "sep_a", "sep_b", "oct_a", "oct_b", "nov_a", "nov_b", "dec_a", "dec_b"};
 
     public static final double TRMM_INVALID_VALUE = -10000.0;
+    public static final double GPCP_INVALID_VALUE = -10000.0;
     public static final double CMAP_INVALID_VALUE = -10000.0;
     public static final double SM_INVALID_VALUE = -1.0;
     public static final double AE_INVALID_VALUE = (double) Short.MAX_VALUE;

@@ -44,12 +44,12 @@ public class MasterOp extends Operator {
 
     @Parameter(defaultValue = "NDVI",
                valueSet = {"NDVI", "NDVI_NEW", "GLOBVEG", "NDVI_MAXCOMPOSIT", "NDVI_MAXCOMPOSIT_NEW", "TRMM_YEARLY",
-                       "TRMM_BIWEEKLY", "CMAP", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
+                       "TRMM_BIWEEKLY", "GPCP", "CMAP", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
                description = "Processing mode (i.e. the data to process")
     private DataCategory category;
 
     @Parameter(valueSet = {"10-iberia", "12-southafrica", "13-west-sudanian-savanna", "15-caatinga", "20-australia"},
-        description = "The site to process in 'Globveg' mode (to be given as 'hYYvXX')")
+               description = "The site to process in 'Globveg' mode (to be given as 'hYYvXX')")
     private String globvegSite;
 
     @Parameter(description = "The tile to process in 'Globveg' mode (to be given as 'hYYvXX')")
@@ -92,6 +92,9 @@ public class MasterOp extends Operator {
                     throw new OperatorException("Problems while parsing TRMM input - cannot proceed: " + e.getMessage());
                 }
                 break;
+            case GPCP:
+                writeGpcpYearlyProducts();
+                break;
             case CMAP:
                 final Product cmapProduct = getActualCmapProduct();
                 setTargetProduct(cmapProduct);
@@ -133,6 +136,24 @@ public class MasterOp extends Operator {
             for (Product sourceProduct : trmm3HrSourceProducts) {
                 sourceProduct.dispose();
             }
+        }
+    }
+
+    private void writeGpcpYearlyProducts() {
+        GpcpOp gpcpOp = new GpcpOp();
+        Product[] gpcpYearlySourceProducts;
+        try {
+            gpcpYearlySourceProducts = AuxdataSourcesProvider.getGpcpSourceProducts(inputDataDir);
+            gpcpOp.setSourceProducts(gpcpYearlySourceProducts);
+            gpcpOp.setParameter("outputDataDir", outputDataDir);
+        } catch (ParseException e) {
+            throw new OperatorException("Problems while parsing GPCP input - cannot proceed: " + e.getMessage());
+        }
+
+        setTargetProduct(gpcpOp.getTargetProduct());
+
+        for (Product sourceProduct : gpcpYearlySourceProducts) {
+            sourceProduct.dispose();
         }
     }
 

@@ -288,6 +288,45 @@ public class AuxdataSourcesProvider {
         return trmmSourceProductsList.toArray(new Product[trmmSourceProductsList.size()]);
     }
 
+    public static Product[] getGpcpSourceProducts(File inputDataDir) throws ParseException {
+        final FileFilter gpcpProductFilter = new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                return file.isFile() &&
+                        file.getName().toLowerCase().startsWith("gpcp_v22") &&
+                        file.getName().toLowerCase().endsWith(".nc");
+            }
+        };
+
+        final String gpcpDir = inputDataDir.getAbsolutePath();
+        final File[] gpcpSourceProductFiles = (new File(gpcpDir)).listFiles(gpcpProductFilter);
+
+        List<Product> gpcpSourceProductsList = new ArrayList<Product>();
+
+        int productIndex = 0;
+        if (gpcpSourceProductFiles != null && gpcpSourceProductFiles.length > 0) {
+            for (File gpcpSourceProductFile : gpcpSourceProductFiles) {
+                try {
+                    final Product product = ProductIO.readProduct(gpcpSourceProductFile.getAbsolutePath());
+                    if (product != null) {
+                        gpcpSourceProductsList.add(product);
+                        productIndex++;
+                    }
+                } catch (IOException e) {
+                    System.err.println("WARNING: GPCP netCDF file '" +
+                                               gpcpSourceProductFile.getName() + "' could not be read - skipping.");
+                }
+            }
+        }
+
+        if (productIndex == 0) {
+            System.out.println("WARNING: No GPCP netCDF source products found - nothing to do.");
+        }
+
+        return gpcpSourceProductsList.toArray(new Product[gpcpSourceProductsList.size()]);
+    }
+
+
     public static Product[] getTrmmBiweeklySourceProducts(File inputDataDir) throws ParseException {
         final FileFilter trmm3B42ProductFilter = new FileFilter() {
             @Override
