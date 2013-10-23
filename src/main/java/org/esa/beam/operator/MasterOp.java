@@ -44,7 +44,7 @@ public class MasterOp extends Operator {
 
     @Parameter(defaultValue = "NDVI",
                valueSet = {"NDVI", "NDVI_NEW", "GLOBVEG", "NDVI_MAXCOMPOSIT", "NDVI_MAXCOMPOSIT_NEW", "TRMM_YEARLY",
-                       "TRMM_BIWEEKLY", "GPCP", "CMAP", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
+                       "TRMM_BIWEEKLY", "GPCP", "CMAP", "CMORPH", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
                description = "Processing mode (i.e. the data to process")
     private DataCategory category;
 
