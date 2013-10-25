@@ -2,6 +2,7 @@ org.esa.beam.operator.MasterOp$Spi
 org.esa.beam.operator.NdviOp$Spi
 org.esa.beam.operator.NdviMaxCompositOp$Spi
 org.esa.beam.operator.TrmmBiweeklySumOp$Spi
+org.esa.beam.operator.CmorphSumOp$Spi
 org.esa.beam.operator.GpcpOp$Spi
 org.esa.beam.operator.SoilMoistureOp$Spi
 org.esa.beam.operator.CmapOp$Spi

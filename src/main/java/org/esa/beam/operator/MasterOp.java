@@ -39,12 +39,20 @@ public class MasterOp extends Operator {
     @Parameter(defaultValue = "", description = "The year to process")
     private String year;
 
+    @Parameter(defaultValue = "01", description = "The month to process (used for CMORPH_BIWEEKLY)",
+               valueSet = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"})
+    private String month;
+
+    @Parameter(defaultValue = "1", description = "The day to process (used for CMORPH_DAILY)", interval = "[1,31]")
+    private int day;
+
     @Parameter(defaultValue = "false", description = "if set to true, flags are written instead of NDVIs")
     private boolean writeNdviFlags;
 
     @Parameter(defaultValue = "NDVI",
                valueSet = {"NDVI", "NDVI_NEW", "GLOBVEG", "NDVI_MAXCOMPOSIT", "NDVI_MAXCOMPOSIT_NEW", "TRMM_YEARLY",
-                       "TRMM_BIWEEKLY", "GPCP", "CMAP", "CMORPH", "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
+                       "TRMM_BIWEEKLY", "GPCP", "CMAP", "CMORPH_DAILY", "CMORPH_BIWEEKLY",
+                       "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
                description = "Processing mode (i.e. the data to process")
     private DataCategory category;
 
@@ -92,6 +100,12 @@ public class MasterOp extends Operator {
                     throw new OperatorException("Problems while parsing TRMM input - cannot proceed: " + e.getMessage());
                 }
                 break;
+            case CMORPH_BIWEEKLY:
+                writeCmorphBiweeklyProducts();
+                break;
+            case CMORPH_DAILY:
+                writeCmorphDailyProducts();
+                break;
             case GPCP:
                 writeGpcpYearlyProducts();
                 break;
@@ -138,6 +152,61 @@ public class MasterOp extends Operator {
             }
         }
     }
+
+    private void writeCmorphBiweeklyProducts() {
+        CmorphSumOp cmorphSumOp;
+
+        final int firstDateIndex = 2 * (Integer.parseInt(month) - 1);
+
+        for (int i = firstDateIndex; i <= firstDateIndex + 1; i++) {
+//        for (int i = 0; i < Constants.BIWEEKLY_START_DATES.length; i++) {
+            String startdateString = year + Constants.BIWEEKLY_START_DATES[i];
+            String enddateString = year + Constants.BIWEEKLY_END_DATES[i];
+            cmorphSumOp = new CmorphSumOp();
+            Product[] cmorph1HrSourceProducts;
+            try {
+                cmorph1HrSourceProducts = AuxdataSourcesProvider.getCmorph1HrSourceProducts(inputDataDir, startdateString, enddateString);
+                cmorphSumOp.setSourceProducts(cmorph1HrSourceProducts);
+                cmorphSumOp.setParameter("year", year);
+                cmorphSumOp.setParameter("outputDataDir", outputDataDir);
+                cmorphSumOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
+                cmorphSumOp.setParameter("category", DataCategory.CMORPH_BIWEEKLY);
+            } catch (ParseException e) {
+                throw new OperatorException("Problems while parsing CMORPH input - cannot proceed: " + e.getMessage());
+            }
+
+            setTargetProduct(cmorphSumOp.getTargetProduct());
+
+            for (Product sourceProduct : cmorph1HrSourceProducts) {
+                sourceProduct.dispose();
+            }
+        }
+    }
+
+    private void writeCmorphDailyProducts() {
+        CmorphSumOp cmorphSumOp;
+
+        String dateString = year + month + String.format("%02d", day);
+        cmorphSumOp = new CmorphSumOp();
+        Product[] cmorph1HrSourceProducts;
+        try {
+            cmorph1HrSourceProducts = AuxdataSourcesProvider.getCmorph1HrSourceProducts(inputDataDir, dateString, dateString);
+            cmorphSumOp.setSourceProducts(cmorph1HrSourceProducts);
+            cmorphSumOp.setParameter("year", year);
+            cmorphSumOp.setParameter("outputDataDir", outputDataDir);
+            cmorphSumOp.setParameter("startdateString", dateString);
+            cmorphSumOp.setParameter("category", DataCategory.CMORPH_DAILY);
+        } catch (ParseException e) {
+            throw new OperatorException("Problems while parsing CMORPH input - cannot proceed: " + e.getMessage());
+        }
+
+        setTargetProduct(cmorphSumOp.getTargetProduct());
+
+        for (Product sourceProduct : cmorph1HrSourceProducts) {
+            sourceProduct.dispose();
+        }
+    }
+
 
     private void writeGpcpYearlyProducts() {
         GpcpOp gpcpOp = new GpcpOp();

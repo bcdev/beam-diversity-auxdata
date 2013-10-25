@@ -3,6 +3,7 @@ package org.esa.beam;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.operator.CmorphSumOp;
 import org.esa.beam.operator.SoilMoistureOp;
 import org.esa.beam.operator.TrmmBiweeklySumOp;
 import org.esa.beam.util.DiversityAuxdataUtils;
@@ -286,6 +287,63 @@ public class AuxdataSourcesProvider {
         }
 
         return trmmSourceProductsList.toArray(new Product[trmmSourceProductsList.size()]);
+    }
+
+    public static Product[] getCmorph1HrSourceProducts(File inputDataDir, String startDateString, String endDateString) throws ParseException {
+        final FileFilter cmorph1HrProductFilter = new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                // e.g. CMORPH_V1.0_RAW_8km-30min_2001033123.nc
+                return file.isFile() &&
+                        (file.getName().length() == 39 || file.getName().length() == 22) &&
+                        file.getName().toLowerCase().startsWith("cmorph") &&
+                        file.getName().toLowerCase().endsWith(".nc");
+            }
+        };
+
+        Date startDate = CmorphSumOp.sdfCmorph.parse(startDateString);
+        Date endDate = CmorphSumOp.sdfCmorph.parse(endDateString);
+
+        final String cmorphDir = inputDataDir.getAbsolutePath();
+        final File[] cmorphSourceProductFiles = (new File(cmorphDir)).listFiles(cmorph1HrProductFilter);
+
+        List<Product> cmorphSourceProductsList = new ArrayList<Product>();
+
+        int productIndex = 0;
+        if (cmorphSourceProductFiles != null && cmorphSourceProductFiles.length > 0) {
+            System.out.println("Reading source products...");
+            for (File cmorphSourceProductFile : cmorphSourceProductFiles) {
+                String productDateString;
+                if (cmorphSourceProductFile.getName().length() == 39) {
+                    // e.g. CMORPH_V1.0_RAW_8km-30min_2001033123.nc
+                    productDateString = cmorphSourceProductFile.getName().substring(26, 34);
+                } else {
+                    // OR   CMORPH_pcp_20010102.nc
+                    productDateString = cmorphSourceProductFile.getName().substring(11, 19);
+                }
+                try {
+                    Date productDate = CmorphSumOp.sdfCmorph.parse(productDateString);
+                    if (DiversityAuxdataUtils.isDateWithinPeriod(startDate, endDate, productDate)) {
+                        final Product product = ProductIO.readProduct(cmorphSourceProductFile.getAbsolutePath());
+                        if (product != null) {
+                            cmorphSourceProductsList.add(product);
+                            productIndex++;
+                        }
+                    }
+                } catch (IOException e) {
+                    System.err.println("WARNING: CMORPH netCDF file '" +
+                                               cmorphSourceProductFile.getName() + "' could not be read - skipping.");
+                }
+            }
+        }
+
+        if (productIndex == 0) {
+            System.out.println("WARNING: No CMORPH netCDF source products found for biweekly period " + startDateString + " - nothing to do.");
+        } else {
+            System.out.println("Read " + productIndex + " source products.");
+        }
+
+        return cmorphSourceProductsList.toArray(new Product[cmorphSourceProductsList.size()]);
     }
 
     public static Product[] getGpcpSourceProducts(File inputDataDir) throws ParseException {
