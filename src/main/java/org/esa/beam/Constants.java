@@ -49,6 +49,7 @@ public class Constants {
             {"jan_a", "jan_b", "feb_a", "feb_b", "mar_a", "mar_b", "apr_a", "apr_b", "may_a", "may_b", "jun_a", "jun_b",
                     "jul_a", "jul_b", "aug_a", "aug_b", "sep_a", "sep_b", "oct_a", "oct_b", "nov_a", "nov_b", "dec_a", "dec_b"};
 
+    public static final double CMORPH_INVALID_VALUE = -999.0;
     public static final double TRMM_INVALID_VALUE = -10000.0;
     public static final double GPCP_INVALID_VALUE = -10000.0;
     public static final double CMAP_INVALID_VALUE = -10000.0;

@@ -72,14 +72,14 @@ public class CmorphSumOp extends Operator {
         // do daily or biweekly summation
         if (sourceProducts != null && sourceProducts.length > 0) {
             final Band precipBand0 = sourceProducts[0].getBand(precipSrcBandName);
-            RenderedImage precipImageSum = precipBand0.getSourceImage();
+            RenderedImage precipImageSum = filterNegativePrecip(precipBand0.getSourceImage());
             for (int j = 1; j < sourceProducts.length; j++) {
                 final Band precipBandJ = sourceProducts[j].getBand(precipSrcBandName);
-                RenderedImage precipImageJ = precipBandJ.getSourceImage();
+                RenderedImage precipImageJ = filterNegativePrecip(precipBandJ.getSourceImage());
                 precipImageSum = AddDescriptor.create(precipImageSum, precipImageJ, null);
             }
 
-            RenderedImage finalPrecipImageSum = filterNegativePrecip(precipImageSum);
+            RenderedImage finalPrecipImageSum = precipImageSum;
 
             Product sumProduct = createSumProduct(precipSrcBandName, precipTargetBandName);
             sumProduct.getBand(sumBandName).setSourceImage(finalPrecipImageSum);
@@ -98,10 +98,10 @@ public class CmorphSumOp extends Operator {
     }
 
     private RenderedImage filterNegativePrecip(RenderedImage precipImageSum) {
-        // set all negative precips to invalid value
+        // set all negative precips to zero
         double[] low = new double[]{-1.E7};
-        double[] high = new double[]{-1.E-3};
-        double[] map = new double[]{Constants.TRMM_INVALID_VALUE};
+        double[] high = new double[]{1.E-3};
+        double[] map = new double[]{0.0};
 
         // threshold operation.
         ParameterBlock pb = new ParameterBlock();
@@ -143,9 +143,10 @@ public class CmorphSumOp extends Operator {
         Band precipSourceBand = sourceProducts[0].getBand(precipSrcBandName);
         sumBandName = precipTargetBandName;
         ProductUtils.copyBand(precipSourceBand.getName(), sourceProducts[0], sumBandName, sumProduct, true);
-        sumProduct.getBand(sumBandName).setNoDataValue(Constants.NDVI_INVALID_VALUE);
+        sumProduct.getBand(sumBandName).setNoDataValue(Constants.CMORPH_INVALID_VALUE);
         sumProduct.getBand(sumBandName).setNoDataValueUsed(true);
         sumProduct.getBand(sumBandName).setDescription("Total precipitation (mm)");
+        sumProduct.getBand(sumBandName).setUnit("mm");
 
         return sumProduct;
     }
