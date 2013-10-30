@@ -56,9 +56,9 @@ public class CmorphSumOp extends Operator {
 
     public static final SimpleDateFormat sdfCmorph = new SimpleDateFormat("yyyyMMdd");
 
-    private static final String HOURLY_PRECIP_BAND_NAME = "PRECIP_HOURLY";
-    private static final String DAILY_PRECIP_BAND_NAME = "PRECIP_DAILY";
-    private static final String BIWEEKLY_PRECIP_BAND_NAME = "PRECIP_BIWEEKLY";
+    public static final String HOURLY_PRECIP_BAND_NAME = "PRECIP_HOURLY";
+    public static final String DAILY_PRECIP_BAND_NAME = "PRECIP_DAILY";
+    public static final String BIWEEKLY_PRECIP_BAND_NAME = "PRECIP_BIWEEKLY";
 
     private String sumBandName;
 
@@ -89,9 +89,11 @@ public class CmorphSumOp extends Operator {
                 sumReprojectedProduct = ReferenceReprojection.reproject(sumProduct);
                 writeFinalBiweeklySumProduct(sumReprojectedProduct);
             } else {
-                writeFinalDailySumProduct(sumReprojectedProduct);
+                // swap at zero meridian
+                CmorphSwapOp swapOp = new CmorphSwapOp();
+                swapOp.setSourceProduct(sumReprojectedProduct);
+                writeFinalDailySumProduct(swapOp.getTargetProduct());
             }
-
         }
 
         setDummyTargetProduct();
@@ -116,7 +118,7 @@ public class CmorphSumOp extends Operator {
     private void writeFinalDailySumProduct(Product product) {
         final String outputFilename = "CMORPH_pcp_" + startdateString + ".nc";
         final File file = new File(outputDataDir, outputFilename);
-        WriteOp writeOp = new WriteOp(product, file, "NetCDF-BEAM");
+        WriteOp writeOp = new WriteOp(product, file, "NetCDF-CF");
         writeOp.writeProduct(ProgressMonitor.NULL);
         System.out.println("Written CMORPH sum file '" + file.getAbsolutePath() + "'.");
     }
