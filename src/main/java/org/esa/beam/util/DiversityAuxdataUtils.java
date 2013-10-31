@@ -61,7 +61,7 @@ public class DiversityAuxdataUtils {
      * @param filter           - a filter substring which the product name must contain
      * @param monthCharPos     - position where MMM starts in product name (e.g. 24 for the 'j' in 'DIVERSITY_TRMM_BIWEEKLY_jan_b')
      * @param halfMonthCharPos - position where month suffix 'a' or 'b' starts in product name
-     *                         (e.g. 27 for the 'b' in 'DIVERSITY_TRMM_BIWEEKLY_jan_b')
+     *                         (e.g. 28 for the 'b' in 'DIVERSITY_TRMM_BIWEEKLY_jan_b')
      * @return the sorted array
      */
     public static Product[] sortProductsByMonth(Product[] products, String filter, int monthCharPos, int halfMonthCharPos) {

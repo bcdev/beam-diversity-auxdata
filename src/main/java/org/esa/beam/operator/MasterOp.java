@@ -24,9 +24,9 @@ import java.util.List;
  * @author olafd
  */
 @OperatorMetadata(alias = "Diversity.Auxdata", version = "1.0",
-                  authors = "Olaf Danne",
-                  copyright = "(c) 2013 Brockmann Consult",
-                  description = "Master operator for preparation/modification of various Diversity auxdata.")
+        authors = "Olaf Danne",
+        copyright = "(c) 2013 Brockmann Consult",
+        description = "Master operator for preparation/modification of various Diversity auxdata.")
 public class MasterOp extends Operator {
     public static final String VERSION = "1.0-SNAPSHOT";
 
@@ -40,7 +40,7 @@ public class MasterOp extends Operator {
     private String year;
 
     @Parameter(defaultValue = "01", description = "The month to process (used for CMORPH_BIWEEKLY)",
-               valueSet = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"})
+            valueSet = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"})
     private String month;
 
     @Parameter(defaultValue = "1", description = "The day to process (used for CMORPH_DAILY)", interval = "[1,31]")
@@ -49,15 +49,17 @@ public class MasterOp extends Operator {
     @Parameter(defaultValue = "false", description = "if set to true, flags are written instead of NDVIs")
     private boolean writeNdviFlags;
 
-    @Parameter(defaultValue = "NDVI",
-               valueSet = {"NDVI", "NDVI_NEW", "GLOBVEG", "NDVI_MAXCOMPOSIT", "NDVI_MAXCOMPOSIT_NEW", "TRMM_YEARLY",
-                       "TRMM_BIWEEKLY", "GPCP", "CMAP", "CMORPH_DAILY", "CMORPH_BIWEEKLY",
-                       "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE"},
-               description = "Processing mode (i.e. the data to process")
+    @Parameter(valueSet = {"NDVI", "NDVI_NEW", "NDVI_MAXCOMPOSIT", "NDVI_MAXCOMPOSIT_NEW",
+                    "TRMM_YEARLY", "TRMM_BIWEEKLY",
+                    "CMORPH_DAILY", "CMORPH_BIWEEKLY", "CMORPH_YEARLY",
+                    "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE", "GLOBVEG",
+                    "GPCP", "CMAP"
+            },
+            description = "Processing mode (i.e. the data to process")
     private DataCategory category;
 
     @Parameter(valueSet = {"10-iberia", "12-southafrica", "13-west-sudanian-savanna", "15-caatinga", "20-australia"},
-               description = "The site to process in 'Globveg' mode (to be given as 'hYYvXX')")
+            description = "The site to process in 'Globveg' mode (to be given as 'hYYvXX')")
     private String globvegSite;
 
     @Parameter(description = "The tile to process in 'Globveg' mode (to be given as 'hYYvXX')")
@@ -92,7 +94,8 @@ public class MasterOp extends Operator {
             case TRMM_YEARLY:
                 TrmmOp trmmOp = new TrmmOp();
                 try {
-                    Product[] trmmBiweeklySourceProducts = AuxdataSourcesProvider.getTrmmBiweeklySourceProducts(inputDataDir);
+                    Product[] trmmBiweeklySourceProducts =
+                            AuxdataSourcesProvider.getBiweeklySourceProducts(inputDataDir, "TRMM");
                     trmmOp.setSourceProducts(trmmBiweeklySourceProducts);
                     trmmOp.setParameter("year", year);
                     setTargetProduct(trmmOp.getTargetProduct());
@@ -105,6 +108,18 @@ public class MasterOp extends Operator {
                 break;
             case CMORPH_DAILY:
                 writeCmorphDailyProducts();
+                break;
+            case CMORPH_YEARLY:
+                CmorphOp cmorphOp = new CmorphOp();
+                try {
+                    Product[] cmorphBiweeklySourceProducts =
+                            AuxdataSourcesProvider.getBiweeklySourceProducts(inputDataDir, "CMORPH");
+                    cmorphOp.setSourceProducts(cmorphBiweeklySourceProducts);
+                    cmorphOp.setParameter("year", year);
+                    setTargetProduct(cmorphOp.getTargetProduct());
+                } catch (ParseException e) {
+                    throw new OperatorException("Problems while parsing CMORPH input - cannot proceed: " + e.getMessage());
+                }
                 break;
             case GPCP:
                 writeGpcpYearlyProducts();
@@ -229,9 +244,9 @@ public class MasterOp extends Operator {
     private Product getNdviMaxcompositProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNdviSourceProducts(inputDataDir,
-                                                                          year,
-                                                                          category,
-                                                                          writeNdviFlags);
+                year,
+                category,
+                writeNdviFlags);
         NdviMaxCompositOp ndviMaxCompositOp = new NdviMaxCompositOp();
         ndviMaxCompositOp.setSourceProducts(ndviSourceProducts);
         ndviMaxCompositOp.setParameter("year", year);
@@ -244,9 +259,9 @@ public class MasterOp extends Operator {
     private Product getNewNdviMaxcompositProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNewNdviSourceProducts(inputDataDir,
-                                                                             year,
-                                                                             category,
-                                                                             writeNdviFlags);
+                year,
+                category,
+                writeNdviFlags);
         NdviMaxCompositOp ndviMaxCompositOp = new NdviMaxCompositOp();
         ndviMaxCompositOp.setSourceProducts(ndviSourceProducts);
         ndviMaxCompositOp.setParameter("year", year);
@@ -267,9 +282,9 @@ public class MasterOp extends Operator {
     private Product getNdviProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNdviSourceProducts(inputDataDir,
-                                                                          year,
-                                                                          category,
-                                                                          writeNdviFlags);
+                year,
+                category,
+                writeNdviFlags);
         NdviOp ndviOp = new NdviOp();
         ndviOp.setSourceProducts(ndviSourceProducts);
         ndviOp.setParameter("year", year);
@@ -282,9 +297,9 @@ public class MasterOp extends Operator {
     private Product getNewNdviProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNewNdviSourceProducts(inputDataDir,
-                                                                             year,
-                                                                             category,
-                                                                             writeNdviFlags);
+                year,
+                category,
+                writeNdviFlags);
         NdviOp ndviOp = new NdviOp();
         ndviOp.setSourceProducts(ndviSourceProducts);
         ndviOp.setParameter("year", year);
@@ -297,9 +312,9 @@ public class MasterOp extends Operator {
     private Product getGlobvegProduct() {
         Product[] globvegSourceProducts;
         globvegSourceProducts = AuxdataSourcesProvider.getGlobvegSourceProducts(inputDataDir,
-                                                                                year,
-                                                                                globvegSite,
-                                                                                globvegTile);
+                year,
+                globvegSite,
+                globvegTile);
         GlobvegOp globvegOp = new GlobvegOp();
         globvegOp.setSourceProducts(globvegSourceProducts);
         globvegOp.setParameter("globvegTile", globvegTile);
@@ -319,9 +334,9 @@ public class MasterOp extends Operator {
             Product[] smDailySourceProducts;
             try {
                 smDailySourceProducts = AuxdataSourcesProvider.getSmDailySourceProducts(inputDataDir,
-                                                                                        year,
-                                                                                        startdateString,
-                                                                                        enddateString);
+                        year,
+                        startdateString,
+                        enddateString);
                 if (smDailySourceProducts != null && smDailySourceProducts.length > 0) {
                     smAveOp.setSourceProducts(smDailySourceProducts);
                     smAveOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
@@ -358,7 +373,7 @@ public class MasterOp extends Operator {
 
             final SubBiweeklyProductFraction pentadProductFractions =
                     DiversityAuxdataUtils.getPentadProductFractionsForBiweeklyPeriods(startDateString,
-                                                                                      endDateString);
+                            endDateString);
 
             if (cmapPentadSplittedSourceProducts != null && cmapPentadSplittedSourceProducts.length > 0) {
                 cmapAveOp.setSourceProducts(cmapPentadSplittedSourceProducts);
@@ -390,13 +405,13 @@ public class MasterOp extends Operator {
 
             final SubBiweeklyProductFraction eightDayProductFractions =
                     DiversityAuxdataUtils.get8DayProductFractionsForBiweeklyPeriods(startDateString,
-                                                                                    endDateString);
+                            endDateString);
             try {
                 ae8DaySourceProducts = AuxdataSourcesProvider.getAe8DaySourceProducts(inputDataDir,
-                                                                                      year,
-                                                                                      eightDayProductFractions,
-                                                                                      startDateString,
-                                                                                      endDateString);
+                        year,
+                        eightDayProductFractions,
+                        startDateString,
+                        endDateString);
                 if (ae8DaySourceProducts != null && ae8DaySourceProducts.length > 0) {
                     aeAveOp.setSourceProducts(ae8DaySourceProducts);
                     aeAveOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
@@ -405,7 +420,7 @@ public class MasterOp extends Operator {
                 }
             } catch (ParseException e) {
                 throw new OperatorException("Problems while parsing Actual Evapotranspiration input - cannot proceed: " +
-                                                    e.getMessage());
+                        e.getMessage());
             }
         }
         Product[] biweeklyAverageProducts = biweeklyAverageProductList.toArray(new Product[biweeklyAverageProductList.size()]);

@@ -385,42 +385,42 @@ public class AuxdataSourcesProvider {
     }
 
 
-    public static Product[] getTrmmBiweeklySourceProducts(File inputDataDir) throws ParseException {
-        final FileFilter trmm3B42ProductFilter = new FileFilter() {
+    public static Product[] getBiweeklySourceProducts(File inputDataDir, final String productCategory) throws ParseException {
+        final FileFilter biweeklyProductFilter = new FileFilter() {
             @Override
             public boolean accept(File file) {
                 return file.isFile() &&
-                        file.getName().startsWith("TRMM") &&
+                        file.getName().startsWith(productCategory) &&
                         (file.getName().endsWith("_a.tif") || file.getName().endsWith("_b.tif"));
             }
         };
 
-        final String trmmDir = inputDataDir.getAbsolutePath();
-        final File[] trmmSourceProductFiles = (new File(trmmDir)).listFiles(trmm3B42ProductFilter);
+        final String biweeklyDir = inputDataDir.getAbsolutePath();
+        final File[] biweeklySourceProductFiles = (new File(biweeklyDir)).listFiles(biweeklyProductFilter);
 
-        List<Product> trmmSourceProductsList = new ArrayList<Product>();
+        List<Product> biweeklySourceProductsList = new ArrayList<Product>();
 
         int productIndex = 0;
-        if (trmmSourceProductFiles != null && trmmSourceProductFiles.length > 0) {
-            for (File trmmSourceProductFile : trmmSourceProductFiles) {
+        if (biweeklySourceProductFiles != null && biweeklySourceProductFiles.length > 0) {
+            for (File biweeklySourceProductFile : biweeklySourceProductFiles) {
                 try {
-                    final Product product = ProductIO.readProduct(trmmSourceProductFile.getAbsolutePath());
+                    final Product product = ProductIO.readProduct(biweeklySourceProductFile.getAbsolutePath());
                     if (product != null) {
-                        trmmSourceProductsList.add(product);
+                        biweeklySourceProductsList.add(product);
                         productIndex++;
                     }
                 } catch (IOException e) {
-                    System.err.println("WARNING: TRMM netCDF file '" +
-                                               trmmSourceProductFile.getName() + "' could not be read - skipping.");
+                    System.err.println("WARNING: biweekly file '" +
+                                               biweeklySourceProductFile.getName() + "' could not be read - skipping.");
                 }
             }
         }
 
         if (productIndex == 0) {
-            System.out.println("WARNING: No TRMM biweekly products found in " + trmmDir + " - nothing to do.");
+            System.out.println("WARNING: No biweekly products found in " + biweeklyDir + " - nothing to do.");
         }
 
-        return trmmSourceProductsList.toArray(new Product[trmmSourceProductsList.size()]);
+        return biweeklySourceProductsList.toArray(new Product[biweeklySourceProductsList.size()]);
     }
 
     public static Product[] getAirTempSourceProducts(File inputDataDir, final String year) {
