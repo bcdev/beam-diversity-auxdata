@@ -18,7 +18,11 @@ import java.awt.*;
 import java.io.IOException;
 
 /**
- * Operator for swap at zero meridian
+ * Operator for swap at zero meridian, computed like this:
+ * p_new(x) = p_old(x+W/2) for x in [0,W/2]
+ * p_new(x) = p_old(x-W/2) for x in [W/2,W],
+ * so this is different from a horizontal flip!
+ * // todo: this might be useful as a general utility operator.
  *
  * @author olafd
  */
@@ -61,7 +65,8 @@ public class CmorphSwapOp extends Operator {
             try {
                 precipSourceBand.readRasterData(0, y, sourceW, 1, rasterData, SubProgressMonitor.create(pm, 1));
                 for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
-                    int sourceX = getSwappedX(targetRectangle.x, x, sourceW);
+                    // targetRectangle.x is zero for tile width set equal to product width!
+                    int sourceX = getSwappedX(x, sourceW);
                     targetTile.setSample(x, y, rasterData.getElemFloatAt(sourceX));
                 }
             } catch (IOException e) {
@@ -70,31 +75,38 @@ public class CmorphSwapOp extends Operator {
         }
     }
 
-    static int getSwappedX(int rectX, int x, int lineWidth) {
-        int sourceX;
-        if (lineWidth % 2 == 0) {
+    /**
+     * This method gets the swapped x index.
+     *
+     * @param sourceX  the source pixel x index
+     * @param rowWidth  the width of the raster row
+     * @return  the target pixel x index
+     */
+    static int getSwappedX(int sourceX, int rowWidth) {
+        int swappedX;
+        if (rowWidth % 2 == 0) {
             // even number of pixels
-            if (rectX + x < lineWidth / 2) {
+            if (sourceX < rowWidth / 2) {
                 // left image half
-                sourceX = rectX + x + lineWidth / 2;
+                swappedX = sourceX + rowWidth / 2;
             } else {
                 // right image half
-                sourceX = rectX + x - lineWidth / 2;
+                swappedX = sourceX - rowWidth / 2;
             }
         } else {
             // odd number of pixels
-            if (rectX + x < lineWidth / 2) {
+            if (sourceX < rowWidth / 2) {
                 // left image half
-                sourceX = rectX + x + (lineWidth+1)/2;
-            } else if (rectX + x > lineWidth / 2) {
+                swappedX = sourceX + (rowWidth+1)/2;
+            } else if (sourceX > rowWidth / 2) {
                 // right image half
-                sourceX = rectX + x - (lineWidth+1)/2;
+                swappedX = sourceX - (rowWidth+1)/2;
             } else {
                 // center column unchanged
-                sourceX = rectX + x;
+                swappedX = sourceX;
             }
         }
-        return sourceX;
+        return swappedX;
     }
 
     private Product createTargetProduct() {

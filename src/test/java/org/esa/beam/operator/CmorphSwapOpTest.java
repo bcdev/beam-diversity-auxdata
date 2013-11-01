@@ -50,12 +50,12 @@ public class CmorphSwapOpTest {
         int[] expectedI = new int[]{
                 3, 4, 5, 0, 1, 2
         };
-        assertEquals(expectedI[0], CmorphSwapOp.getSwappedX(0, 0, actual.length));
-        assertEquals(expectedI[1], CmorphSwapOp.getSwappedX(0, 1, actual.length));
-        assertEquals(expectedI[2], CmorphSwapOp.getSwappedX(0, 2, actual.length));
-        assertEquals(expectedI[3], CmorphSwapOp.getSwappedX(0, 3, actual.length));
-        assertEquals(expectedI[4], CmorphSwapOp.getSwappedX(0, 4, actual.length));
-        assertEquals(expectedI[5], CmorphSwapOp.getSwappedX(0, 5, actual.length));
+        assertEquals(expectedI[0], CmorphSwapOp.getSwappedX(0, actual.length));
+        assertEquals(expectedI[1], CmorphSwapOp.getSwappedX(1, actual.length));
+        assertEquals(expectedI[2], CmorphSwapOp.getSwappedX(2, actual.length));
+        assertEquals(expectedI[3], CmorphSwapOp.getSwappedX(3, actual.length));
+        assertEquals(expectedI[4], CmorphSwapOp.getSwappedX(4, actual.length));
+        assertEquals(expectedI[5], CmorphSwapOp.getSwappedX(5, actual.length));
 
         actual = new float[]{
                 8.9f, 6.7f, 4.5f, 3.6f, 2.4f
@@ -65,10 +65,10 @@ public class CmorphSwapOpTest {
                 3, 4, 2, 0, 1
         };
 
-        assertEquals(expectedI[0], CmorphSwapOp.getSwappedX(0, 0, actual.length));
-        assertEquals(expectedI[1], CmorphSwapOp.getSwappedX(0, 1, actual.length));
-        assertEquals(expectedI[2], CmorphSwapOp.getSwappedX(0, 2, actual.length));
-        assertEquals(expectedI[3], CmorphSwapOp.getSwappedX(0, 3, actual.length));
-        assertEquals(expectedI[4], CmorphSwapOp.getSwappedX(0, 4, actual.length));
+        assertEquals(expectedI[0], CmorphSwapOp.getSwappedX(0, actual.length));
+        assertEquals(expectedI[1], CmorphSwapOp.getSwappedX(1, actual.length));
+        assertEquals(expectedI[2], CmorphSwapOp.getSwappedX(2, actual.length));
+        assertEquals(expectedI[3], CmorphSwapOp.getSwappedX(3, actual.length));
+        assertEquals(expectedI[4], CmorphSwapOp.getSwappedX(4, actual.length));
     }
 }
