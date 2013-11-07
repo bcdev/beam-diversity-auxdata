@@ -23,26 +23,26 @@ public class DiversityAuxdataUtils {
         FlagCoding ndviFC = new FlagCoding(Constants.NDVI_FLAG_NAME);
 
         ndviFC.addFlag(Constants.NDVI_GOOD_VALUE_FLAG_NAME,
-                Constants.GOOD_VALUE,
-                "Good value");
+                       Constants.GOOD_VALUE,
+                       "Good value");
         ndviFC.addFlag(Constants.NDVI_GOOD_VALUE_POSSIBLY_SNOW_FLAG_NAME,
-                Constants.GOOD_VALUE_POSSIBLY_SNOW,
-                "Good value, possibly snow");
+                       Constants.GOOD_VALUE_POSSIBLY_SNOW,
+                       "Good value, possibly snow");
         ndviFC.addFlag(Constants.NDVI_NDVI_FROM_SPLINE_FLAG_NAME,
-                Constants.NDVI_FROM_SPLINE,
-                "NDVI retrived from spline interpolation");
+                       Constants.NDVI_FROM_SPLINE,
+                       "NDVI retrived from spline interpolation");
         ndviFC.addFlag(Constants.NDVI_NDVI_FROM_SPLINE_POSSIBLY_SNOW_FLAG_NAME,
-                Constants.NDVI_FROM_SPLINE_POSSIBLY_SNOW,
-                "NDVI retrived from spline interpolation, possibly snow");
+                       Constants.NDVI_FROM_SPLINE_POSSIBLY_SNOW,
+                       "NDVI retrived from spline interpolation, possibly snow");
         ndviFC.addFlag(Constants.NDVI_NDVI_FROM_AVERAGE_SEASONAL_PROFILE_FLAG_NAME,
-                Constants.NDVI_FROM_AVERAGE_SEASONAL_PROFILE,
-                "NDVI retrieved from average seasonal profile");
+                       Constants.NDVI_FROM_AVERAGE_SEASONAL_PROFILE,
+                       "NDVI retrieved from average seasonal profile");
         ndviFC.addFlag(Constants.NDVI_NDVI_FROM_AVERAGE_SEASONAL_PROFILE_POSSIBLY_SNOW_FLAG_NAME,
-                Constants.NDVI_FROM_AVERAGE_SEASONAL_PROFILE_POSSIBLY_SNOW,
-                "NDVI retrieved from average seasonal profile, possibly snow");
+                       Constants.NDVI_FROM_AVERAGE_SEASONAL_PROFILE_POSSIBLY_SNOW,
+                       "NDVI retrieved from average seasonal profile, possibly snow");
         ndviFC.addFlag(Constants.NDVI_MISSING_DATA_FLAG_NAME,
-                Constants.MISSING_DATA,
-                "missing data");
+                       Constants.MISSING_DATA,
+                       "missing data");
 
         return ndviFC;
     }
@@ -71,15 +71,24 @@ public class DiversityAuxdataUtils {
         }
 
         for (Product product : products) {
-            if (product != null && (filter == null || product.getName().contains(filter))) {
-                final String monthNameSubstring = product.getName().substring(monthCharPos, monthCharPos + 3);  // e.g. "jan"
-                final char monthHalfChar = product.getName().charAt(halfMonthCharPos);  // 'a' or 'b'
-                for (int i = 0; i < Constants.MONTHS.length; i++) {
-                    if (monthNameSubstring.equals(Constants.MONTHS[i])) {
-                        if (monthHalfChar == 'a') {
-                            sortedProductsList.set(2 * i, product);
-                        } else if (monthHalfChar == 'b') {
-                            sortedProductsList.set(2 * i + 1, product);
+            if (product != null) {
+                String productName;
+                if (product.getFileLocation() != null) {
+                    // this is necessary if  is rea
+                    productName = product.getFileLocation().getName();
+                } else {
+                    productName = product.getName();
+                }
+                if (filter == null || productName.contains(filter)) {
+                    final String monthNameSubstring = productName.substring(monthCharPos, monthCharPos + 3);  // e.g. "jan"
+                    final char monthHalfChar = productName.charAt(halfMonthCharPos);  // 'a' or 'b'
+                    for (int i = 0; i < Constants.MONTHS.length; i++) {
+                        if (monthNameSubstring.equals(Constants.MONTHS[i])) {
+                            if (monthHalfChar == 'a') {
+                                sortedProductsList.set(2 * i, product);
+                            } else if (monthHalfChar == 'b') {
+                                sortedProductsList.set(2 * i + 1, product);
+                            }
                         }
                     }
                 }
@@ -219,7 +228,7 @@ public class DiversityAuxdataUtils {
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 10));
                 productFractions.add(5.0 / norm);
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 15));
-                productFractions.add(-1.0*endDiff / norm);
+                productFractions.add(-1.0 * endDiff / norm);
                 break;
             } else if (startDiff > 0 && startDiff < 5 && endDiff == -5) {
                 // only left overlap, 4 fractions
@@ -243,7 +252,7 @@ public class DiversityAuxdataUtils {
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 10));
                 productFractions.add(5.0 / norm);
                 productPentadIdentifiers.add(String.format("%03d", startDayOfPentadPeriod + 15));
-                productFractions.add(-1.0*endDiff / norm);
+                productFractions.add(-1.0 * endDiff / norm);
                 break;
             }
         }

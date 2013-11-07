@@ -389,9 +389,10 @@ public class AuxdataSourcesProvider {
         final FileFilter biweeklyProductFilter = new FileFilter() {
             @Override
             public boolean accept(File file) {
+                final String extension = productCategory.equals("CMORPH")? "nc" : "tif";
                 return file.isFile() &&
                         file.getName().startsWith(productCategory) &&
-                        (file.getName().endsWith("_a.tif") || file.getName().endsWith("_b.tif"));
+                        (file.getName().endsWith("_a." + extension) || file.getName().endsWith("_b." + extension));
             }
         };
 
@@ -406,6 +407,7 @@ public class AuxdataSourcesProvider {
                 try {
                     final Product product = ProductIO.readProduct(biweeklySourceProductFile.getAbsolutePath());
                     if (product != null) {
+                        product.setFileLocation(biweeklySourceProductFile);
                         biweeklySourceProductsList.add(product);
                         productIndex++;
                     }

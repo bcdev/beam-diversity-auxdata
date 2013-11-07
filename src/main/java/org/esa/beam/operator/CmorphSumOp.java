@@ -87,12 +87,12 @@ public class CmorphSumOp extends Operator {
             if (category == DataCategory.CMORPH_BIWEEKLY) {
                 // do reprojection
                 sumReprojectedProduct = ReferenceReprojection.reproject(sumProduct);
-                writeFinalBiweeklySumProduct(sumReprojectedProduct);
+                writeFinalSumProduct(sumReprojectedProduct);
             } else {
                 // swap at zero meridian
                 CmorphSwapOp swapOp = new CmorphSwapOp();
                 swapOp.setSourceProduct(sumReprojectedProduct);
-                writeFinalDailySumProduct(swapOp.getTargetProduct());
+                writeFinalSumProduct(swapOp.getTargetProduct());
             }
         }
 
@@ -115,7 +115,7 @@ public class CmorphSumOp extends Operator {
     }
 
 
-    private void writeFinalDailySumProduct(Product product) {
+    private void writeFinalSumProduct(Product product) {
         final String outputFilename = "CMORPH_pcp_" + startdateString + ".nc";
         final File file = new File(outputDataDir, outputFilename);
         WriteOp writeOp = new WriteOp(product, file, "NetCDF-CF");
@@ -123,13 +123,13 @@ public class CmorphSumOp extends Operator {
         System.out.println("Written CMORPH sum file '" + file.getAbsolutePath() + "'.");
     }
 
-    private void writeFinalBiweeklySumProduct(Product product) {
-        final String outputFilename = "CMORPH_pcp_" + startdateString + ".tif";
-        final File file = new File(outputDataDir, outputFilename);
-        WriteOp writeOp = new WriteOp(product, file, "GeoTIFF");
-        writeOp.writeProduct(ProgressMonitor.NULL);
-        System.out.println("Written CMORPH sum file '" + file.getAbsolutePath() + "'.");
-    }
+//    private void writeFinalBiweeklySumProduct(Product product) {
+//        final String outputFilename = "CMORPH_pcp_" + startdateString + ".tif";
+//        final File file = new File(outputDataDir, outputFilename);
+//        WriteOp writeOp = new WriteOp(product, file, "GeoTIFF");
+//        writeOp.writeProduct(ProgressMonitor.NULL);
+//        System.out.println("Written CMORPH sum file '" + file.getAbsolutePath() + "'.");
+//    }
 
     private Product createSumProduct(String precipSrcBandName, String precipTargetBandName) {
         final int width = sourceProducts[0].getSceneRasterWidth();
