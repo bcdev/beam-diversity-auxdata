@@ -2,22 +2,29 @@ package org.esa.beam.operator.mph_chl;
 
 
 import junit.framework.Assert;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FlagCoding;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
+import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
+import java.util.HashMap;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 public class MphChlOpTest {
+
+    private MphChlOp mphChlOp;
+
+    @Before
+    public void setUp() {
+        mphChlOp = new MphChlOp();
+    }
 
     @Test
     public void testOperatorMetadata() {
@@ -40,10 +47,19 @@ public class MphChlOpTest {
     }
 
     @Test
+    public void testInvalidPixelExpressionAnnotation() throws NoSuchFieldException {
+        final Field validPixelField = MphChlOp.class.getDeclaredField("invalidPixelExpression");
+
+        final Parameter annotation = validPixelField.getAnnotation(Parameter.class);
+        assertNotNull(annotation);
+        assertEquals("l2_flags_p1.F_LANDCONS or l2_flags_p1.F_COASTLINE", annotation.defaultValue());
+        assertEquals("Expression defining pixels not considered for processing.", annotation.description());
+    }
+
+    @Test
     public void testConfigureTargetProduct() {
         final TestProductConfigurer productConfigurer = new TestProductConfigurer();
 
-        final MphChlOp mphChlOp = new MphChlOp();
         mphChlOp.configureTargetProduct(productConfigurer);
 
         final Product targetProduct = productConfigurer.getTargetProduct();
@@ -61,8 +77,144 @@ public class MphChlOpTest {
 
         final FlagCoding cyanoFlagCoding = targetProduct.getFlagCodingGroup().get("cyano_flag");
         assertNotNull(cyanoFlagCoding);
-        final int flagMask = cyanoFlagCoding.getFlagMask("cyano_flag");
-        assertEquals(1, flagMask);
+        final MetadataAttribute cyanoFlag = cyanoFlagCoding.getFlag("cyano_flag");
+        assertEquals("cyano_flag", cyanoFlag.getName());
+        assertEquals("Cyanobacteria dominated waters", cyanoFlag.getDescription());
+        assertEquals(1, cyanoFlag.getData().getElemInt());
+    }
+
+    @Test
+    public void testConfigureSourceSample() {
+        final TestSampleConfigurer sampleConfigurer = new TestSampleConfigurer();
+
+        mphChlOp.configureSourceSamples(sampleConfigurer);
+
+        final HashMap<Integer, String> sampleMap = sampleConfigurer.getSampleMap();
+        assertEquals("brr_6", sampleMap.get(0));
+        assertEquals("brr_7", sampleMap.get(1));
+        assertEquals("brr_8", sampleMap.get(2));
+        assertEquals("brr_9", sampleMap.get(3));
+        assertEquals("brr_10", sampleMap.get(4));
+        assertEquals("brr_14", sampleMap.get(5));
+        assertEquals("l2_flags_p1", sampleMap.get(6));
+    }
+
+    @Test
+    public void testConfigureTargetSample() {
+        final TestSampleConfigurer sampleConfigurer = new TestSampleConfigurer();
+
+        mphChlOp.configureTargetSamples(sampleConfigurer);
+
+        final HashMap<Integer, String> sampleMap = sampleConfigurer.getSampleMap();
+        assertEquals("Chl", sampleMap.get(0));
+        assertEquals("cyano_flag", sampleMap.get(1));
+    }
+
+    @Test
+    public void testSetToInvalid() {
+        final TestSample[] samples = new TestSample[2];
+        samples[0] = new TestSample();
+        samples[1] = new TestSample();
+
+        MphChlOp.setToInvalid(samples);
+
+        assertEquals(-999.0, samples[0].getDouble(), 1e-8);
+        assertEquals(0.0, samples[1].getDouble(), 1e-8);
+    }
+
+    @Test
+    public void testGetMax_789() {
+        double[] reflectances = new double[]{3.0, 6.0, 4.0};
+        MaxResult maxResult = new MaxResult();
+
+        maxResult = MphChlOp.getMax_789(reflectances, maxResult);
+        assertNotNull(maxResult);
+        assertEquals(6.0, maxResult.getReflectance(), 1e-8);
+        assertEquals(681.0, maxResult.getWavelength());
+
+        reflectances = new double[]{1.0, 1.0, 4.0};
+        maxResult = MphChlOp.getMax_789(reflectances, maxResult);
+        assertNotNull(maxResult);
+        assertEquals(4.0, maxResult.getReflectance(), 1e-8);
+        assertEquals(709.0, maxResult.getWavelength());
+    }
+
+    @Test
+    public void testGetMax_8910() {
+        double[] reflectances = new double[]{2.0, 1.0, 0.3};
+        MaxResult maxResult = new MaxResult();
+
+        maxResult = MphChlOp.getMax_8910(reflectances, maxResult);
+        assertNotNull(maxResult);
+        assertEquals(2.0, maxResult.getReflectance(), 1e-8);
+        assertEquals(681.0, maxResult.getWavelength());
+
+        reflectances = new double[]{.03, 0.3, 3.0};
+        maxResult = MphChlOp.getMax_8910(reflectances, maxResult);
+        assertNotNull(maxResult);
+        assertEquals(3.0, maxResult.getReflectance(), 1e-8);
+        assertEquals(753.0, maxResult.getWavelength());
+    }
+
+    @Test
+    public void testComputeMph() {
+        double mph = MphChlOp.computeMph(1, 2, 3, 4, 5, 6);
+        assertEquals(-3, mph, 1e-8);
+
+        mph = MphChlOp.computeMph(0, 2, 3, 4, 5, 6);
+        assertEquals(-4, mph, 1e-8);
+
+        mph = MphChlOp.computeMph(1, 0, 3, 4, 5, 6);
+        assertEquals(-5, mph, 1e-8);
+
+        mph = MphChlOp.computeMph(1, 2, 0, 4, 5, 6);
+        assertEquals(3, mph, 1e-8);
+
+        mph = MphChlOp.computeMph(1, 2, 3, 0, 5, 6);
+        assertEquals(-2.2, mph, 1e-8);
+
+        mph = MphChlOp.computeMph(1, 2, 3, 4, 0, 6);
+        assertEquals(-0.5, mph, 1e-8);
+
+        mph = MphChlOp.computeMph(1, 2, 3, 4, 5, 0);
+        assertEquals(3.0, mph, 1e-8);
+    }
+
+    @Test
+    public void testAssign_789() {
+        final TestSample[] samples = new TestSample[4];
+        final double[] reflectances = new double[3];
+        samples[1] = new TestSample();
+        samples[1].set(1.0);
+        samples[2] = new TestSample();
+        samples[2].set(2.0);
+        samples[3] = new TestSample();
+        samples[3].set(3.0);
+
+        MphChlOp.assign_789(reflectances, samples);
+
+        assertEquals(1.0, reflectances[0], 1e-8);
+        assertEquals(2.0, reflectances[1], 1e-8);
+        assertEquals(3.0, reflectances[2], 1e-8);
+    }
+
+
+    @Test
+    public void testAssign_8910() {
+        final TestSample[] samples = new TestSample[5];
+        final double[] reflectances = new double[3];
+        samples[2] = new TestSample();
+        samples[2].set(2.0);
+        samples[3] = new TestSample();
+        samples[3].set(3.0);
+        samples[4] = new TestSample();
+        samples[4].set(4.0);
+
+        MphChlOp.assign_8910(reflectances, samples);
+
+        assertEquals(2.0, reflectances[0], 1e-8);
+        assertEquals(3.0, reflectances[1], 1e-8);
+        assertEquals(4.0, reflectances[2], 1e-8);
     }
 
     @Test
