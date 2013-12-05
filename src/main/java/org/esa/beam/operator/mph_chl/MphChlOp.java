@@ -35,7 +35,7 @@ public class MphChlOp extends PixelOperator {
 
     @SourceProduct
     private Product sourceProduct;
-    @Parameter(defaultValue = "l2_flags_p1.F_LANDCONS or l2_flags_p1.F_COASTLINE",
+    @Parameter(defaultValue = "not (cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_MIXED_PIXEL or l1_flags.INVALID )",
             description = "Expression defining pixels not considered for processing.")
     private String invalidPixelExpression;
 
@@ -58,15 +58,9 @@ public class MphChlOp extends PixelOperator {
             final double r_14 = sourceSamples[REFL_14_IDX].getDouble();
             MaxResult maxResult = maxResult_TL.get();
 
-            assign_789(reflectances, sourceSamples);
-            maxResult = getMax_789(reflectances, maxResult);
-
-            double mph = computeMph(maxResult.getReflectance(), r_7, r_14, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14], maxResult.getWavelength());
-            if (mph > 0.05) {
-                assign_8910(reflectances, sourceSamples);
-                maxResult = getMax_8910(reflectances, maxResult);
-                mph = computeMph(maxResult.getReflectance(), r_7, r_14, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14], maxResult.getWavelength());
-            }
+            assign_8910(reflectances, sourceSamples);
+            maxResult = getMax_8910(reflectances, maxResult);
+            final double mph = computeMph(maxResult.getReflectance(), r_7, r_14, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14], maxResult.getWavelength());
 
             final double SICF_peak = r_8 - r_7 - ((r_9 - r_7) * RATIO_C);
             final double SIPF_peak = r_7 - r_6 - ((r_8 - r_6) * RATIO_P);
@@ -76,7 +70,7 @@ public class MphChlOp extends PixelOperator {
                 cyano_flag = 1;
             }
 
-            double chl = 0.0;
+            double chl;
             if (cyano_flag == 0) {
                 final double mph_sq = mph * mph;
                 final double mph_p3 = mph_sq * mph;
@@ -102,14 +96,7 @@ public class MphChlOp extends PixelOperator {
         reflectances[2] = sourceSamples[4].getDouble();
     }
 
-    // package access for testing only tb 2013-12-05
-    static void assign_789(double[] reflectances, Sample[] sourceSamples) {
-        reflectances[0] = sourceSamples[REFL_7_IDX].getDouble();
-        reflectances[1] = sourceSamples[REFL_8_IDX].getDouble();
-        reflectances[2] = sourceSamples[REFL_9_IDX].getDouble();
-    }
-
-    // package access for testing only tb 2013-12-04
+     // package access for testing only tb 2013-12-04
     static void setToInvalid(WritableSample[] targetSamples) {
         targetSamples[0].set(-999.0);
         targetSamples[1].set(0.0);
@@ -137,7 +124,10 @@ public class MphChlOp extends PixelOperator {
         sampleConfigurer.defineSample(3, "brr_9");
         sampleConfigurer.defineSample(4, "brr_10");
         sampleConfigurer.defineSample(5, "brr_14");
-        sampleConfigurer.defineSample(6, "l2_flags_p1");
+        sampleConfigurer.defineSample(6, "l1_flags");
+        sampleConfigurer.defineSample(7, "gas_flags");
+        sampleConfigurer.defineSample(8, "ray_corr_flags");
+        sampleConfigurer.defineSample(9, "cloud_classif_flags");
     }
 
     @Override
@@ -169,7 +159,7 @@ public class MphChlOp extends PixelOperator {
     }
 
     private boolean isSampleValid(int x, int y) {
-        return invalidOpImage.getData(new Rectangle(x, y, 1, 1)).getSample(x, y, 0) == 0;
+        return invalidOpImage.getData(new Rectangle(x, y, 1, 1)).getSample(x, y, 0) != 0;
     }
 
     private static MaxResult getMaxResultWithWavelength(double[] reflectances, MaxResult maxResult, int[] indexArray) {

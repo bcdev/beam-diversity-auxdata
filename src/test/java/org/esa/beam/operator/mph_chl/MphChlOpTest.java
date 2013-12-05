@@ -52,7 +52,7 @@ public class MphChlOpTest {
 
         final Parameter annotation = validPixelField.getAnnotation(Parameter.class);
         assertNotNull(annotation);
-        assertEquals("l2_flags_p1.F_LANDCONS or l2_flags_p1.F_COASTLINE", annotation.defaultValue());
+        assertEquals("not (cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_MIXED_PIXEL or l1_flags.INVALID )", annotation.defaultValue());
         assertEquals("Expression defining pixels not considered for processing.", annotation.description());
     }
 
@@ -96,7 +96,10 @@ public class MphChlOpTest {
         assertEquals("brr_9", sampleMap.get(3));
         assertEquals("brr_10", sampleMap.get(4));
         assertEquals("brr_14", sampleMap.get(5));
-        assertEquals("l2_flags_p1", sampleMap.get(6));
+        assertEquals("l1_flags", sampleMap.get(6));
+        assertEquals("gas_flags", sampleMap.get(7));
+        assertEquals("ray_corr_flags", sampleMap.get(8));
+        assertEquals("cloud_classif_flags", sampleMap.get(9));
     }
 
     @Test
@@ -179,25 +182,6 @@ public class MphChlOpTest {
         mph = MphChlOp.computeMph(1, 2, 3, 4, 5, 0);
         assertEquals(3.0, mph, 1e-8);
     }
-
-    @Test
-    public void testAssign_789() {
-        final TestSample[] samples = new TestSample[4];
-        final double[] reflectances = new double[3];
-        samples[1] = new TestSample();
-        samples[1].set(1.0);
-        samples[2] = new TestSample();
-        samples[2].set(2.0);
-        samples[3] = new TestSample();
-        samples[3].set(3.0);
-
-        MphChlOp.assign_789(reflectances, samples);
-
-        assertEquals(1.0, reflectances[0], 1e-8);
-        assertEquals(2.0, reflectances[1], 1e-8);
-        assertEquals(3.0, reflectances[2], 1e-8);
-    }
-
 
     @Test
     public void testAssign_8910() {
