@@ -95,14 +95,14 @@ public class MphChlOp extends PixelOperator {
         }
     }
 
-    // @todo 2 tb/tb add test tb 2013-12-04
+    // package access for testing only tb 2013-12-05
     static void assign_8910(double[] reflectances, Sample[] sourceSamples) {
         reflectances[0] = sourceSamples[REFL_8_IDX].getDouble();
         reflectances[1] = sourceSamples[REFL_9_IDX].getDouble();
         reflectances[2] = sourceSamples[4].getDouble();
     }
 
-    // @todo 2 tb/tb add test tb 2013-12-04
+    // package access for testing only tb 2013-12-05
     static void assign_789(double[] reflectances, Sample[] sourceSamples) {
         reflectances[0] = sourceSamples[REFL_7_IDX].getDouble();
         reflectances[1] = sourceSamples[REFL_8_IDX].getDouble();

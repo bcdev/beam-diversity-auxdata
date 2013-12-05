@@ -44,7 +44,7 @@
     <extension point="beam-ui:actions">
         <action>
             <id>correctAtmosphereModis</id>
-            <class>org.esa.beam.operator.ui.DiversityAuxdataAction</class>
+            <class>org.esa.beam.ui.DiversityAuxdataAction</class>
             <text>Diversity Auxdata...</text>
             <shortDescr>Prepares various Diversity drylands auxdata sets</shortDescr>
             <longDescr>Prepares various Diversity drylands auxdata sets</longDescr>
@@ -54,6 +54,19 @@
         </action>
     </extension>
 
+    <extension point="beam-ui:actions">
+        <action>
+            <id>Diversity.MPH.CHL</id>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <operatorName>Diversity.MPH.CHL</operatorName>
+            <text>Diversity.MPH.CHL ...</text>
+            <shortDescr>Computes maximum peak height of chlorophyll</shortDescr>
+            <longDescr>Computes maximum peak height of chlorophyll</longDescr>
+            <mnemonic/>
+            <parent>tools</parent>
+            <helpId>diversityAuxdata</helpId>
+        </action>
+    </extension>
     <!--<extension point="beam-ui:helpSets">-->
         <!--<helpSet>-->
             <!--<parent>beam-help</parent>-->
