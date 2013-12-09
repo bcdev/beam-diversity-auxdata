@@ -161,25 +161,25 @@ public class MphChlOpTest {
 
     @Test
     public void testComputeMph() {
-        double mph = MphChlOp.computeMph(1, 2, 3, 4, 5, 6);
+        double mph = MphChlOp.computeMph(1, 2, 3, 6, 4, 5);
         assertEquals(-3, mph, 1e-8);
 
-        mph = MphChlOp.computeMph(0, 2, 3, 4, 5, 6);
+        mph = MphChlOp.computeMph(0, 2, 3, 6, 4, 5);
         assertEquals(-4, mph, 1e-8);
 
-        mph = MphChlOp.computeMph(1, 0, 3, 4, 5, 6);
+        mph = MphChlOp.computeMph(1, 0, 3, 6, 4, 5);
         assertEquals(-5, mph, 1e-8);
 
-        mph = MphChlOp.computeMph(1, 2, 0, 4, 5, 6);
+        mph = MphChlOp.computeMph(1, 2, 0, 6, 4, 5);
         assertEquals(3, mph, 1e-8);
 
-        mph = MphChlOp.computeMph(1, 2, 3, 0, 5, 6);
+        mph = MphChlOp.computeMph(1, 2, 3, 6, 0, 5);
         assertEquals(-2.2, mph, 1e-8);
 
-        mph = MphChlOp.computeMph(1, 2, 3, 4, 0, 6);
+        mph = MphChlOp.computeMph(1, 2, 3, 6, 4, 0);
         assertEquals(-0.5, mph, 1e-8);
 
-        mph = MphChlOp.computeMph(1, 2, 3, 4, 5, 0);
+        mph = MphChlOp.computeMph(1, 2, 3, 0, 4, 5);
         assertEquals(3.0, mph, 1e-8);
     }
 

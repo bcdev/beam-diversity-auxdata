@@ -31,6 +31,7 @@ public class MphChlOp extends PixelOperator {
     private static final int REFL_7_IDX = 1;
     private static final int REFL_8_IDX = 2;
     private static final int REFL_9_IDX = 3;
+    private static final int REFL_10_IDX = 4;
     private static final int REFL_14_IDX = 5;
 
     @SourceProduct
@@ -40,27 +41,30 @@ public class MphChlOp extends PixelOperator {
     private String invalidPixelExpression;
 
     private VirtualBandOpImage invalidOpImage;
-    private ThreadLocal<MaxResult> maxResult_TL = new ThreadLocal<MaxResult>() {
-        @Override
-        protected MaxResult initialValue() {
-            return new MaxResult();
-        }
-    };
 
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
         if (isSampleValid(x, y)) {
-            final double[] reflectances = new double[3];
             final double r_6 = sourceSamples[REFL_6_IDX].getDouble();
             final double r_7 = sourceSamples[REFL_7_IDX].getDouble();
             final double r_8 = sourceSamples[REFL_8_IDX].getDouble();
             final double r_9 = sourceSamples[REFL_9_IDX].getDouble();
+            final double r_10 = sourceSamples[REFL_10_IDX].getDouble();
             final double r_14 = sourceSamples[REFL_14_IDX].getDouble();
-            MaxResult maxResult = maxResult_TL.get();
 
-            assign_8910(reflectances, sourceSamples);
-            maxResult = getMax_8910(reflectances, maxResult);
-            final double mph = computeMph(maxResult.getReflectance(), r_7, r_14, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14], maxResult.getWavelength());
+            double maxBrr = r_8;
+            double maxLambda = MERIS_WAVELENGTHS[8];
+            if (r_9 > maxBrr) {
+                maxBrr = r_9;
+                maxLambda = MERIS_WAVELENGTHS[9];
+            }
+            double mph = computeMph(maxBrr, r_7, r_14, maxLambda, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
+
+            if (mph > 0.05 && r_10 > maxBrr) {
+                maxBrr = r_10;
+                maxLambda = MERIS_WAVELENGTHS[10];
+                mph = computeMph(maxBrr, r_7, r_14, maxLambda, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
+            }
 
             final double SICF_peak = r_8 - r_7 - ((r_9 - r_7) * RATIO_C);
             final double SIPF_peak = r_7 - r_6 - ((r_8 - r_6) * RATIO_P);
@@ -112,7 +116,7 @@ public class MphChlOp extends PixelOperator {
         return getMaxResultWithWavelength(reflectances, maxResult, WL_8910_IDX);
     }
 
-    static double computeMph(double rBr_Max, double r_7, double r_14, double wl_7, double wl_14, double wl_max) {
+    static double computeMph(double rBr_Max, double r_7, double r_14, double wl_max, double wl_7, double wl_14) {
         return rBr_Max - r_7 - ((r_14 - r_7) * (wl_max - wl_7) / (wl_14 - wl_7));
     }
 
