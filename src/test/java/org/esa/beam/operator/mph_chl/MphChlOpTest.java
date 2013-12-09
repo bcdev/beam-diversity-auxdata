@@ -126,40 +126,6 @@ public class MphChlOpTest {
     }
 
     @Test
-    public void testGetMax_789() {
-        double[] reflectances = new double[]{3.0, 6.0, 4.0};
-        MaxResult maxResult = new MaxResult();
-
-        maxResult = MphChlOp.getMax_789(reflectances, maxResult);
-        assertNotNull(maxResult);
-        assertEquals(6.0, maxResult.getReflectance(), 1e-8);
-        assertEquals(681.0, maxResult.getWavelength());
-
-        reflectances = new double[]{1.0, 1.0, 4.0};
-        maxResult = MphChlOp.getMax_789(reflectances, maxResult);
-        assertNotNull(maxResult);
-        assertEquals(4.0, maxResult.getReflectance(), 1e-8);
-        assertEquals(709.0, maxResult.getWavelength());
-    }
-
-    @Test
-    public void testGetMax_8910() {
-        double[] reflectances = new double[]{2.0, 1.0, 0.3};
-        MaxResult maxResult = new MaxResult();
-
-        maxResult = MphChlOp.getMax_8910(reflectances, maxResult);
-        assertNotNull(maxResult);
-        assertEquals(2.0, maxResult.getReflectance(), 1e-8);
-        assertEquals(681.0, maxResult.getWavelength());
-
-        reflectances = new double[]{.03, 0.3, 3.0};
-        maxResult = MphChlOp.getMax_8910(reflectances, maxResult);
-        assertNotNull(maxResult);
-        assertEquals(3.0, maxResult.getReflectance(), 1e-8);
-        assertEquals(753.0, maxResult.getWavelength());
-    }
-
-    @Test
     public void testComputeMph() {
         double mph = MphChlOp.computeMph(1, 2, 3, 6, 4, 5);
         assertEquals(-3, mph, 1e-8);

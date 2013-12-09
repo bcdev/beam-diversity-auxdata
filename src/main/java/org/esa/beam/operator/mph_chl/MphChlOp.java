@@ -25,8 +25,6 @@ public class MphChlOp extends PixelOperator {
     private static final double[] MERIS_WAVELENGTHS = {0., 412., 442., 490., 510., 560., 619., 664., 681., 709., 753., 760., 779., 865., 885., 900.};
     private static final double RATIO_C = (MERIS_WAVELENGTHS[8] - MERIS_WAVELENGTHS[7]) / (MERIS_WAVELENGTHS[9] - MERIS_WAVELENGTHS[7]);
     private static final double RATIO_P = (MERIS_WAVELENGTHS[7] - MERIS_WAVELENGTHS[6]) / (MERIS_WAVELENGTHS[8] - MERIS_WAVELENGTHS[6]);
-    private static final int[] WL_789_IDX = {7, 8, 9};
-    private static final int[] WL_8910_IDX = {8, 9, 10};
     private static final int REFL_6_IDX = 0;
     private static final int REFL_7_IDX = 1;
     private static final int REFL_8_IDX = 2;
@@ -100,22 +98,13 @@ public class MphChlOp extends PixelOperator {
         reflectances[2] = sourceSamples[4].getDouble();
     }
 
-     // package access for testing only tb 2013-12-04
+    // package access for testing only tb 2013-12-04
     static void setToInvalid(WritableSample[] targetSamples) {
         targetSamples[0].set(-999.0);
         targetSamples[1].set(0.0);
     }
 
     // package access for testing only tb 2013-12-04
-    static MaxResult getMax_789(double[] reflectances, MaxResult maxResult) {
-        return getMaxResultWithWavelength(reflectances, maxResult, WL_789_IDX);
-    }
-
-    // package access for testing only tb 2013-12-04
-    static MaxResult getMax_8910(double[] reflectances, MaxResult maxResult) {
-        return getMaxResultWithWavelength(reflectances, maxResult, WL_8910_IDX);
-    }
-
     static double computeMph(double rBr_Max, double r_7, double r_14, double wl_max, double wl_7, double wl_14) {
         return rBr_Max - r_7 - ((r_14 - r_7) * (wl_max - wl_7) / (wl_14 - wl_7));
     }
@@ -164,22 +153,6 @@ public class MphChlOp extends PixelOperator {
 
     private boolean isSampleValid(int x, int y) {
         return invalidOpImage.getData(new Rectangle(x, y, 1, 1)).getSample(x, y, 0) != 0;
-    }
-
-    private static MaxResult getMaxResultWithWavelength(double[] reflectances, MaxResult maxResult, int[] indexArray) {
-        double max_ref = Double.MIN_VALUE;
-        double max_wl = 0;
-        int index = 0;
-        for (double reflectance : reflectances) {
-            if (reflectance > max_ref) {
-                max_ref = reflectance;
-                max_wl = MERIS_WAVELENGTHS[indexArray[index]];
-            }
-            ++index;
-        }
-        maxResult.setReflectance(max_ref);
-        maxResult.setWavelength(max_wl);
-        return maxResult;
     }
 
     public static class Spi extends OperatorSpi {
