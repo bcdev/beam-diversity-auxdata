@@ -68,6 +68,8 @@ public class MphChlOpTest {
         final Band chlBand = targetProduct.getBand("Chl");
         assertNotNull(chlBand);
         assertEquals(ProductData.TYPE_FLOAT32, chlBand.getDataType());
+        assertEquals("mg/m^3", chlBand.getUnit());
+        assertEquals(Double.NaN, chlBand.getGeophysicalNoDataValue());
 
         final Band cyanoFlagBand = targetProduct.getBand("cyano_flag");
         Assert.assertNotNull(cyanoFlagBand);
@@ -121,7 +123,7 @@ public class MphChlOpTest {
 
         MphChlOp.setToInvalid(samples);
 
-        assertEquals(-999.0, samples[0].getDouble(), 1e-8);
+        assertEquals(Double.NaN, samples[0].getDouble(), 1e-8);
         assertEquals(0.0, samples[1].getDouble(), 1e-8);
     }
 
@@ -147,24 +149,6 @@ public class MphChlOpTest {
 
         mph = MphChlOp.computeMph(1, 2, 3, 0, 4, 5);
         assertEquals(3.0, mph, 1e-8);
-    }
-
-    @Test
-    public void testAssign_8910() {
-        final TestSample[] samples = new TestSample[5];
-        final double[] reflectances = new double[3];
-        samples[2] = new TestSample();
-        samples[2].set(2.0);
-        samples[3] = new TestSample();
-        samples[3].set(3.0);
-        samples[4] = new TestSample();
-        samples[4].set(4.0);
-
-        MphChlOp.assign_8910(reflectances, samples);
-
-        assertEquals(2.0, reflectances[0], 1e-8);
-        assertEquals(3.0, reflectances[1], 1e-8);
-        assertEquals(4.0, reflectances[2], 1e-8);
     }
 
     @Test

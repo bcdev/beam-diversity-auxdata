@@ -1,6 +1,7 @@
 package org.esa.beam.operator.mph_chl;
 
 
+import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -91,16 +92,9 @@ public class MphChlOp extends PixelOperator {
         }
     }
 
-    // package access for testing only tb 2013-12-05
-    static void assign_8910(double[] reflectances, Sample[] sourceSamples) {
-        reflectances[0] = sourceSamples[REFL_8_IDX].getDouble();
-        reflectances[1] = sourceSamples[REFL_9_IDX].getDouble();
-        reflectances[2] = sourceSamples[4].getDouble();
-    }
-
     // package access for testing only tb 2013-12-04
     static void setToInvalid(WritableSample[] targetSamples) {
-        targetSamples[0].set(-999.0);
+        targetSamples[0].set(Double.NaN);
         targetSamples[1].set(0.0);
     }
 
@@ -131,7 +125,10 @@ public class MphChlOp extends PixelOperator {
 
     @Override
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {
-        productConfigurer.addBand("Chl", ProductData.TYPE_FLOAT32);
+        final Band chlBand = productConfigurer.addBand("Chl", ProductData.TYPE_FLOAT32);
+        chlBand.setUnit("mg/m^3");
+        chlBand.setGeophysicalNoDataValue(Double.NaN);
+
         productConfigurer.addBand("cyano_flag", ProductData.TYPE_INT8);
 
         productConfigurer.copyGeoCoding();

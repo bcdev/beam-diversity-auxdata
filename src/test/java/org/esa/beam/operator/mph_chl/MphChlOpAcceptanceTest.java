@@ -4,6 +4,7 @@ import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.GPF;
+import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.util.io.FileUtils;
 import org.junit.After;
 import org.junit.Before;
@@ -11,6 +12,7 @@ import org.junit.Test;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 
 import static org.junit.Assert.*;
 
@@ -58,7 +60,7 @@ public class MphChlOpAcceptanceTest {
             assertEquals(1.5443997383117676f, chlBand.getSampleFloat(0, 0), 1e-8);
             assertEquals(0.6783487796783447f, chlBand.getSampleFloat(1, 0), 1e-8);
             assertEquals(29.945907592773438f, chlBand.getSampleFloat(0, 1), 1e-8);
-            assertEquals(-999.f, chlBand.getSampleFloat(1, 1), 1e-8);
+            assertEquals(Double.NaN, chlBand.getSampleFloat(1, 1), 1e-8);
 
             final Band cyano_flagBand = savedProduct.getBand("cyano_flag");
             assertNotNull(cyano_flagBand);
@@ -73,4 +75,17 @@ public class MphChlOpAcceptanceTest {
         }
     }
 
+    @Test
+    public void testWithFaultyInvalidPixelExpression() {
+        final Product brrProduct = MerisBrrProduct.create();
+
+        HashMap<String, Object> params = new HashMap<String, Object>();
+        params.put("invalidPixelExpression", "extremely INVALID");
+
+        try {
+            GPF.createProduct("Diversity.MPH.CHL", params, brrProduct);
+            fail("OperatorException expected");
+        } catch (OperatorException expected) {
+        }
+    }
 }
