@@ -111,10 +111,6 @@ public class MphChlOp extends PixelOperator {
         sampleConfigurer.defineSample(3, "brr_9");
         sampleConfigurer.defineSample(4, "brr_10");
         sampleConfigurer.defineSample(5, "brr_14");
-        sampleConfigurer.defineSample(6, "l1_flags");
-        sampleConfigurer.defineSample(7, "gas_flags");
-        sampleConfigurer.defineSample(8, "ray_corr_flags");
-        sampleConfigurer.defineSample(9, "cloud_classif_flags");
     }
 
     @Override

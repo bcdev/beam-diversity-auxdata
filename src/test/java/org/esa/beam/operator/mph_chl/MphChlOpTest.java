@@ -98,10 +98,6 @@ public class MphChlOpTest {
         assertEquals("brr_9", sampleMap.get(3));
         assertEquals("brr_10", sampleMap.get(4));
         assertEquals("brr_14", sampleMap.get(5));
-        assertEquals("l1_flags", sampleMap.get(6));
-        assertEquals("gas_flags", sampleMap.get(7));
-        assertEquals("ray_corr_flags", sampleMap.get(8));
-        assertEquals("cloud_classif_flags", sampleMap.get(9));
     }
 
     @Test
