@@ -125,14 +125,15 @@ public class MphChlOp extends PixelOperator {
         chlBand.setUnit("mg/m^3");
         chlBand.setGeophysicalNoDataValue(Double.NaN);
 
-        productConfigurer.addBand("cyano_flag", ProductData.TYPE_INT8);
+        Band cyanoFlagBand = productConfigurer.addBand("cyano_flag", ProductData.TYPE_INT8);
 
-        productConfigurer.copyGeoCoding();
+        super.configureTargetProduct(productConfigurer);
 
         final Product targetProduct = productConfigurer.getTargetProduct();
         final FlagCoding cyanoFlagCoding = new FlagCoding("cyano_flag");
-        cyanoFlagCoding.addFlag("cyano_flag", 1, "Cyanobacteria dominated waters");
+        cyanoFlagCoding.addFlag("CYANO", 1, "Cyanobacteria dominated waters");
         targetProduct.getFlagCodingGroup().add(cyanoFlagCoding);
+        cyanoFlagBand.setSampleCoding(cyanoFlagCoding);
     }
 
     @Override

@@ -15,6 +15,7 @@ import java.util.HashMap;
 
 import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
 public class MphChlOpTest {
@@ -79,8 +80,11 @@ public class MphChlOpTest {
 
         final FlagCoding cyanoFlagCoding = targetProduct.getFlagCodingGroup().get("cyano_flag");
         assertNotNull(cyanoFlagCoding);
-        final MetadataAttribute cyanoFlag = cyanoFlagCoding.getFlag("cyano_flag");
-        assertEquals("cyano_flag", cyanoFlag.getName());
+        FlagCoding bandFlagcoding = cyanoFlagBand.getFlagCoding();
+        assertSame(cyanoFlagCoding, bandFlagcoding);
+
+        final MetadataAttribute cyanoFlag = cyanoFlagCoding.getFlag("CYANO");
+        assertEquals("CYANO", cyanoFlag.getName());
         assertEquals("Cyanobacteria dominated waters", cyanoFlag.getDescription());
         assertEquals(1, cyanoFlag.getData().getElemInt());
     }
