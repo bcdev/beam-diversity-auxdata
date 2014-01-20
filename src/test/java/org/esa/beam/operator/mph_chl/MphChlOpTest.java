@@ -32,9 +32,9 @@ public class MphChlOpTest {
         final OperatorMetadata operatorMetadata = MphChlOp.class.getAnnotation(OperatorMetadata.class);
         assertNotNull(operatorMetadata);
         assertEquals("Diversity.MPH.CHL", operatorMetadata.alias());
-        assertEquals("1.0", operatorMetadata.version());
+        assertEquals("1.1", operatorMetadata.version());
         assertEquals("Tom Block", operatorMetadata.authors());
-        assertEquals("(c) 2013 by Brockmann Consult", operatorMetadata.copyright());
+        assertEquals("(c) 2013, 2014 by Brockmann Consult", operatorMetadata.copyright());
         assertEquals("Computes maximum peak height of chlorophyll", operatorMetadata.description());
     }
 

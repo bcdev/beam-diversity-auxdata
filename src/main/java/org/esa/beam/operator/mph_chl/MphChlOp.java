@@ -17,15 +17,16 @@ import org.esa.beam.jai.VirtualBandOpImage;
 import java.awt.*;
 
 @OperatorMetadata(alias = "Diversity.MPH.CHL",
-        version = "1.0",
+        version = "1.1",
         authors = "Tom Block",
-        copyright = "(c) 2013 by Brockmann Consult",
+        copyright = "(c) 2013, 2014 by Brockmann Consult",
         description = "Computes maximum peak height of chlorophyll")
 public class MphChlOp extends PixelOperator {
 
     private static final double[] MERIS_WAVELENGTHS = {0., 412., 442., 490., 510., 560., 619., 664., 681., 709., 753., 760., 779., 865., 885., 900.};
     private static final double RATIO_C = (MERIS_WAVELENGTHS[8] - MERIS_WAVELENGTHS[7]) / (MERIS_WAVELENGTHS[9] - MERIS_WAVELENGTHS[7]);
     private static final double RATIO_P = (MERIS_WAVELENGTHS[7] - MERIS_WAVELENGTHS[6]) / (MERIS_WAVELENGTHS[8] - MERIS_WAVELENGTHS[6]);
+    private static final double RATIO_A = (MERIS_WAVELENGTHS[9] - MERIS_WAVELENGTHS[8]) / (MERIS_WAVELENGTHS[10] - MERIS_WAVELENGTHS[8]);
     private static final int REFL_6_IDX = 0;
     private static final int REFL_7_IDX = 1;
     private static final int REFL_8_IDX = 2;
@@ -38,6 +39,10 @@ public class MphChlOp extends PixelOperator {
     @Parameter(defaultValue = "not (cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_MIXED_PIXEL or l1_flags.INVALID )",
             description = "Expression defining pixels not considered for processing.")
     private String invalidPixelExpression;
+
+    @Parameter(defaultValue = "false",
+            description = "Switch on to use exponential for chl_a calculation in cyano case, Default is pow10.")
+    private boolean useExpChl;
 
     private VirtualBandOpImage invalidOpImage;
 
@@ -67,9 +72,10 @@ public class MphChlOp extends PixelOperator {
 
             final double SICF_peak = r_8 - r_7 - ((r_9 - r_7) * RATIO_C);
             final double SIPF_peak = r_7 - r_6 - ((r_8 - r_6) * RATIO_P);
+            final double AIR_peak = r_9 - r_8 - ((r_10 - r_8) * RATIO_A);
 
             int cyano_flag = 0;
-            if (SICF_peak < 0.0 && SIPF_peak > 0.0) {
+            if (SICF_peak < 0.0 && SIPF_peak > 0.0 && AIR_peak > 0.001) {
                 cyano_flag = 1;
             }
 
@@ -82,7 +88,11 @@ public class MphChlOp extends PixelOperator {
                 chl = 5.2392E9 * mph_p4 - 1.9524E8 * mph_p3 + 2.4649E6 * mph_sq + 4.0172E3 * mph + 1.9726;
             } else {
                 final double exponent = 35.79 * mph;
-                chl = 22.44 * Math.pow(10, exponent);
+                if (useExpChl) {
+                    chl = 22.44 * Math.exp(exponent);
+                } else {
+                    chl = 22.44 * Math.pow(10, exponent);
+                }
             }
 
             targetSamples[0].set(chl);

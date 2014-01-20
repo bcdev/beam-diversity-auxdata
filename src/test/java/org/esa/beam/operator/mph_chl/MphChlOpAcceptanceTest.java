@@ -88,4 +88,14 @@ public class MphChlOpAcceptanceTest {
         } catch (OperatorException expected) {
         }
     }
+
+//    @Test
+//    public void testProcessTestProduct() throws IOException {
+//        final Product product = ProductIO.readProduct("C:/Data/DIVERSITY/L2_of_MER_FSG_1PNUPA20110605_160100_000003633103_00155_48445_6691.dim");
+//
+//        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL", GPF.NO_PARAMS, product);
+//
+//        final String targetProductPath = testOutDirectory.getAbsolutePath() + File.separator + "Diversity_MPHCHL_pow10.dim";
+//        ProductIO.writeProduct(mphChlProduct, targetProductPath, "BEAM-DIMAP");
+//    }
 }
