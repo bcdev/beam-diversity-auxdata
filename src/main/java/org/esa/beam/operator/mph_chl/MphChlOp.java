@@ -81,11 +81,10 @@ public class MphChlOp extends PixelOperator {
                 cyano_flag = 1;
             }
 
-            double chl;
+            double chl = Double.NaN;
             if (cyano_flag == 0) {
                 if (floating_flag) {
                     setToInvalid(targetSamples);
-                    return;
                 } else {
                     final double mph_sq = mph * mph;
                     final double mph_p3 = mph_sq * mph;
@@ -103,6 +102,7 @@ public class MphChlOp extends PixelOperator {
 
             targetSamples[0].set(chl);
             targetSamples[1].set(cyano_flag);
+            targetSamples[2].set(floating_flag);
         } else {
             setToInvalid(targetSamples);
         }
@@ -131,17 +131,19 @@ public class MphChlOp extends PixelOperator {
 
     @Override
     protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
-        sampleConfigurer.defineSample(0, "Chl");
+        sampleConfigurer.defineSample(0, "chl");
         sampleConfigurer.defineSample(1, "cyano_flag");
+        sampleConfigurer.defineSample(2, "floating_flag");
     }
 
     @Override
     protected void configureTargetProduct(ProductConfigurer productConfigurer) {
-        final Band chlBand = productConfigurer.addBand("Chl", ProductData.TYPE_FLOAT32);
+        final Band chlBand = productConfigurer.addBand("chl", ProductData.TYPE_FLOAT32);
         chlBand.setUnit("mg/m^3");
         chlBand.setGeophysicalNoDataValue(Double.NaN);
 
-        Band cyanoFlagBand = productConfigurer.addBand("cyano_flag", ProductData.TYPE_INT8);
+        final Band cyanoFlagBand = productConfigurer.addBand("cyano_flag", ProductData.TYPE_INT8);
+        final Band floatingFlagBand = productConfigurer.addBand("floating_flag", ProductData.TYPE_INT8);
 
         super.configureTargetProduct(productConfigurer);
 
@@ -150,6 +152,11 @@ public class MphChlOp extends PixelOperator {
         cyanoFlagCoding.addFlag("CYANO", 1, "Cyanobacteria dominated waters");
         targetProduct.getFlagCodingGroup().add(cyanoFlagCoding);
         cyanoFlagBand.setSampleCoding(cyanoFlagCoding);
+
+        final FlagCoding floatingFlagCoding = new FlagCoding("floating_flag");
+        floatingFlagCoding.addFlag("FLOAT", 1, "Floating vegetation or cyanobacteria on water surface");
+        targetProduct.getFlagCodingGroup().add(floatingFlagCoding);
+        floatingFlagBand.setSampleCoding(floatingFlagCoding);
     }
 
     @Override

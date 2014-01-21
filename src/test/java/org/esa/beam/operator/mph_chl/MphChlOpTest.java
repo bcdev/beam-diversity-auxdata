@@ -76,6 +76,10 @@ public class MphChlOpTest {
         Assert.assertNotNull(cyanoFlagBand);
         assertEquals(ProductData.TYPE_INT8, cyanoFlagBand.getDataType());
 
+        final Band floatingFlagBand = targetProduct.getBand("floating_flag");
+        Assert.assertNotNull(floatingFlagBand);
+        assertEquals(ProductData.TYPE_INT8, floatingFlagBand.getDataType());
+
         assertTrue(productConfigurer.isCopyGeoCodingCalled());
 
         final FlagCoding cyanoFlagCoding = targetProduct.getFlagCodingGroup().get("cyano_flag");
@@ -87,6 +91,16 @@ public class MphChlOpTest {
         assertEquals("CYANO", cyanoFlag.getName());
         assertEquals("Cyanobacteria dominated waters", cyanoFlag.getDescription());
         assertEquals(1, cyanoFlag.getData().getElemInt());
+
+        final FlagCoding floatingFlagCoding = targetProduct.getFlagCodingGroup().get("floating_flag");
+        assertNotNull(floatingFlagCoding);
+        bandFlagcoding = floatingFlagBand.getFlagCoding();
+        assertSame(floatingFlagCoding, bandFlagcoding);
+
+        final MetadataAttribute floatFlag = floatingFlagCoding.getFlag("FLOAT");
+        assertEquals("FLOAT", floatFlag.getName());
+        assertEquals("Floating vegetation or cyanobacteria on water surface", floatFlag.getDescription());
+        assertEquals(1, floatFlag.getData().getElemInt());
     }
 
     @Test
@@ -111,20 +125,23 @@ public class MphChlOpTest {
         mphChlOp.configureTargetSamples(sampleConfigurer);
 
         final HashMap<Integer, String> sampleMap = sampleConfigurer.getSampleMap();
-        assertEquals("Chl", sampleMap.get(0));
+        assertEquals("chl", sampleMap.get(0));
         assertEquals("cyano_flag", sampleMap.get(1));
+        assertEquals("floating_flag", sampleMap.get(2));
     }
 
     @Test
     public void testSetToInvalid() {
-        final TestSample[] samples = new TestSample[2];
+        final TestSample[] samples = new TestSample[3];
         samples[0] = new TestSample();
         samples[1] = new TestSample();
+        samples[2] = new TestSample();
 
         MphChlOp.setToInvalid(samples);
 
         assertEquals(Double.NaN, samples[0].getDouble(), 1e-8);
         assertEquals(0.0, samples[1].getDouble(), 1e-8);
+        assertEquals(0.0, samples[2].getDouble(), 1e-8);
     }
 
     @Test

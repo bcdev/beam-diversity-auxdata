@@ -55,7 +55,7 @@ public class MphChlOpAcceptanceTest {
             savedProduct = ProductIO.readProduct(targetProductPath);
             assertNotNull(savedProduct);
 
-            final Band chlBand = savedProduct.getBand("Chl");
+            final Band chlBand = savedProduct.getBand("chl");
             assertNotNull(chlBand);
             assertEquals(1.5443997383117676f, chlBand.getSampleFloat(0, 0), 1e-8);
             assertEquals(0.6783487796783447f, chlBand.getSampleFloat(1, 0), 1e-8);
@@ -68,6 +68,13 @@ public class MphChlOpAcceptanceTest {
             assertEquals(0, cyano_flagBand.getSampleInt(1, 0));
             assertEquals(1, cyano_flagBand.getSampleInt(0, 1));
             assertEquals(0, cyano_flagBand.getSampleInt(1, 1));
+
+            final Band floating_flagBand = savedProduct.getBand("floating_flag");
+            assertNotNull(floating_flagBand);
+            assertEquals(0, floating_flagBand.getSampleInt(0, 0));
+            assertEquals(0, floating_flagBand.getSampleInt(1, 0));
+            assertEquals(0, floating_flagBand.getSampleInt(0, 1));
+            assertEquals(0, floating_flagBand.getSampleInt(1, 1));
         } finally {
             if (savedProduct != null) {
                 savedProduct.dispose();
