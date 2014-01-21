@@ -26,7 +26,7 @@ public class MphChlOp extends PixelOperator {
     private static final double[] MERIS_WAVELENGTHS = {0., 412., 442., 490., 510., 560., 619., 664., 681., 709., 753., 760., 779., 865., 885., 900.};
     private static final double RATIO_C = (MERIS_WAVELENGTHS[8] - MERIS_WAVELENGTHS[7]) / (MERIS_WAVELENGTHS[9] - MERIS_WAVELENGTHS[7]);
     private static final double RATIO_P = (MERIS_WAVELENGTHS[7] - MERIS_WAVELENGTHS[6]) / (MERIS_WAVELENGTHS[8] - MERIS_WAVELENGTHS[6]);
-    private static final double RATIO_A = (MERIS_WAVELENGTHS[9] - MERIS_WAVELENGTHS[8]) / (MERIS_WAVELENGTHS[10] - MERIS_WAVELENGTHS[8]);
+    private static final double RATIO_B = (MERIS_WAVELENGTHS[9] - MERIS_WAVELENGTHS[8]) / (MERIS_WAVELENGTHS[10] - MERIS_WAVELENGTHS[8]);
     private static final int REFL_6_IDX = 0;
     private static final int REFL_7_IDX = 1;
     private static final int REFL_8_IDX = 2;
@@ -40,9 +40,9 @@ public class MphChlOp extends PixelOperator {
             description = "Expression defining pixels not considered for processing.")
     private String invalidPixelExpression;
 
-    @Parameter(defaultValue = "false",
-            description = "Switch on to use exponential for chl_a calculation in cyano case, Default is pow10.")
-    private boolean useExpChl;
+    @Parameter(defaultValue = "1000.0",
+            description = "Clipping value for chl-a in case of cyano occurrence.")
+    private double cyanoMaxValue;
 
     private VirtualBandOpImage invalidOpImage;
 
@@ -64,34 +64,40 @@ public class MphChlOp extends PixelOperator {
             }
             double mph = computeMph(maxBrr, r_7, r_14, maxLambda, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
 
+            boolean floating_flag = false;
             if (mph > 0.05 && r_10 > maxBrr) {
                 maxBrr = r_10;
                 maxLambda = MERIS_WAVELENGTHS[10];
                 mph = computeMph(maxBrr, r_7, r_14, maxLambda, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
+                floating_flag = true;
             }
 
             final double SICF_peak = r_8 - r_7 - ((r_9 - r_7) * RATIO_C);
             final double SIPF_peak = r_7 - r_6 - ((r_8 - r_6) * RATIO_P);
-            final double AIR_peak = r_9 - r_8 - ((r_10 - r_8) * RATIO_A);
+            final double BAIR_peak = r_9 - r_8 - ((r_10 - r_8) * RATIO_B);
 
             int cyano_flag = 0;
-            if (SICF_peak < 0.0 && SIPF_peak > 0.0 && AIR_peak > 0.001) {
+            if (SICF_peak < 0.0 && SIPF_peak > 0.0 && BAIR_peak > 0.001) {
                 cyano_flag = 1;
             }
 
             double chl;
             if (cyano_flag == 0) {
-                final double mph_sq = mph * mph;
-                final double mph_p3 = mph_sq * mph;
-                final double mph_p4 = mph_sq * mph_sq;
+                if (floating_flag) {
+                    setToInvalid(targetSamples);
+                    return;
+                } else {
+                    final double mph_sq = mph * mph;
+                    final double mph_p3 = mph_sq * mph;
+                    final double mph_p4 = mph_sq * mph_sq;
 
-                chl = 5.2392E9 * mph_p4 - 1.9524E8 * mph_p3 + 2.4649E6 * mph_sq + 4.0172E3 * mph + 1.9726;
+                    chl = 5.2392E9 * mph_p4 - 1.9524E8 * mph_p3 + 2.4649E6 * mph_sq + 4.0172E3 * mph + 1.9726;
+                }
             } else {
                 final double exponent = 35.79 * mph;
-                if (useExpChl) {
-                    chl = 22.44 * Math.exp(exponent);
-                } else {
-                    chl = 22.44 * Math.pow(10, exponent);
+                chl = 22.44 * Math.exp(exponent);
+                if (chl > cyanoMaxValue) {
+                    chl = cyanoMaxValue;
                 }
             }
 
