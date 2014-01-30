@@ -22,11 +22,11 @@ import java.awt.*;
         copyright = "(c) 2013, 2014 by Brockmann Consult",
         description = "Computes maximum peak height of chlorophyll")
 public class MphChlOp extends PixelOperator {
-
+    //                                                 0    1     2     3     4     5     6     7     8     9     10    11    12    13    14    15
     private static final double[] MERIS_WAVELENGTHS = {0., 412., 442., 490., 510., 560., 619., 664., 681., 709., 753., 760., 779., 865., 885., 900.};
-    private static final double RATIO_C = (MERIS_WAVELENGTHS[8] - MERIS_WAVELENGTHS[7]) / (MERIS_WAVELENGTHS[9] - MERIS_WAVELENGTHS[7]);
     private static final double RATIO_P = (MERIS_WAVELENGTHS[7] - MERIS_WAVELENGTHS[6]) / (MERIS_WAVELENGTHS[8] - MERIS_WAVELENGTHS[6]);
-    private static final double RATIO_B = (MERIS_WAVELENGTHS[9] - MERIS_WAVELENGTHS[8]) / (MERIS_WAVELENGTHS[10] - MERIS_WAVELENGTHS[8]);
+    private static final double RATIO_C = (MERIS_WAVELENGTHS[8] - MERIS_WAVELENGTHS[7]) / (MERIS_WAVELENGTHS[9] - MERIS_WAVELENGTHS[7]);
+    private static final double RATIO_B = (MERIS_WAVELENGTHS[9] - MERIS_WAVELENGTHS[7]) / (MERIS_WAVELENGTHS[13] - MERIS_WAVELENGTHS[7]);
     private static final int REFL_6_IDX = 0;
     private static final int REFL_7_IDX = 1;
     private static final int REFL_8_IDX = 2;
@@ -64,20 +64,32 @@ public class MphChlOp extends PixelOperator {
             }
             double mph = computeMph(maxBrr, r_7, r_14, maxLambda, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
 
-            boolean floating_flag = false;
-            if (mph > 0.05 && r_10 > maxBrr) {
+            if (r_10 > maxBrr) {
                 maxBrr = r_10;
                 maxLambda = MERIS_WAVELENGTHS[10];
-                mph = computeMph(maxBrr, r_7, r_14, maxLambda, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
-                floating_flag = true;
             }
 
-            final double SICF_peak = r_8 - r_7 - ((r_9 - r_7) * RATIO_C);
+
+            boolean floating_flag = false;
+            boolean adj_flag = false;
+            if (maxLambda == MERIS_WAVELENGTHS[10]) {
+                adj_flag = true;
+            }
+
+            if (mph > 0.02) {
+                mph = computeMph(maxBrr, r_7, r_14, maxLambda, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
+                if (maxLambda == MERIS_WAVELENGTHS[10]) {
+                    floating_flag = true;
+                    adj_flag = false;
+                }
+            }
+
             final double SIPF_peak = r_7 - r_6 - ((r_8 - r_6) * RATIO_P);
-            final double BAIR_peak = r_9 - r_8 - ((r_10 - r_8) * RATIO_B);
+            final double SICF_peak = r_8 - r_7 - ((r_9 - r_7) * RATIO_C);
+            final double BAIR_peak = r_9 - r_7 - ((r_14 - r_7) * RATIO_B);
 
             int cyano_flag = 0;
-            if (SICF_peak < 0.0 && SIPF_peak > 0.0 && BAIR_peak > 0.001) {
+            if (SICF_peak < 0.0 && SIPF_peak > 0.0 && BAIR_peak > 0.005) {
                 cyano_flag = 1;
             }
 
