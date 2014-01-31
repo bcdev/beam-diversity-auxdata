@@ -55,6 +55,26 @@ public class MphChlOpTest {
     }
 
     @Test
+    public void testCyanoMaxValueAnnotation() throws NoSuchFieldException {
+        final Field cyanoMaxValueField = MphChlOp.class.getDeclaredField("cyanoMaxValue");
+
+        final Parameter annotation = cyanoMaxValueField.getAnnotation(Parameter.class);
+        assertNotNull(annotation);
+        assertEquals("1000.0", annotation.defaultValue());
+        assertEquals("Clipping value for chl-a in case of cyano occurrence.", annotation.description());
+    }
+
+    @Test
+    public void testExportMphAnnotation() throws NoSuchFieldException {
+        final Field exportMphField = MphChlOp.class.getDeclaredField("exportMph");
+
+        final Parameter annotation = exportMphField.getAnnotation(Parameter.class);
+        assertNotNull(annotation);
+        assertEquals("false", annotation.defaultValue());
+        assertEquals("Switch to true to write 'mph' band.", annotation.description());
+    }
+
+    @Test
     public void testConfigureTargetProduct() {
         final TestProductConfigurer productConfigurer = new TestProductConfigurer();
 
@@ -99,6 +119,23 @@ public class MphChlOpTest {
     }
 
     @Test
+    public void testConfigureTargetProduct_withMphBand() {
+        final TestProductConfigurer productConfigurer = new TestProductConfigurer();
+
+        mphChlOp.exportMph = true;
+        mphChlOp.configureTargetProduct(productConfigurer);
+
+        final Product targetProduct = productConfigurer.getTargetProduct();
+        assertNotNull(targetProduct);
+
+        final Band mphBand = targetProduct.getBand("mph");
+        assertNotNull(mphBand);
+        assertEquals(ProductData.TYPE_FLOAT32, mphBand.getDataType());
+        assertEquals("dl", mphBand.getUnit());
+        assertEquals(Double.NaN, mphBand.getGeophysicalNoDataValue(), 1e-8);
+    }
+
+    @Test
     public void testConfigureSourceSample() {
         final TestSampleConfigurer sampleConfigurer = new TestSampleConfigurer();
 
@@ -126,17 +163,43 @@ public class MphChlOpTest {
     }
 
     @Test
+    public void testConfigureTargetSample_withMph() {
+        final TestSampleConfigurer sampleConfigurer = new TestSampleConfigurer();
+
+        mphChlOp.exportMph = true;
+        mphChlOp.configureTargetSamples(sampleConfigurer);
+
+        final HashMap<Integer, String> sampleMap = sampleConfigurer.getSampleMap();
+        assertEquals(3, sampleMap.size());
+        assertEquals("chl", sampleMap.get(0));
+        assertEquals("mph_chl_flags", sampleMap.get(1));
+        assertEquals("mph", sampleMap.get(2));
+    }
+
+    @Test
     public void testSetToInvalid() {
+        final TestSample[] samples = new TestSample[2];
+        samples[0] = new TestSample();
+        samples[1] = new TestSample();
+
+        MphChlOp.setToInvalid(samples, false);
+
+        assertEquals(Double.NaN, samples[0].getDouble(), 1e-8);
+        assertEquals(0.0, samples[1].getDouble(), 1e-8);
+    }
+
+    @Test
+    public void testSetToInvalid_withMph() {
         final TestSample[] samples = new TestSample[3];
         samples[0] = new TestSample();
         samples[1] = new TestSample();
         samples[2] = new TestSample();
 
-        MphChlOp.setToInvalid(samples);
+        MphChlOp.setToInvalid(samples, true);
 
         assertEquals(Double.NaN, samples[0].getDouble(), 1e-8);
         assertEquals(0.0, samples[1].getDouble(), 1e-8);
-        assertEquals(0.0, samples[2].getDouble(), 1e-8);
+        assertEquals(Double.NaN, samples[2].getDouble(), 1e-8);
     }
 
     @Test

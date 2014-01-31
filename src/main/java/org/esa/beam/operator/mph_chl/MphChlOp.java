@@ -44,6 +44,10 @@ public class MphChlOp extends PixelOperator {
             description = "Clipping value for chl-a in case of cyano occurrence.")
     private double cyanoMaxValue;
 
+    @Parameter(defaultValue = "false",
+            description = "Switch to true to write 'mph' band.")
+    boolean exportMph;
+
     private VirtualBandOpImage invalidOpImage;
 
     @Override
@@ -97,7 +101,7 @@ public class MphChlOp extends PixelOperator {
                 // polynomial + immersed_eucaryotes
                 chl = computeChlPolynomial(mph);
             } else if (floating_flag && !adj_flag && !cyano_flag) {
-                setToInvalid(targetSamples);
+                setToInvalid(targetSamples, exportMph);
             } else if (!adj_flag && cyano_flag) {
                 chl = computeChlExponential(mph, cyanoMaxValue);
                 if (floating_flag) {
@@ -109,8 +113,11 @@ public class MphChlOp extends PixelOperator {
 
             targetSamples[0].set(chl);
             targetSamples[1].set(encodeFlags(cyano_flag, floating_flag, adj_flag));
+            if (exportMph) {
+                targetSamples[2].set(mph);
+            }
         } else {
-            setToInvalid(targetSamples);
+            setToInvalid(targetSamples, exportMph);
         }
     }
 
@@ -155,9 +162,12 @@ public class MphChlOp extends PixelOperator {
     }
 
     // package access for testing only tb 2013-12-04
-    static void setToInvalid(WritableSample[] targetSamples) {
+    static void setToInvalid(WritableSample[] targetSamples, boolean exportMph) {
         targetSamples[0].set(Double.NaN);
         targetSamples[1].set(0.0);
+        if (exportMph) {
+            targetSamples[2].set(Double.NaN);
+        }
     }
 
     // package access for testing only tb 2013-12-04
@@ -179,6 +189,9 @@ public class MphChlOp extends PixelOperator {
     protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         sampleConfigurer.defineSample(0, "chl");
         sampleConfigurer.defineSample(1, "mph_chl_flags");
+        if (exportMph) {
+            sampleConfigurer.defineSample(2, "mph");
+        }
     }
 
     @Override
@@ -187,7 +200,13 @@ public class MphChlOp extends PixelOperator {
         chlBand.setUnit("mg/m^3");
         chlBand.setGeophysicalNoDataValue(Double.NaN);
 
+        if (exportMph) {
+            final Band mphBand = productConfigurer.addBand("mph", ProductData.TYPE_FLOAT32);
+            mphBand.setUnit("dl");
+            mphBand.setGeophysicalNoDataValue(Double.NaN);
+        }
         final Band flagBand = productConfigurer.addBand("mph_chl_flags", ProductData.TYPE_INT8);
+
 
         super.configureTargetProduct(productConfigurer);
 

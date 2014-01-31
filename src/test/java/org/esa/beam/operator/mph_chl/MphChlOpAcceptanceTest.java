@@ -13,8 +13,10 @@ import org.junit.Test;
 import java.io.File;
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.Map;
 
 import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
 
 public class MphChlOpAcceptanceTest {
 
@@ -68,11 +70,46 @@ public class MphChlOpAcceptanceTest {
             assertEquals(0, flagBand.getSampleInt(1, 0));
             assertEquals(0, flagBand.getSampleInt(0, 1));
             assertEquals(0, flagBand.getSampleInt(1, 1));
+
+            final Band mphBand = savedProduct.getBand("mph");
+            assertNull(mphBand);
         } finally {
             if (savedProduct != null) {
                 savedProduct.dispose();
             }
         }
+    }
+
+    @Test
+    public void testComputeMphChlProduct_withMph() throws IOException {
+        final Product brrProduct = MerisBrrProduct.create();
+
+        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL", createParameter(), brrProduct);
+        Product savedProduct = null;
+        try {
+            final String targetProductPath = testOutDirectory.getAbsolutePath() + File.separator + "Diversity_MPHCHL.dim";
+            ProductIO.writeProduct(mphChlProduct, targetProductPath, "BEAM-DIMAP");
+
+            savedProduct = ProductIO.readProduct(targetProductPath);
+            assertNotNull(savedProduct);
+
+            final Band mphBand = savedProduct.getBand("mph");
+            assertNotNull(mphBand);
+            assertEquals(-1.1474395432742313E-4f, mphBand.getSampleFloat(0, 0), 1e-8);
+            assertEquals(-4.521883383858949E-4f, mphBand.getSampleFloat(1, 0), 1e-8);
+            assertEquals(0.003501386847347021f, mphBand.getSampleFloat(0, 1), 1e-8);
+            assertEquals(Double.NaN, mphBand.getSampleFloat(1, 1), 1e-8);
+        } finally {
+            if (savedProduct != null) {
+                savedProduct.dispose();
+            }
+        }
+    }
+
+    private Map<String, Object> createParameter() {
+        final HashMap<String, Object> parameterMap = new HashMap<String, Object>();
+        parameterMap.put("exportMph", Boolean.TRUE);
+        return parameterMap;
     }
 
     @Test
