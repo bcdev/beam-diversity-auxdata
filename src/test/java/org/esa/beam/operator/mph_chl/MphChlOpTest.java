@@ -89,6 +89,22 @@ public class MphChlOpTest {
         assertEquals("mg/m^3", chlBand.getUnit());
         assertEquals(Double.NaN, chlBand.getGeophysicalNoDataValue(), 1e-8);
 
+        final Band immersed_eucaryotesBand = targetProduct.getBand("immersed_eucaryotes");
+        assertNotNull(immersed_eucaryotesBand);
+        assertEquals(ProductData.TYPE_INT8, immersed_eucaryotesBand.getDataType());
+
+        final Band immersed_cyanobacteriaBand = targetProduct.getBand("immersed_cyanobacteria");
+        assertNotNull(immersed_cyanobacteriaBand);
+        assertEquals(ProductData.TYPE_INT8, immersed_cyanobacteriaBand.getDataType());
+
+        final Band floating_cyanobacteriaBand = targetProduct.getBand("floating_cyanobacteria");
+        assertNotNull(floating_cyanobacteriaBand);
+        assertEquals(ProductData.TYPE_INT8, floating_cyanobacteriaBand.getDataType());
+
+        final Band floating_vegetationBand = targetProduct.getBand("floating_vegetation");
+        assertNotNull(floating_vegetationBand);
+        assertEquals(ProductData.TYPE_INT8, floating_vegetationBand.getDataType());
+
         final Band flagBand = targetProduct.getBand("mph_chl_flags");
         Assert.assertNotNull(flagBand);
         assertEquals(ProductData.TYPE_INT8, flagBand.getDataType());
@@ -157,9 +173,13 @@ public class MphChlOpTest {
         mphChlOp.configureTargetSamples(sampleConfigurer);
 
         final HashMap<Integer, String> sampleMap = sampleConfigurer.getSampleMap();
-        assertEquals(2, sampleMap.size());
+        assertEquals(6, sampleMap.size());
         assertEquals("chl", sampleMap.get(0));
         assertEquals("mph_chl_flags", sampleMap.get(1));
+        assertEquals("immersed_eucaryotes", sampleMap.get(2));
+        assertEquals("immersed_cyanobacteria", sampleMap.get(3));
+        assertEquals("floating_cyanobacteria", sampleMap.get(4));
+        assertEquals("floating_vegetation", sampleMap.get(5));
     }
 
     @Test
@@ -170,36 +190,43 @@ public class MphChlOpTest {
         mphChlOp.configureTargetSamples(sampleConfigurer);
 
         final HashMap<Integer, String> sampleMap = sampleConfigurer.getSampleMap();
-        assertEquals(3, sampleMap.size());
+        assertEquals(7, sampleMap.size());
         assertEquals("chl", sampleMap.get(0));
         assertEquals("mph_chl_flags", sampleMap.get(1));
-        assertEquals("mph", sampleMap.get(2));
+        assertEquals("immersed_eucaryotes", sampleMap.get(2));
+        assertEquals("immersed_cyanobacteria", sampleMap.get(3));
+        assertEquals("floating_cyanobacteria", sampleMap.get(4));
+        assertEquals("floating_vegetation", sampleMap.get(5));
+        assertEquals("mph", sampleMap.get(6));
     }
 
     @Test
     public void testSetToInvalid() {
-        final TestSample[] samples = new TestSample[2];
-        samples[0] = new TestSample();
-        samples[1] = new TestSample();
+        final TestSample[] samples = createSampleArray(6);
 
         MphChlOp.setToInvalid(samples, false);
 
         assertEquals(Double.NaN, samples[0].getDouble(), 1e-8);
         assertEquals(0.0, samples[1].getDouble(), 1e-8);
+        assertEquals(0.0, samples[2].getDouble(), 1e-8);
+        assertEquals(0.0, samples[3].getDouble(), 1e-8);
+        assertEquals(0.0, samples[4].getDouble(), 1e-8);
+        assertEquals(0.0, samples[4].getDouble(), 1e-8);
     }
 
     @Test
     public void testSetToInvalid_withMph() {
-        final TestSample[] samples = new TestSample[3];
-        samples[0] = new TestSample();
-        samples[1] = new TestSample();
-        samples[2] = new TestSample();
+        final TestSample[] samples = createSampleArray(7);
 
         MphChlOp.setToInvalid(samples, true);
 
         assertEquals(Double.NaN, samples[0].getDouble(), 1e-8);
         assertEquals(0.0, samples[1].getDouble(), 1e-8);
-        assertEquals(Double.NaN, samples[2].getDouble(), 1e-8);
+        assertEquals(0.0, samples[2].getDouble(), 1e-8);
+        assertEquals(0.0, samples[3].getDouble(), 1e-8);
+        assertEquals(0.0, samples[4].getDouble(), 1e-8);
+        assertEquals(0.0, samples[5].getDouble(), 1e-8);
+        assertEquals(Double.NaN, samples[6].getDouble(), 1e-8);
     }
 
     @Test
@@ -271,5 +298,13 @@ public class MphChlOpTest {
         final MphChlOp.Spi spi = new MphChlOp.Spi();
         final Class<? extends Operator> operatorClass = spi.getOperatorClass();
         assertTrue(operatorClass.isAssignableFrom(MphChlOp.class));
+    }
+
+    private static TestSample[] createSampleArray(int numSamples) {
+        final TestSample[] samples = new TestSample[numSamples];
+        for (int i = 0; i < numSamples; i++) {
+            samples[i] = new TestSample();
+        }
+        return samples;
     }
 }

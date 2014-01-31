@@ -96,25 +96,34 @@ public class MphChlOp extends PixelOperator {
                 cyano_flag = true;
             }
 
+            int immersed_eucaryotes = 0;
+            int immersed_cyano = 0;
+            int floating_cyano = 0;
+            int floating_vegetation = 0;
             double chl = Double.NaN;
             if (!floating_flag && !cyano_flag) {
-                // polynomial + immersed_eucaryotes
                 chl = computeChlPolynomial(mph);
+                immersed_eucaryotes = 1;
             } else if (floating_flag && !adj_flag && !cyano_flag) {
                 setToInvalid(targetSamples, exportMph);
+                floating_vegetation = 1;
             } else if (!adj_flag && cyano_flag) {
                 chl = computeChlExponential(mph, cyanoMaxValue);
                 if (floating_flag) {
-                    // immersed_cyano
+                    immersed_cyano = 1;
                 } else {
-                    // floating_cyano
+                    floating_cyano = 1;
                 }
             }
 
             targetSamples[0].set(chl);
             targetSamples[1].set(encodeFlags(cyano_flag, floating_flag, adj_flag));
+            targetSamples[2].set(immersed_eucaryotes);
+            targetSamples[3].set(immersed_cyano);
+            targetSamples[4].set(floating_cyano);
+            targetSamples[5].set(floating_vegetation);
             if (exportMph) {
-                targetSamples[2].set(mph);
+                targetSamples[6].set(mph);
             }
         } else {
             setToInvalid(targetSamples, exportMph);
@@ -164,9 +173,13 @@ public class MphChlOp extends PixelOperator {
     // package access for testing only tb 2013-12-04
     static void setToInvalid(WritableSample[] targetSamples, boolean exportMph) {
         targetSamples[0].set(Double.NaN);
-        targetSamples[1].set(0.0);
+        targetSamples[1].set(0.0);  // mph_chl_flag
+        targetSamples[2].set(0.0);  // immersed eucaryotes
+        targetSamples[3].set(0.0);  // immersed cyanobacteria
+        targetSamples[4].set(0.0);  // floating cyanobacteria
+        targetSamples[5].set(0.0);  // floating vegetation
         if (exportMph) {
-            targetSamples[2].set(Double.NaN);
+            targetSamples[6].set(Double.NaN);
         }
     }
 
@@ -189,8 +202,12 @@ public class MphChlOp extends PixelOperator {
     protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         sampleConfigurer.defineSample(0, "chl");
         sampleConfigurer.defineSample(1, "mph_chl_flags");
+        sampleConfigurer.defineSample(2, "immersed_eucaryotes");
+        sampleConfigurer.defineSample(3, "immersed_cyanobacteria");
+        sampleConfigurer.defineSample(4, "floating_cyanobacteria");
+        sampleConfigurer.defineSample(5, "floating_vegetation");
         if (exportMph) {
-            sampleConfigurer.defineSample(2, "mph");
+            sampleConfigurer.defineSample(6, "mph");
         }
     }
 
@@ -200,13 +217,17 @@ public class MphChlOp extends PixelOperator {
         chlBand.setUnit("mg/m^3");
         chlBand.setGeophysicalNoDataValue(Double.NaN);
 
+        productConfigurer.addBand("immersed_eucaryotes", ProductData.TYPE_INT8);
+        productConfigurer.addBand("immersed_cyanobacteria", ProductData.TYPE_INT8);
+        productConfigurer.addBand("floating_cyanobacteria", ProductData.TYPE_INT8);
+        productConfigurer.addBand("floating_vegetation", ProductData.TYPE_INT8);
+
         if (exportMph) {
             final Band mphBand = productConfigurer.addBand("mph", ProductData.TYPE_FLOAT32);
             mphBand.setUnit("dl");
             mphBand.setGeophysicalNoDataValue(Double.NaN);
         }
         final Band flagBand = productConfigurer.addBand("mph_chl_flags", ProductData.TYPE_INT8);
-
 
         super.configureTargetProduct(productConfigurer);
 
