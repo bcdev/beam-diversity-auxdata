@@ -14,9 +14,7 @@ import java.lang.reflect.Field;
 import java.util.HashMap;
 
 import static junit.framework.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
-import static org.junit.Assert.assertSame;
-import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.*;
 
 public class MphChlOpTest {
 
@@ -32,7 +30,7 @@ public class MphChlOpTest {
         final OperatorMetadata operatorMetadata = MphChlOp.class.getAnnotation(OperatorMetadata.class);
         assertNotNull(operatorMetadata);
         assertEquals("Diversity.MPH.CHL", operatorMetadata.alias());
-        assertEquals("1.1", operatorMetadata.version());
+        assertEquals("1.2", operatorMetadata.version());
         assertEquals("Tom Block", operatorMetadata.authors());
         assertEquals("(c) 2013, 2014 by Brockmann Consult", operatorMetadata.copyright());
         assertEquals("Computes maximum peak height of chlorophyll", operatorMetadata.description());
@@ -66,11 +64,11 @@ public class MphChlOpTest {
         final Product targetProduct = productConfigurer.getTargetProduct();
         assertNotNull(targetProduct);
 
-        final Band chlBand = targetProduct.getBand("Chl");
+        final Band chlBand = targetProduct.getBand("chl");
         assertNotNull(chlBand);
         assertEquals(ProductData.TYPE_FLOAT32, chlBand.getDataType());
         assertEquals("mg/m^3", chlBand.getUnit());
-        assertEquals(Double.NaN, chlBand.getGeophysicalNoDataValue());
+        assertEquals(Double.NaN, chlBand.getGeophysicalNoDataValue(), 1e-8);
 
         final Band cyanoFlagBand = targetProduct.getBand("cyano_flag");
         Assert.assertNotNull(cyanoFlagBand);
@@ -166,6 +164,36 @@ public class MphChlOpTest {
 
         mph = MphChlOp.computeMph(1, 2, 3, 0, 4, 5);
         assertEquals(3.0, mph, 1e-8);
+    }
+
+    @Test
+    public void testIsCyano() {
+        assertFalse(MphChlOp.isCyano(0.0, 1.0, 1.0));
+        assertFalse(MphChlOp.isCyano(0.5, 1.0, 1.0));
+        assertTrue(MphChlOp.isCyano(-0.1, 1.0, 1.0));
+
+        assertFalse(MphChlOp.isCyano(-1.0, 0.0, 1.0));
+        assertFalse(MphChlOp.isCyano(-1.0, -0.1, 1.0));
+        assertTrue(MphChlOp.isCyano(-1.0, 0.5, 1.0));
+
+        assertFalse(MphChlOp.isCyano(-1.0, 1.0, 0.0));
+        assertFalse(MphChlOp.isCyano(-1.0, 1.0, 0.00049));
+        assertTrue(MphChlOp.isCyano(-1.0, 1.0, 0.0051));
+    }
+
+    @Test
+    public void testComputeChlPolynomial() {
+         assertEquals(353732.6926, MphChlOp.computeChlPolynomial(0.1), 1e-8);
+         assertEquals(8.2646992, MphChlOp.computeChlPolynomial(0.001), 1e-8);
+         assertEquals(1.9726, MphChlOp.computeChlPolynomial(0.0), 1e-8);
+    }
+
+    @Test
+    public void testComputeChlExponential() {
+        assertEquals(500.0, MphChlOp.computeChlExponential(0.1, 500), 1e-8);
+
+        assertEquals(23.25767257114881, MphChlOp.computeChlExponential(0.001, 500), 1e-8);
+        assertEquals(22.44, MphChlOp.computeChlExponential(0.0, 500), 1e-8);
     }
 
     @Test

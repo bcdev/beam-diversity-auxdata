@@ -17,7 +17,7 @@ import org.esa.beam.jai.VirtualBandOpImage;
 import java.awt.*;
 
 @OperatorMetadata(alias = "Diversity.MPH.CHL",
-        version = "1.1",
+        version = "1.2",
         authors = "Tom Block",
         copyright = "(c) 2013, 2014 by Brockmann Consult",
         description = "Computes maximum peak height of chlorophyll")
@@ -69,7 +69,6 @@ public class MphChlOp extends PixelOperator {
                 maxLambda = MERIS_WAVELENGTHS[10];
             }
 
-
             boolean floating_flag = false;
             boolean adj_flag = false;
             if (maxLambda == MERIS_WAVELENGTHS[10]) {
@@ -78,9 +77,9 @@ public class MphChlOp extends PixelOperator {
 
             if (mph > 0.02) {
                 mph = computeMph(maxBrr, r_7, r_14, maxLambda, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
+                adj_flag = false;
                 if (maxLambda == MERIS_WAVELENGTHS[10]) {
                     floating_flag = true;
-                    adj_flag = false;
                 }
             }
 
@@ -88,27 +87,23 @@ public class MphChlOp extends PixelOperator {
             final double SICF_peak = r_8 - r_7 - ((r_9 - r_7) * RATIO_C);
             final double BAIR_peak = r_9 - r_7 - ((r_14 - r_7) * RATIO_B);
 
-            int cyano_flag = 0;
-            if (SICF_peak < 0.0 && SIPF_peak > 0.0 && BAIR_peak > 0.005) {
-                cyano_flag = 1;
+            boolean cyano_flag = false;
+            if (isCyano(SICF_peak, SIPF_peak, BAIR_peak)) {
+                cyano_flag = true;
             }
 
             double chl = Double.NaN;
-            if (cyano_flag == 0) {
+            if (!floating_flag && !cyano_flag) {
+                // polynomial + immersed_eucaryotes
+                chl = computeChlPolynomial(mph);
+            } else if (floating_flag && !adj_flag && !cyano_flag) {
+                setToInvalid(targetSamples);
+            } else if (!adj_flag && cyano_flag) {
+                chl = computeChlExponential(mph, cyanoMaxValue);
                 if (floating_flag) {
-                    setToInvalid(targetSamples);
+                    // immersed_cyano
                 } else {
-                    final double mph_sq = mph * mph;
-                    final double mph_p3 = mph_sq * mph;
-                    final double mph_p4 = mph_sq * mph_sq;
-
-                    chl = 5.2392E9 * mph_p4 - 1.9524E8 * mph_p3 + 2.4649E6 * mph_sq + 4.0172E3 * mph + 1.9726;
-                }
-            } else {
-                final double exponent = 35.79 * mph;
-                chl = 22.44 * Math.exp(exponent);
-                if (chl > cyanoMaxValue) {
-                    chl = cyanoMaxValue;
+                    // floating_cyano
                 }
             }
 
@@ -118,6 +113,31 @@ public class MphChlOp extends PixelOperator {
         } else {
             setToInvalid(targetSamples);
         }
+    }
+
+    // package access for testing only tb 2014-01-30
+    static double computeChlExponential(double mph, double cyanoMaxValue) {
+        double chl;
+        final double exponent = 35.79 * mph;
+        chl = 22.44 * Math.exp(exponent);
+        if (chl > cyanoMaxValue) {
+            chl = cyanoMaxValue;
+        }
+        return chl;
+    }
+
+    // package access for testing only tb 2014-01-30
+    static double computeChlPolynomial(double mph) {
+        final double mph_sq = mph * mph;
+        final double mph_p3 = mph_sq * mph;
+        final double mph_p4 = mph_sq * mph_sq;
+
+        return 5.2392E9 * mph_p4 - 1.9524E8 * mph_p3 + 2.4649E6 * mph_sq + 4.0172E3 * mph + 1.9726;
+    }
+
+    // package access for testing only tb 2013-01-30
+    static boolean isCyano(double SICF_peak, double SIPF_peak, double BAIR_peak) {
+        return SICF_peak < 0.0 && SIPF_peak > 0.0 && BAIR_peak > 0.005;
     }
 
     // package access for testing only tb 2013-12-04
