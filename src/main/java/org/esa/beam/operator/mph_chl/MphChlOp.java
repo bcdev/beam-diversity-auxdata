@@ -108,11 +108,25 @@ public class MphChlOp extends PixelOperator {
             }
 
             targetSamples[0].set(chl);
-            targetSamples[1].set(cyano_flag);
-            targetSamples[2].set(floating_flag);
+            targetSamples[1].set(encodeFlags(cyano_flag, floating_flag, adj_flag));
         } else {
             setToInvalid(targetSamples);
         }
+    }
+
+    // package access for testing only tb 2014-01-31
+    static int encodeFlags(boolean cyano_flag, boolean floating_flag, boolean adj_flag) {
+        int flag = 0;
+        if (cyano_flag) {
+            flag = flag | 0x1;
+        }
+        if (floating_flag) {
+            flag = flag | 0x2;
+        }
+        if (adj_flag) {
+            flag = flag | 0x4;
+        }
+        return flag;
     }
 
     // package access for testing only tb 2014-01-30
@@ -164,8 +178,7 @@ public class MphChlOp extends PixelOperator {
     @Override
     protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         sampleConfigurer.defineSample(0, "chl");
-        sampleConfigurer.defineSample(1, "cyano_flag");
-        sampleConfigurer.defineSample(2, "floating_flag");
+        sampleConfigurer.defineSample(1, "mph_chl_flags");
     }
 
     @Override
@@ -174,21 +187,17 @@ public class MphChlOp extends PixelOperator {
         chlBand.setUnit("mg/m^3");
         chlBand.setGeophysicalNoDataValue(Double.NaN);
 
-        final Band cyanoFlagBand = productConfigurer.addBand("cyano_flag", ProductData.TYPE_INT8);
-        final Band floatingFlagBand = productConfigurer.addBand("floating_flag", ProductData.TYPE_INT8);
+        final Band flagBand = productConfigurer.addBand("mph_chl_flags", ProductData.TYPE_INT8);
 
         super.configureTargetProduct(productConfigurer);
 
         final Product targetProduct = productConfigurer.getTargetProduct();
-        final FlagCoding cyanoFlagCoding = new FlagCoding("cyano_flag");
-        cyanoFlagCoding.addFlag("CYANO", 1, "Cyanobacteria dominated waters");
-        targetProduct.getFlagCodingGroup().add(cyanoFlagCoding);
-        cyanoFlagBand.setSampleCoding(cyanoFlagCoding);
-
-        final FlagCoding floatingFlagCoding = new FlagCoding("floating_flag");
-        floatingFlagCoding.addFlag("FLOAT", 1, "Floating vegetation or cyanobacteria on water surface");
-        targetProduct.getFlagCodingGroup().add(floatingFlagCoding);
-        floatingFlagBand.setSampleCoding(floatingFlagCoding);
+        final FlagCoding flagCoding = new FlagCoding("mph_chl_flags");
+        flagCoding.addFlag("CYANO", 1, "Cyanobacteria dominated waters");
+        flagCoding.addFlag("FLOATING", 2, "Floating vegetation or cyanobacteria on water surface");
+        flagCoding.addFlag("ADJACENCY", 4, "Pixel suspect of adjacency effects");
+        targetProduct.getFlagCodingGroup().add(flagCoding);
+        flagBand.setSampleCoding(flagCoding);
     }
 
     @Override

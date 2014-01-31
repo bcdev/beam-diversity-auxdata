@@ -62,19 +62,12 @@ public class MphChlOpAcceptanceTest {
             assertEquals(38.66391372680664f, chlBand.getSampleFloat(0, 1), 1e-8);
             assertEquals(Double.NaN, chlBand.getSampleFloat(1, 1), 1e-8);
 
-            final Band cyano_flagBand = savedProduct.getBand("cyano_flag");
-            assertNotNull(cyano_flagBand);
-            assertEquals(0, cyano_flagBand.getSampleInt(0, 0));
-            assertEquals(0, cyano_flagBand.getSampleInt(1, 0));
-            assertEquals(0, cyano_flagBand.getSampleInt(0, 1));
-            assertEquals(0, cyano_flagBand.getSampleInt(1, 1));
-
-            final Band floating_flagBand = savedProduct.getBand("floating_flag");
-            assertNotNull(floating_flagBand);
-            assertEquals(0, floating_flagBand.getSampleInt(0, 0));
-            assertEquals(0, floating_flagBand.getSampleInt(1, 0));
-            assertEquals(0, floating_flagBand.getSampleInt(0, 1));
-            assertEquals(0, floating_flagBand.getSampleInt(1, 1));
+            final Band flagBand = savedProduct.getBand("mph_chl_flags");
+            assertNotNull(flagBand);
+            assertEquals(0, flagBand.getSampleInt(0, 0));
+            assertEquals(0, flagBand.getSampleInt(1, 0));
+            assertEquals(0, flagBand.getSampleInt(0, 1));
+            assertEquals(0, flagBand.getSampleInt(1, 1));
         } finally {
             if (savedProduct != null) {
                 savedProduct.dispose();

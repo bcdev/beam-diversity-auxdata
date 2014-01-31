@@ -1,19 +1,18 @@
 package org.esa.beam.operator.mph_chl;
 
 
-import junit.framework.Assert;
 import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
-import static junit.framework.Assert.assertEquals;
 import static org.junit.Assert.*;
 
 public class MphChlOpTest {
@@ -70,35 +69,33 @@ public class MphChlOpTest {
         assertEquals("mg/m^3", chlBand.getUnit());
         assertEquals(Double.NaN, chlBand.getGeophysicalNoDataValue(), 1e-8);
 
-        final Band cyanoFlagBand = targetProduct.getBand("cyano_flag");
-        Assert.assertNotNull(cyanoFlagBand);
-        assertEquals(ProductData.TYPE_INT8, cyanoFlagBand.getDataType());
-
-        final Band floatingFlagBand = targetProduct.getBand("floating_flag");
-        Assert.assertNotNull(floatingFlagBand);
-        assertEquals(ProductData.TYPE_INT8, floatingFlagBand.getDataType());
+        final Band flagBand = targetProduct.getBand("mph_chl_flags");
+        Assert.assertNotNull(flagBand);
+        assertEquals(ProductData.TYPE_INT8, flagBand.getDataType());
 
         assertTrue(productConfigurer.isCopyGeoCodingCalled());
 
-        final FlagCoding cyanoFlagCoding = targetProduct.getFlagCodingGroup().get("cyano_flag");
-        assertNotNull(cyanoFlagCoding);
-        FlagCoding bandFlagcoding = cyanoFlagBand.getFlagCoding();
-        assertSame(cyanoFlagCoding, bandFlagcoding);
+        final FlagCoding flagCoding = targetProduct.getFlagCodingGroup().get("mph_chl_flags");
+        assertNotNull(flagCoding);
+        FlagCoding bandFlagcoding = flagBand.getFlagCoding();
+        assertSame(flagCoding, bandFlagcoding);
 
-        final MetadataAttribute cyanoFlag = cyanoFlagCoding.getFlag("CYANO");
+        final MetadataAttribute cyanoFlag = flagCoding.getFlag("CYANO");
         assertEquals("CYANO", cyanoFlag.getName());
         assertEquals("Cyanobacteria dominated waters", cyanoFlag.getDescription());
         assertEquals(1, cyanoFlag.getData().getElemInt());
 
-        final FlagCoding floatingFlagCoding = targetProduct.getFlagCodingGroup().get("floating_flag");
-        assertNotNull(floatingFlagCoding);
-        bandFlagcoding = floatingFlagBand.getFlagCoding();
-        assertSame(floatingFlagCoding, bandFlagcoding);
+        final MetadataAttribute floatingFlag = flagCoding.getFlag("FLOATING");
+        assertNotNull(floatingFlag);
+        assertEquals("FLOATING", floatingFlag.getName());
+        assertEquals("Floating vegetation or cyanobacteria on water surface", floatingFlag.getDescription());
+        assertEquals(2, floatingFlag.getData().getElemInt());
 
-        final MetadataAttribute floatFlag = floatingFlagCoding.getFlag("FLOAT");
-        assertEquals("FLOAT", floatFlag.getName());
-        assertEquals("Floating vegetation or cyanobacteria on water surface", floatFlag.getDescription());
-        assertEquals(1, floatFlag.getData().getElemInt());
+        final MetadataAttribute adjacencyFlag = flagCoding.getFlag("ADJACENCY");
+        assertNotNull(adjacencyFlag);
+        assertEquals("ADJACENCY", adjacencyFlag.getName());
+        assertEquals("Pixel suspect of adjacency effects", adjacencyFlag.getDescription());
+        assertEquals(4, adjacencyFlag.getData().getElemInt());
     }
 
     @Test
@@ -123,9 +120,9 @@ public class MphChlOpTest {
         mphChlOp.configureTargetSamples(sampleConfigurer);
 
         final HashMap<Integer, String> sampleMap = sampleConfigurer.getSampleMap();
+        assertEquals(2, sampleMap.size());
         assertEquals("chl", sampleMap.get(0));
-        assertEquals("cyano_flag", sampleMap.get(1));
-        assertEquals("floating_flag", sampleMap.get(2));
+        assertEquals("mph_chl_flags", sampleMap.get(1));
     }
 
     @Test
@@ -183,9 +180,9 @@ public class MphChlOpTest {
 
     @Test
     public void testComputeChlPolynomial() {
-         assertEquals(353732.6926, MphChlOp.computeChlPolynomial(0.1), 1e-8);
-         assertEquals(8.2646992, MphChlOp.computeChlPolynomial(0.001), 1e-8);
-         assertEquals(1.9726, MphChlOp.computeChlPolynomial(0.0), 1e-8);
+        assertEquals(353732.6926, MphChlOp.computeChlPolynomial(0.1), 1e-8);
+        assertEquals(8.2646992, MphChlOp.computeChlPolynomial(0.001), 1e-8);
+        assertEquals(1.9726, MphChlOp.computeChlPolynomial(0.0), 1e-8);
     }
 
     @Test
@@ -194,6 +191,16 @@ public class MphChlOpTest {
 
         assertEquals(23.25767257114881, MphChlOp.computeChlExponential(0.001, 500), 1e-8);
         assertEquals(22.44, MphChlOp.computeChlExponential(0.0, 500), 1e-8);
+    }
+
+    @Test
+    public void testEncodeFlags() {
+        assertEquals(0, MphChlOp.encodeFlags(false, false, false));
+        assertEquals(1, MphChlOp.encodeFlags(true, false, false));
+        assertEquals(2, MphChlOp.encodeFlags(false, true, false));
+        assertEquals(4, MphChlOp.encodeFlags(false, false, true));
+        assertEquals(3, MphChlOp.encodeFlags(true, true, false));
+        assertEquals(5, MphChlOp.encodeFlags(true, false, true));
     }
 
     @Test
