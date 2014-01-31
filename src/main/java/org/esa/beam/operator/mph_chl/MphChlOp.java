@@ -44,6 +44,10 @@ public class MphChlOp extends PixelOperator {
             description = "Clipping value for chl-a in case of cyano occurrence.")
     private double cyanoMaxValue;
 
+    @Parameter(defaultValue = "500.0",
+            description = "chl_mph threshold for mandatory float_flag.")
+    private double chlThreshForFloatFlag;
+
     @Parameter(defaultValue = "false",
             description = "Switch to true to write 'mph' band.")
     boolean exportMph;
@@ -59,6 +63,8 @@ public class MphChlOp extends PixelOperator {
             final double r_9 = sourceSamples[REFL_9_IDX].getDouble();
             final double r_10 = sourceSamples[REFL_10_IDX].getDouble();
             final double r_14 = sourceSamples[REFL_14_IDX].getDouble();
+
+            boolean useTwoArgsCyanoCheck = false;
 
             double maxBrr = r_8;
             double maxLambda = MERIS_WAVELENGTHS[8];
@@ -84,16 +90,19 @@ public class MphChlOp extends PixelOperator {
                 adj_flag = false;
                 if (maxLambda == MERIS_WAVELENGTHS[10]) {
                     floating_flag = true;
+                    useTwoArgsCyanoCheck = true;
                 }
             }
 
             final double SIPF_peak = r_7 - r_6 - ((r_8 - r_6) * RATIO_P);
             final double SICF_peak = r_8 - r_7 - ((r_9 - r_7) * RATIO_C);
-            final double BAIR_peak = r_9 - r_7 - ((r_14 - r_7) * RATIO_B);
 
-            boolean cyano_flag = false;
-            if (isCyano(SICF_peak, SIPF_peak, BAIR_peak)) {
-                cyano_flag = true;
+            boolean cyano_flag;
+            if (useTwoArgsCyanoCheck) {
+                cyano_flag = isCyano(SICF_peak, SIPF_peak);
+            } else {
+                final double BAIR_peak = r_9 - r_7 - ((r_14 - r_7) * RATIO_B);
+                cyano_flag = isCyano(SICF_peak, SIPF_peak, BAIR_peak);
             }
 
             int immersed_eucaryotes = 0;
@@ -109,10 +118,10 @@ public class MphChlOp extends PixelOperator {
                 floating_vegetation = 1;
             } else if (!adj_flag && cyano_flag) {
                 chl = computeChlExponential(mph, cyanoMaxValue);
-                if (floating_flag) {
-                    immersed_cyano = 1;
-                } else {
+                if (floating_flag || chl > chlThreshForFloatFlag) {
                     floating_cyano = 1;
+                } else if (!floating_flag && chl < chlThreshForFloatFlag){
+                    immersed_cyano = 1;
                 }
             }
 
@@ -167,7 +176,12 @@ public class MphChlOp extends PixelOperator {
 
     // package access for testing only tb 2013-01-30
     static boolean isCyano(double SICF_peak, double SIPF_peak, double BAIR_peak) {
-        return SICF_peak < 0.0 && SIPF_peak > 0.0 && BAIR_peak > 0.005;
+        return SICF_peak < 0.0 && SIPF_peak > 0.0 && BAIR_peak > 0.001;
+    }
+
+    // package access for testing only tb 2013-01-30
+    static boolean isCyano(double SICF_peak, double SIPF_peak) {
+        return SICF_peak < 0.0 || SIPF_peak > 0.0;
     }
 
     // package access for testing only tb 2013-12-04

@@ -65,6 +65,16 @@ public class MphChlOpTest {
     }
 
     @Test
+    public void testChlThreshForFloatFlagAnnotation() throws NoSuchFieldException {
+        final Field chlThreshForFloatFlagField = MphChlOp.class.getDeclaredField("chlThreshForFloatFlag");
+
+        final Parameter annotation = chlThreshForFloatFlagField.getAnnotation(Parameter.class);
+        assertNotNull(annotation);
+        assertEquals("500.0", annotation.defaultValue());
+        assertEquals("chl_mph threshold for mandatory float_flag.", annotation.description());
+    }
+
+    @Test
     public void testExportMphAnnotation() throws NoSuchFieldException {
         final Field exportMphField = MphChlOp.class.getDeclaredField("exportMph");
 
@@ -254,7 +264,7 @@ public class MphChlOpTest {
     }
 
     @Test
-    public void testIsCyano() {
+    public void testIsCyano_threeArgs() {
         assertFalse(MphChlOp.isCyano(0.0, 1.0, 1.0));
         assertFalse(MphChlOp.isCyano(0.5, 1.0, 1.0));
         assertTrue(MphChlOp.isCyano(-0.1, 1.0, 1.0));
@@ -264,8 +274,17 @@ public class MphChlOpTest {
         assertTrue(MphChlOp.isCyano(-1.0, 0.5, 1.0));
 
         assertFalse(MphChlOp.isCyano(-1.0, 1.0, 0.0));
-        assertFalse(MphChlOp.isCyano(-1.0, 1.0, 0.00049));
-        assertTrue(MphChlOp.isCyano(-1.0, 1.0, 0.0051));
+        assertFalse(MphChlOp.isCyano(-1.0, 1.0, 0.00009));
+        assertTrue(MphChlOp.isCyano(-1.0, 1.0, 0.0011));
+    }
+
+    @Test
+    public void testIsCyano_twoArgs() {
+         assertFalse(MphChlOp.isCyano(1.0, -1.0));
+
+         assertTrue(MphChlOp.isCyano(-0.1, -1.0));
+         assertTrue(MphChlOp.isCyano(1.0, 0.1));
+         assertTrue(MphChlOp.isCyano(-0.1, 0.1));
     }
 
     @Test
