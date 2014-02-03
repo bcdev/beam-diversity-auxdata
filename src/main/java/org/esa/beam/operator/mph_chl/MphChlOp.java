@@ -37,8 +37,8 @@ public class MphChlOp extends PixelOperator {
     @SourceProduct
     private Product sourceProduct;
     @Parameter(defaultValue = "not (cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_MIXED_PIXEL or l1_flags.INVALID )",
-            description = "Expression defining pixels not considered for processing.")
-    private String invalidPixelExpression;
+            description = "Expression defining pixels considered for processing.")
+    private String validPixelExpression;
 
     @Parameter(defaultValue = "1000.0",
             description = "Clipping value for chl-a in case of cyano occurrence.")
@@ -256,11 +256,11 @@ public class MphChlOp extends PixelOperator {
 
     @Override
     protected void prepareInputs() throws OperatorException {
-        if (!sourceProduct.isCompatibleBandArithmeticExpression(invalidPixelExpression)) {
-            final String message = String.format("The given expression '%s' is not compatible with the source product.", invalidPixelExpression);
+        if (!sourceProduct.isCompatibleBandArithmeticExpression(validPixelExpression)) {
+            final String message = String.format("The given expression '%s' is not compatible with the source product.", validPixelExpression);
             throw new OperatorException(message);
         }
-        invalidOpImage = VirtualBandOpImage.createMask(invalidPixelExpression, sourceProduct, ResolutionLevel.MAXRES);
+        invalidOpImage = VirtualBandOpImage.createMask(validPixelExpression, sourceProduct, ResolutionLevel.MAXRES);
     }
 
     private boolean isSampleValid(int x, int y) {

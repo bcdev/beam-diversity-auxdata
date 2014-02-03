@@ -46,12 +46,12 @@ public class MphChlOpTest {
 
     @Test
     public void testInvalidPixelExpressionAnnotation() throws NoSuchFieldException {
-        final Field validPixelField = MphChlOp.class.getDeclaredField("invalidPixelExpression");
+        final Field validPixelField = MphChlOp.class.getDeclaredField("validPixelExpression");
 
         final Parameter annotation = validPixelField.getAnnotation(Parameter.class);
         assertNotNull(annotation);
         assertEquals("not (cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_MIXED_PIXEL or l1_flags.INVALID )", annotation.defaultValue());
-        assertEquals("Expression defining pixels not considered for processing.", annotation.description());
+        assertEquals("Expression defining pixels considered for processing.", annotation.description());
     }
 
     @Test

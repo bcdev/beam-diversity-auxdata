@@ -141,11 +141,11 @@ public class MphChlOpAcceptanceTest {
     }
 
     @Test
-    public void testWithFaultyInvalidPixelExpression() {
+    public void testWithFaultyValidPixelExpression() {
         final Product brrProduct = MerisBrrProduct.create();
 
         HashMap<String, Object> params = new HashMap<String, Object>();
-        params.put("invalidPixelExpression", "extremely INVALID");
+        params.put("validPixelExpression", "extremely INVALID");
 
         try {
             GPF.createProduct("Diversity.MPH.CHL", params, brrProduct);
