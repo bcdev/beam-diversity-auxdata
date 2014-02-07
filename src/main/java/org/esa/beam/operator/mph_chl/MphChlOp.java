@@ -181,7 +181,7 @@ public class MphChlOp extends PixelOperator {
 
     // package access for testing only tb 2013-01-30
     static boolean isCyano(double SICF_peak, double SIPF_peak) {
-        return SICF_peak < 0.0 || SIPF_peak > 0.0;
+        return SICF_peak < 0.0 && SIPF_peak > 0.0;
     }
 
     // package access for testing only tb 2013-12-04
