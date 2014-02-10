@@ -1,10 +1,7 @@
 package org.esa.beam.operator.mph_chl;
 
 
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FlagCoding;
-import org.esa.beam.framework.datamodel.Product;
-import org.esa.beam.framework.datamodel.ProductData;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
@@ -17,7 +14,7 @@ import org.esa.beam.jai.VirtualBandOpImage;
 import java.awt.*;
 
 @OperatorMetadata(alias = "Diversity.MPH.CHL",
-        version = "1.2",
+        version = "1.3",
         authors = "Tom Block",
         copyright = "(c) 2013, 2014 by Brockmann Consult",
         description = "Computes maximum peak height of chlorophyll")
@@ -34,18 +31,25 @@ public class MphChlOp extends PixelOperator {
     private static final int REFL_10_IDX = 4;
     private static final int REFL_14_IDX = 5;
 
+    private static final String CYANO_FLAG_NAME = "CYANO";
+    private static final String CYANO_FLAG_DESCRIPTION = "Cyanobacteria dominated waters";
+    private static final String FLOATING_FLAG_NAME = "FLOATING";
+    private static final String FLOATING_FLAG_DESCRIPTION = "Floating vegetation or cyanobacteria on water surface";
+    private static final String ADJACENCY_FLAG_NAME = "ADJACENCY";
+    private static final String ADJACENCY_FLAG_DESCRIPTION = "Pixel suspect of adjacency effects";
+
     @SourceProduct
     private Product sourceProduct;
-    @Parameter(defaultValue = "not (cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_MIXED_PIXEL or l1_flags.INVALID )",
+    @Parameter(defaultValue = "not (l1_flags.LAND_OCEAN or l1_flags.INVALID)",
             description = "Expression defining pixels considered for processing.")
     private String validPixelExpression;
 
     @Parameter(defaultValue = "1000.0",
-            description = "Clipping value for chl-a in case of cyano occurrence.")
+            description = "Maximum chlorophyll, arithmetically higher values are capped.")
     private double cyanoMaxValue;
 
     @Parameter(defaultValue = "500.0",
-            description = "chl_mph threshold for mandatory float_flag.")
+            description = "Chlorophyll threshold, above which all cyanobacteria dominated waters are 'float.")
     private double chlThreshForFloatFlag;
 
     @Parameter(defaultValue = "false",
@@ -117,12 +121,16 @@ public class MphChlOp extends PixelOperator {
                 setToInvalid(targetSamples, exportMph);
                 floating_vegetation = 1;
             } else if (!adj_flag && cyano_flag) {
-                chl = computeChlExponential(mph, cyanoMaxValue);
+                chl = computeChlExponential(mph);
                 if (floating_flag || chl > chlThreshForFloatFlag) {
                     floating_cyano = 1;
-                } else if (!floating_flag && chl < chlThreshForFloatFlag){
+                } else if (!floating_flag && chl < chlThreshForFloatFlag) {
                     immersed_cyano = 1;
                 }
+            }
+
+            if (chl > cyanoMaxValue) {
+                chl = cyanoMaxValue;
             }
 
             targetSamples[0].set(chl);
@@ -155,13 +163,11 @@ public class MphChlOp extends PixelOperator {
     }
 
     // package access for testing only tb 2014-01-30
-    static double computeChlExponential(double mph, double cyanoMaxValue) {
+    static double computeChlExponential(double mph) {
         double chl;
         final double exponent = 35.79 * mph;
         chl = 22.44 * Math.exp(exponent);
-        if (chl > cyanoMaxValue) {
-            chl = cyanoMaxValue;
-        }
+
         return chl;
     }
 
@@ -247,11 +253,16 @@ public class MphChlOp extends PixelOperator {
 
         final Product targetProduct = productConfigurer.getTargetProduct();
         final FlagCoding flagCoding = new FlagCoding("mph_chl_flags");
-        flagCoding.addFlag("CYANO", 1, "Cyanobacteria dominated waters");
-        flagCoding.addFlag("FLOATING", 2, "Floating vegetation or cyanobacteria on water surface");
-        flagCoding.addFlag("ADJACENCY", 4, "Pixel suspect of adjacency effects");
+        flagCoding.addFlag(CYANO_FLAG_NAME, 1, CYANO_FLAG_DESCRIPTION);
+        flagCoding.addFlag(FLOATING_FLAG_NAME, 2, FLOATING_FLAG_DESCRIPTION);
+        flagCoding.addFlag(ADJACENCY_FLAG_NAME, 4, ADJACENCY_FLAG_DESCRIPTION);
         targetProduct.getFlagCodingGroup().add(flagCoding);
         flagBand.setSampleCoding(flagCoding);
+
+        final ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
+        maskGroup.add(mask(CYANO_FLAG_NAME, CYANO_FLAG_DESCRIPTION, "mph_chl_flags.CYANO", Color.cyan, 0.5f, targetProduct));
+        maskGroup.add(mask(FLOATING_FLAG_NAME, FLOATING_FLAG_DESCRIPTION, "mph_chl_flags.FLOATING", Color.green, 0.5f, targetProduct));
+        maskGroup.add(mask(ADJACENCY_FLAG_NAME, ADJACENCY_FLAG_DESCRIPTION, "mph_chl_flags.ADJACENCY", Color.red, 0.5f, targetProduct));
     }
 
     @Override
@@ -265,6 +276,10 @@ public class MphChlOp extends PixelOperator {
 
     private boolean isSampleValid(int x, int y) {
         return invalidOpImage.getData(new Rectangle(x, y, 1, 1)).getSample(x, y, 0) != 0;
+    }
+
+    protected Mask mask(String name, String description, String expression, Color color, float transparency, Product product) {
+        return Mask.BandMathsType.create(name, description, product.getSceneRasterWidth(), product.getSceneRasterHeight(), expression, color, transparency);
     }
 
     public static class Spi extends OperatorSpi {

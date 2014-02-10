@@ -10,6 +10,7 @@ import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 
+import java.awt.*;
 import java.lang.reflect.Field;
 import java.util.HashMap;
 
@@ -29,7 +30,7 @@ public class MphChlOpTest {
         final OperatorMetadata operatorMetadata = MphChlOp.class.getAnnotation(OperatorMetadata.class);
         assertNotNull(operatorMetadata);
         assertEquals("Diversity.MPH.CHL", operatorMetadata.alias());
-        assertEquals("1.2", operatorMetadata.version());
+        assertEquals("1.3", operatorMetadata.version());
         assertEquals("Tom Block", operatorMetadata.authors());
         assertEquals("(c) 2013, 2014 by Brockmann Consult", operatorMetadata.copyright());
         assertEquals("Computes maximum peak height of chlorophyll", operatorMetadata.description());
@@ -50,7 +51,7 @@ public class MphChlOpTest {
 
         final Parameter annotation = validPixelField.getAnnotation(Parameter.class);
         assertNotNull(annotation);
-        assertEquals("not (cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_MIXED_PIXEL or l1_flags.INVALID )", annotation.defaultValue());
+        assertEquals("not (l1_flags.LAND_OCEAN or l1_flags.INVALID)", annotation.defaultValue());
         assertEquals("Expression defining pixels considered for processing.", annotation.description());
     }
 
@@ -61,7 +62,7 @@ public class MphChlOpTest {
         final Parameter annotation = cyanoMaxValueField.getAnnotation(Parameter.class);
         assertNotNull(annotation);
         assertEquals("1000.0", annotation.defaultValue());
-        assertEquals("Clipping value for chl-a in case of cyano occurrence.", annotation.description());
+        assertEquals("Maximum chlorophyll, arithmetically higher values are capped.", annotation.description());
     }
 
     @Test
@@ -71,7 +72,7 @@ public class MphChlOpTest {
         final Parameter annotation = chlThreshForFloatFlagField.getAnnotation(Parameter.class);
         assertNotNull(annotation);
         assertEquals("500.0", annotation.defaultValue());
-        assertEquals("chl_mph threshold for mandatory float_flag.", annotation.description());
+        assertEquals("Chlorophyll threshold, above which all cyanobacteria dominated waters are 'float.", annotation.description());
     }
 
     @Test
@@ -142,6 +143,26 @@ public class MphChlOpTest {
         assertEquals("ADJACENCY", adjacencyFlag.getName());
         assertEquals("Pixel suspect of adjacency effects", adjacencyFlag.getDescription());
         assertEquals(4, adjacencyFlag.getData().getElemInt());
+
+        final ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
+        assertNotNull(maskGroup);
+        final Mask cyanoMask = maskGroup.get("CYANO");
+        assertNotNull(cyanoMask);
+        assertEquals("Cyanobacteria dominated waters", cyanoMask.getDescription());
+        assertEquals(Color.cyan, cyanoMask.getImageColor());
+        assertEquals(0.5f, cyanoMask.getImageTransparency(), 1e-8);
+
+        final Mask floatingMask = maskGroup.get("FLOATING");
+        assertNotNull(floatingMask);
+        assertEquals("Floating vegetation or cyanobacteria on water surface", floatingMask.getDescription());
+        assertEquals(Color.green, floatingMask.getImageColor());
+        assertEquals(0.5f, floatingMask.getImageTransparency(), 1e-8);
+
+        final Mask adjacencyMask = maskGroup.get("ADJACENCY");
+        assertNotNull(adjacencyMask);
+        assertEquals("Pixel suspect of adjacency effects", adjacencyMask.getDescription());
+        assertEquals(Color.red, adjacencyMask.getImageColor());
+        assertEquals(0.5f, adjacencyMask.getImageTransparency(), 1e-8);
     }
 
     @Test
@@ -296,10 +317,9 @@ public class MphChlOpTest {
 
     @Test
     public void testComputeChlExponential() {
-        assertEquals(500.0, MphChlOp.computeChlExponential(0.1, 500), 1e-8);
-
-        assertEquals(23.25767257114881, MphChlOp.computeChlExponential(0.001, 500), 1e-8);
-        assertEquals(22.44, MphChlOp.computeChlExponential(0.0, 500), 1e-8);
+        assertEquals(22.5204566512951240, MphChlOp.computeChlExponential(0.0001), 1e-8);
+        assertEquals(23.25767257114881, MphChlOp.computeChlExponential(0.001), 1e-8);
+        assertEquals(22.44, MphChlOp.computeChlExponential(0.0), 1e-8);
     }
 
     @Test

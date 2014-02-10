@@ -138,7 +138,8 @@ class MerisBrrProduct {
 
     private static void addFlagCodings(Product merisL1BProduct) {
         final FlagCoding l1_flags = new FlagCoding("l1_flags");
-        l1_flags.addFlag("INVALID", 0x80, "No Pixel is invalid.");
+        l1_flags.addFlag("LAND_OCEAN", 0x10, "Pixel is over land, not ocean.");
+        l1_flags.addFlag("INVALID", 0x80, "Pixel is invalid.");
         merisL1BProduct.getBand("l1_flags").setSampleCoding(l1_flags);
         merisL1BProduct.getFlagCodingGroup().add(l1_flags);
 
