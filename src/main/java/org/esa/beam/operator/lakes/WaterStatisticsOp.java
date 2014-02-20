@@ -2,11 +2,7 @@ package org.esa.beam.operator.lakes;
 
 import com.bc.ceres.core.ProgressMonitor;
 import org.esa.beam.collocation.CollocateOp;
-import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.GeoCoding;
-import org.esa.beam.framework.datamodel.GeoPos;
-import org.esa.beam.framework.datamodel.PixelPos;
-import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.*;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
@@ -64,11 +60,11 @@ public class WaterStatisticsOp extends Operator implements Output {
 
 
         final GeoCoding geoCoding = collocatedInput.getGeoCoding();
-        final Band ndwi_ind_mean = collocatedInput.getBand("ndwi_ind_mean_M");
-        final Band water_extent = collocatedInput.getBand("water_extent_S");
+        final Band ndwiIndMean = collocatedInput.getBand("ndwi_ind_mean_M");
+        final Band waterExtent = collocatedInput.getBand("water_extent_S");
         try {
-            ndwi_ind_mean.readRasterDataFully(ProgressMonitor.NULL);
-            water_extent.readRasterDataFully(ProgressMonitor.NULL);
+            ndwiIndMean.readRasterDataFully(ProgressMonitor.NULL);
+            waterExtent.readRasterDataFully(ProgressMonitor.NULL);
             GeoPos p0= new GeoPos();
             GeoPos p1 = new GeoPos();
             GeoPos p2 = new GeoPos();
@@ -78,11 +74,11 @@ public class WaterStatisticsOp extends Operator implements Output {
             double wetArea = 0.0;
             double invisibleArea = 0.0;
             double overallArea = 0.0;
-            for (int y=0; y<ndwi_ind_mean.getRasterHeight(); ++y) {
-                for (int x=0; x<ndwi_ind_mean.getRasterWidth(); ++x) {
-                    float ndwi_ind_value = ndwi_ind_mean.getSampleFloat(x, y);
-                    float water_extent_value = water_extent.getSampleFloat(x, y);
-                    if (water_extent_value != 1.0f) {
+            for (int y=0; y<ndwiIndMean.getRasterHeight(); ++y) {
+                for (int x=0; x<ndwiIndMean.getRasterWidth(); ++x) {
+                    float ndwiIndValue = ndwiIndMean.getSampleFloat(x, y);
+                    float waterExtentValue = waterExtent.getSampleFloat(x, y);
+                    if (waterExtentValue != 1.0f) {
                         continue;
                     }
                     geoCoding.getGeoPos(new PixelPos(x+0.5f, y+0.5f), p0);
@@ -95,11 +91,11 @@ public class WaterStatisticsOp extends Operator implements Output {
                     double p34 = Math.sqrt(sqr((p4.getLat() - p3.getLat()) * MathUtils.DTOR) + sqr(r2 * (p4.getLon() - p3.getLon()) * MathUtils.DTOR));
                     double a = p12 * p34 * sqr(RsMathUtils.MEAN_EARTH_RADIUS / 1000.0);
                     overallArea += a;
-                    if (Float.isNaN(ndwi_ind_value)) {
+                    if (Float.isNaN(ndwiIndValue)) {
                         invisibleArea += a;
-                    } else if (ndwi_ind_value > 0.0) {
+                    } else if (ndwiIndValue > 0.0) {
                         wetArea += a;
-                        if (ndwi_ind_value >= 1.0) {
+                        if (ndwiIndValue >= 1.0) {
                             waterArea += a;
                         }
                     }
