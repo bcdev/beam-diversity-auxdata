@@ -23,7 +23,7 @@ import java.util.TimeZone;
 /**
  * Computes water coverage statistics as WaterStatisticsOp, but for L2 input
  *
- * @author Martin Boettcher, Olaf Danne
+ * @author Martin Boettcher, Olaf Danne, Daniel Odermatt
  */
 @OperatorMetadata(alias = "WaterStatisticsL2Op",
                   version = "1.0",
@@ -39,7 +39,7 @@ public class WaterStatisticsL2Op extends Operator implements Output {
     }
 
 
-    @SourceProduct(alias = "source", description = "The source product with the ndwi_ind_mean band.")
+    @SourceProduct(alias = "source", description = "The source product with the water_in_basin band.")
     Product sourceProduct;
 
     @SourceProduct(alias = "mask", description = "The water mask with a water_extent band.")
@@ -61,32 +61,37 @@ public class WaterStatisticsL2Op extends Operator implements Output {
         Product collocatedInput = collocateOp.getTargetProduct();
 
         final GeoCoding geoCoding = collocatedInput.getGeoCoding();
-        final Band waterToaNdwi = collocatedInput.getBand("water_TOA-NDWI_M");
-        final Band cloudsSuspect = collocatedInput.getBand("clouds_suspect_M");
-        final Band sarMaximumWaterExtent = collocatedInput.getBand("SAR_maximum_water_extent_M");
-        final Band waterExtent = collocatedInput.getBand("water_extent_S");
+        final Band basinExtent = collocatedInput.getBand("basin_extent_M");
+        final Band waterInBasin = collocatedInput.getBand("water_in_basin_M");
+        final Band cloudsInBasin = collocatedInput.getBand("clouds_in_basin_M");
+        final Band cloudsExBasin = collocatedInput.getBand("clouds_ex_basin_M");
+        final Band cloudIndicator = collocatedInput.getBand("cloud_indicator_M");
         try {
-            waterToaNdwi.readRasterDataFully(ProgressMonitor.NULL);
-            waterExtent.readRasterDataFully(ProgressMonitor.NULL);
-            cloudsSuspect.readRasterDataFully(ProgressMonitor.NULL);
-            sarMaximumWaterExtent.readRasterDataFully(ProgressMonitor.NULL);
+            basinExtent.readRasterDataFully(ProgressMonitor.NULL);
+            waterInBasin.readRasterDataFully(ProgressMonitor.NULL);
+            cloudsInBasin.readRasterDataFully(ProgressMonitor.NULL);
+            cloudsExBasin.readRasterDataFully(ProgressMonitor.NULL);
+            cloudIndicator.readRasterDataFully(ProgressMonitor.NULL);
             GeoPos p0 = new GeoPos();
             GeoPos p1 = new GeoPos();
             GeoPos p2 = new GeoPos();
             GeoPos p3 = new GeoPos();
             GeoPos p4 = new GeoPos();
 
-            double waterToaNDWIArea = 0.0;
-            double waterExtentArea = 0.0;
-            double cloudsSuspectArea = 0.0;
-            double sarMaximumWaterExtentArea = 0.0;
+            double basinExtentArea = 0.0;
+            double waterInBasinArea = 0.0;
+            double cloudsInBasinArea = 0.0;
+            double cloudsExBasinArea = 0.0;
+            double fovTotalArea = 0.0;
+            double fovBasinArea = 0.0;
 
-            for (int y = 0; y < waterToaNdwi.getRasterHeight(); ++y) {
-                for (int x = 0; x < waterToaNdwi.getRasterWidth(); ++x) {
-                    float waterToaNdwiValue = waterToaNdwi.getSampleFloat(x, y);
-                    float waterExtentValue = waterExtent.getSampleFloat(x, y);
-                    float sarMaximumWaterExtentValue = sarMaximumWaterExtent.getSampleFloat(x, y);
-                    float cloudsSuspectValue = cloudsSuspect.getSampleFloat(x, y);
+            for (int y = 0; y < waterInBasin.getRasterHeight(); ++y) {
+                for (int x = 0; x < waterInBasin.getRasterWidth(); ++x) {
+                    float basinExtentValue = basinExtent.getSampleFloat(x, y);
+                    float waterInBasinValue = waterInBasin.getSampleFloat(x, y);
+                    float cloudsInBasinValue = cloudsInBasin.getSampleFloat(x, y);
+                    float cloudsExBasinValue = cloudsExBasin.getSampleFloat(x, y);
+                    float cloudIndicatorValue = cloudIndicator.getSampleFloat(x, y);
                     geoCoding.getGeoPos(new PixelPos(x + 0.5f, y + 0.5f), p0);
                     geoCoding.getGeoPos(new PixelPos(x + 0.0f, y + 0.5f), p1);
                     geoCoding.getGeoPos(new PixelPos(x + 1.0f, y + 0.5f), p2);
@@ -97,17 +102,23 @@ public class WaterStatisticsL2Op extends Operator implements Output {
                     double p34 = Math.sqrt(sqr((p4.getLat() - p3.getLat()) * MathUtils.DTOR) + sqr(r2 * (p4.getLon() - p3.getLon()) * MathUtils.DTOR));
                     double a = p12 * p34 * sqr(RsMathUtils.MEAN_EARTH_RADIUS / 1000.0);
 
-                    if (waterToaNdwiValue == 1) {
-                        waterToaNDWIArea += a;
+                    if (waterInBasinValue == 1) {
+                        waterInBasinArea += a;
                     }
-                    if (waterExtentValue == 1) {
-                        waterExtentArea += a;
+                    if (basinExtentValue == 1) {
+                        basinExtentArea += a;
                     }
-                    if (sarMaximumWaterExtentValue == 1) {
-                        sarMaximumWaterExtentArea += a;
+                    if (cloudIndicatorValue > 0.5 && basinExtentValue == 1) {
+                        fovBasinArea += a;
                     }
-                    if (cloudsSuspectValue == 1) {
-                        cloudsSuspectArea += a;
+                    if (cloudsInBasinValue == 1) {
+                        cloudsInBasinArea += a;
+                    }
+                    if (cloudsExBasinValue == 1) {
+                        cloudsExBasinArea += a;
+                    }
+                    if (cloudIndicatorValue > 0.5) {
+                        fovTotalArea += a;
                     }
                 }
             }
@@ -127,16 +138,20 @@ public class WaterStatisticsL2Op extends Operator implements Output {
 
             csvOutputStream.println("Region" + "\t" +
                                             "Start Date" + "\t" +
-                                            "Water_TOA_NDWI Area" + "\t" +
-                                            "Water_Extent Area" + "\t" +
-                                            "SAR_Maximum_Water_Extent Area" + "\t" +
-                                            "Clouds_Suspect Area");
+                                            "Total Basin Area" + "\t" +
+                                            "FOV Area "+ "\t" +
+                                            "Basin in FOV Area" + "\t" +
+                                            "Water Area" + "\t" +
+                                            "Clouds-in-basin Area" + "\t" +
+                                            "Clouds-ex-basin Area");
             csvOutputStream.println(regionName + "\t" +
                                             CCSDS_DATE_FORMAT.format(startDate) + "\t" +
-                                            waterToaNDWIArea + "\t" +
-                                            waterExtentArea + "\t" +
-                                            sarMaximumWaterExtentArea + "\t" +
-                                            cloudsSuspectArea);
+                                            basinExtentArea + "\t" +
+                                            fovTotalArea + "\t" +
+                                            fovBasinArea + "\t" +
+                                            waterInBasinArea + "\t" +
+                                            cloudsInBasinArea + "\t" +
+                                            cloudsExBasinArea);
             csvOutputStream.close();
         } catch (Exception ex) {
             ex.printStackTrace();
