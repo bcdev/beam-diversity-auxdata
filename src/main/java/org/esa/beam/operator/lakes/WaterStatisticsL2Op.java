@@ -27,8 +27,8 @@ import java.util.TimeZone;
  */
 @OperatorMetadata(alias = "WaterStatisticsL2Op",
                   version = "1.0",
-                  authors = "Martin Boettcher",
-                  copyright = "(c) 2013 by Brockmann Consult GmbH",
+                  authors = "Martin Boettcher, Olaf Danne, Daniel Odermatt",
+                  copyright = "(c) 2013, 2014 by Brockmann Consult GmbH",
                   description = "Computes water coverage statistics as WaterStatisticsOp, but for L2 input")
 public class WaterStatisticsL2Op extends Operator implements Output {
 
@@ -54,6 +54,8 @@ public class WaterStatisticsL2Op extends Operator implements Output {
 
     @Override
     public void initialize() throws OperatorException {
+        validateSourceProduct();
+
         setDummyTargetProduct();
         final CollocateOp collocateOp = new CollocateOp();
         collocateOp.setMasterProduct(sourceProduct);
@@ -139,7 +141,7 @@ public class WaterStatisticsL2Op extends Operator implements Output {
             csvOutputStream.println("Region" + "\t" +
                                             "Start Date" + "\t" +
                                             "Total Basin Area" + "\t" +
-                                            "FOV Area "+ "\t" +
+                                            "FOV Area " + "\t" +
                                             "Basin in FOV Area" + "\t" +
                                             "Water Area" + "\t" +
                                             "Clouds-in-basin Area" + "\t" +
@@ -156,6 +158,29 @@ public class WaterStatisticsL2Op extends Operator implements Output {
         } catch (Exception ex) {
             ex.printStackTrace();
             throw new OperatorException("water statistics operator failed", ex);
+        }
+    }
+
+    private void validateSourceProduct() {
+        if (sourceProduct.getGeoCoding() == null) {
+            throw new OperatorException
+                    ("Source product '" + sourceProduct.getName() + "' has no geocoding - cannot continue.");
+        }
+
+        if (sourceProduct.getBand("basin_extent") == null ||
+                sourceProduct.getBand("water_in_basin") == null ||
+                sourceProduct.getBand("clouds_in_basin") == null ||
+                sourceProduct.getBand("clouds_ex_basin") == null ||
+                sourceProduct.getBand("cloud_indicator") == null) {
+
+            throw new OperatorException("One or more mandatory input bands missing in source product '" +
+                                                sourceProduct.getFileLocation() + "'. \n" +
+                                                "Required bands: \n" +
+                                                "    'basin_extent'\n" +
+                                                "    'water_in_basin'\n" +
+                                                "    'clouds_in_basin'\n" +
+                                                "    'clouds_ex_basin'\n" +
+                                                "    'cloud_indicator'.");
         }
     }
 
