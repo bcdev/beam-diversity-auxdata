@@ -65,6 +65,11 @@ public class MasterOp extends Operator {
     @Parameter(description = "The tile to process in 'Globveg' mode (to be given as 'hYYvXX')")
     private String globvegTile;
 
+    @Parameter(valueSet = {"MERGED", "COMBINED"},
+               defaultValue = "MERGED",
+               description = "The SM data type (MERGED = old dataset, COMBINED = dataset update, March 2014")
+    private String smDataType;
+
     @Override
     public void initialize() throws OperatorException {
         switch (category) {
@@ -335,6 +340,7 @@ public class MasterOp extends Operator {
             try {
                 smDailySourceProducts = AuxdataSourcesProvider.getSmDailySourceProducts(inputDataDir,
                         year,
+                        smDataType,
                         startdateString,
                         enddateString);
                 if (smDailySourceProducts != null && smDailySourceProducts.length > 0) {

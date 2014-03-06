@@ -72,12 +72,13 @@ public class AuxdataSourcesProvider {
         return aeSourceProductsList.toArray(new Product[aeSourceProductsList.size()]);
     }
 
-    public static Product[] getSmDailySourceProducts(File inputDataDir, String year, String startDateString, String endDateString) throws ParseException {
+    public static Product[] getSmDailySourceProducts(File inputDataDir, String year, final String smDataType,
+                                                     String startDateString, String endDateString) throws ParseException {
         final FileFilter smProductFilter = new FileFilter() {
             @Override
             public boolean accept(File file) {
                 return file.isFile() &&
-                        file.getName().startsWith("ESACCI-L3S_SOILMOISTURE-SSMV-MERGED-") &&
+                        file.getName().startsWith("ESACCI-L3S_SOILMOISTURE-SSMV-" + smDataType + "-") &&
                         file.getName().toLowerCase().endsWith(".nc");
             }
         };
@@ -93,7 +94,9 @@ public class AuxdataSourcesProvider {
         int productIndex = 0;
         for (File smSourceProductFile : smSourceProductFiles) {
             // e.g. ESACCI-L3S_SOILMOISTURE-SSMV-MERGED-20100105000000-fv00.1.nc
-            final String productDateString = smSourceProductFile.getName().substring(36, 44);   // 20100105
+//            final String productDateString = smSourceProductFile.getName().substring(36, 44);   // 20100105
+            final String productDateString =
+                    smSourceProductFile.getName().substring(30+smDataType.length(), 38+smDataType.length());   // 20100105
             try {
                 Date productDate = SoilMoistureOp.sdfSM.parse(productDateString);
                 if (DiversityAuxdataUtils.isDateWithinPeriod(startDate, endDate, productDate)) {
