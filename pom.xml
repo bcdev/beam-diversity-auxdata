@@ -7,6 +7,7 @@
     <version>1.0-SNAPSHOT</version>
     <modules>
         <module>diversity-mph-chl</module>
+        <module>diversity-auxdata</module>
     </modules>
     <name>Diversity Project</name>
 
