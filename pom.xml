@@ -3,8 +3,11 @@
     <modelVersion>4.0.0</modelVersion>
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-diversity-auxdata</artifactId>
-    <packaging>jar</packaging>
+    <packaging>pom</packaging>
     <version>1.0-SNAPSHOT</version>
+    <modules>
+        <module>diversity-mph-chl</module>
+    </modules>
     <name>Diversity Project</name>
 
     <pluginRepositories>
