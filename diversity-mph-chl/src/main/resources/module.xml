@@ -44,6 +44,7 @@
     <extension point="beam-ui:actions">
         <action>
             <id>Diversity.MPH.CHL</id>
+            <helpId>diversityMphChlOp</helpId>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
             <operatorName>Diversity.MPH.CHL</operatorName>
             <text>Diversity.MPH.CHL ...</text>
@@ -51,15 +52,14 @@
             <longDescr>Computes maximum peak height of chlorophyll</longDescr>
             <mnemonic/>
             <parent>tools</parent>
-            <helpId>diversityAuxdata</helpId>
             <targetProductNameSuffix>_MPH</targetProductNameSuffix>
         </action>
     </extension>
-    <!--<extension point="beam-ui:helpSets">-->
-        <!--<helpSet>-->
-            <!--<parent>beam-help</parent>-->
-            <!--<path>doc/help/diversity-auxdata.hs</path>-->
-        <!--</helpSet>-->
-    <!--</extension>-->
+    <extension point="beam-ui:helpSets">
+        <helpSet>
+            <parent>beam-help</parent>
+            <path>doc/help/mph_chl.hs</path>
+        </helpSet>
+    </extension>
 
 </module>

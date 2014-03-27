@@ -1,0 +1,74 @@
+<!--
+  ~ Copyright (C) 2014 Brockmann Consult GmbH (info@brockmann-consult.de)
+  ~
+  ~ This program is free software; you can redistribute it and/or modify it
+  ~ under the terms of the GNU General Public License as published by the Free
+  ~ Software Foundation; either version 3 of the License, or (at your option)
+  ~ any later version.
+  ~ This program is distributed in the hope that it will be useful, but WITHOUT
+  ~ ANY WARRANTY; without even the implied warranty of MERCHANTABILITY or
+  ~ FITNESS FOR A PARTICULAR PURPOSE. See the GNU General Public License for
+  ~ more details.
+  ~
+  ~ You should have received a copy of the GNU General Public License along
+  ~ with this program; if not, see http://www.gnu.org/licenses/
+  -->
+
+<html>
+<head>
+    <title>BEAM Data Processors - Diversity Mph/Chl Processor</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=iso-8859-1">
+    <link rel="stylesheet" href="../style.css">
+</head>
+<body>
+<table class="header">
+    <tr class="header">
+        <td class="header">&nbsp;
+            Diversity Mph/Chl Processor - Algorithm Specification
+        </td>
+    </tr>
+</table>
+
+<p>
+    The Maximum Peak Height (MPH) algorithm exploits bottom-of-Rayleight reflectance peaks in certain spectral bands
+    above
+    a baseline, which passes through two other spectral bands (Matthews et al., 2012). This baseline technique is
+    basically the same used in the Fluorescence Line Height (FLH) and Maximum Chlorophyll Index (MCI) algorithms (Gower
+    et al., 1999).
+</p>
+
+<p>
+    Different reflectance peak positions occur mostly as a consequence of pigment concentration levels, and these peaks?
+    heights depend on specific optical drivers (Figure 1).
+</p>
+
+<p align="center"><img src="images/reflectance_peaks.png"></p>
+
+<p>
+    For the most common water types, MPH selects a suitable baseline
+    using a sequence of predefined conditions and thresholds (Figure 2).
+</p>
+
+<p align="center"><img src="images/algorithm_workflow.png"></p>
+
+<h2>References</h2>
+
+<p><b>Gower, J.F.R., R. Doerffer, and G.A. Borstad</b>: Interpretation of the 685 nm peak in water-leaving radiance
+    spectra in
+    terms of fluorescence, absorption and scattering, and its observation by MERIS, Int. J. Remote Sensing, 9,
+    1771-1786, 1999.
+</p>
+
+
+<p><b>Matthews, M. W., S. Bernard and L. Robertson</b>: An Algorithm for Detecting Trophic Status (chlorophyll-A),
+    Cyanobacterial-Dominance, Surface Scums and Floating Vegetation in Inland and Coastal Waters, Remote Sensing of
+    Environment 124 (0): 637?52, 2012.
+</p>
+
+
+<p>
+    <b>Matthews, M. W. and D. Odermatt</b>: Improved maximum peak height algorithm for the BEAM toolbox, Remote Sensing
+    Letters: In
+    preparation.
+</p>
+</body>
