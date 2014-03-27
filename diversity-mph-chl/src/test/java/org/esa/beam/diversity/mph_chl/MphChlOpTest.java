@@ -295,14 +295,13 @@ public class MphChlOpTest {
         assertTrue(MphChlOp.isCyano(-1.0, 0.5, 1.0));
 
         assertFalse(MphChlOp.isCyano(-1.0, 1.0, 0.0));
-        assertFalse(MphChlOp.isCyano(-1.0, 1.0, 0.00009));
-        assertTrue(MphChlOp.isCyano(-1.0, 1.0, 0.0011));
+        assertFalse(MphChlOp.isCyano(-1.0, 1.0, 0.0019));
+        assertTrue(MphChlOp.isCyano(-1.0, 1.0, 0.0021));
     }
 
     @Test
     public void testIsCyano_twoArgs() {
          assertFalse(MphChlOp.isCyano(1.0, -1.0));
-
          assertFalse(MphChlOp.isCyano(-0.1, -1.0));
          assertFalse(MphChlOp.isCyano(1.0, 0.1));
          assertTrue(MphChlOp.isCyano(-0.1, 0.1));

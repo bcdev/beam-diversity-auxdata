@@ -56,94 +56,113 @@ public class MphChlOp extends PixelOperator {
             description = "Switch to true to write 'mph' band.")
     boolean exportMph;
 
-    private VirtualBandOpImage invalidOpImage;
+    // package access for testing only tb 2014-03-27
+    VirtualBandOpImage invalidOpImage;
 
     @Override
     protected void computePixel(int x, int y, Sample[] sourceSamples, WritableSample[] targetSamples) {
-        if (isSampleValid(x, y)) {
-            final double r_6 = sourceSamples[REFL_6_IDX].getDouble();
-            final double r_7 = sourceSamples[REFL_7_IDX].getDouble();
-            final double r_8 = sourceSamples[REFL_8_IDX].getDouble();
-            final double r_9 = sourceSamples[REFL_9_IDX].getDouble();
-            final double r_10 = sourceSamples[REFL_10_IDX].getDouble();
-            final double r_14 = sourceSamples[REFL_14_IDX].getDouble();
+        if (!isSampleValid(x, y)) {
+            setToInvalid(targetSamples, exportMph);
+            return;
+        }
 
-            boolean useTwoArgsCyanoCheck = false;
+        final double r_6 = sourceSamples[REFL_6_IDX].getDouble();
+        final double r_7 = sourceSamples[REFL_7_IDX].getDouble();
+        final double r_8 = sourceSamples[REFL_8_IDX].getDouble();
+        final double r_9 = sourceSamples[REFL_9_IDX].getDouble();
+        final double r_10 = sourceSamples[REFL_10_IDX].getDouble();
+        final double r_14 = sourceSamples[REFL_14_IDX].getDouble();
 
-            double maxBrr = r_8;
-            double maxLambda = MERIS_WAVELENGTHS[8];
-            if (r_9 > maxBrr) {
-                maxBrr = r_9;
-                maxLambda = MERIS_WAVELENGTHS[9];
-            }
-            double mph = computeMph(maxBrr, r_7, r_14, maxLambda, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
+        double maxBrr_0 = r_8;
+        double maxLambda_0 = MERIS_WAVELENGTHS[8];
+        if (r_9 > maxBrr_0) {
+            maxBrr_0 = r_9;
+            maxLambda_0 = MERIS_WAVELENGTHS[9];
+        }
 
-            if (r_10 > maxBrr) {
-                maxBrr = r_10;
-                maxLambda = MERIS_WAVELENGTHS[10];
-            }
+        double maxBrr_1 = maxBrr_0;
+        double maxLambda_1 = maxLambda_0;
+        if (r_10 > maxBrr_1) {
+            maxBrr_1 = r_10;
+            maxLambda_1 = MERIS_WAVELENGTHS[10];
+        }
 
-            boolean floating_flag = false;
-            boolean adj_flag = false;
-            if (maxLambda == MERIS_WAVELENGTHS[10]) {
-                adj_flag = true;
-            }
+        final double ndvi = (r_14 - r_7) / (r_14 + r_7);
+        final double SIPF_peak = r_7 - r_6 - ((r_8 - r_6) * RATIO_P);
+        final double SICF_peak = r_8 - r_7 - ((r_9 - r_7) * RATIO_C);
+        final double BAIR_peak = r_9 - r_7 - ((r_14 - r_7) * RATIO_B);
 
-            if (mph > 0.02) {
-                mph = computeMph(maxBrr, r_7, r_14, maxLambda, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
-                adj_flag = false;
-                if (maxLambda == MERIS_WAVELENGTHS[10]) {
-                    floating_flag = true;
-                    useTwoArgsCyanoCheck = true;
-                }
-            }
+        double mph_0 = computeMph(maxBrr_0, r_7, r_14, maxLambda_0, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
+        double mph_1 = computeMph(maxBrr_1, r_7, r_14, maxLambda_1, MERIS_WAVELENGTHS[7], MERIS_WAVELENGTHS[14]);
 
-            final double SIPF_peak = r_7 - r_6 - ((r_8 - r_6) * RATIO_P);
-            final double SICF_peak = r_8 - r_7 - ((r_9 - r_7) * RATIO_C);
+        boolean floating_flag = false;
+        boolean adj_flag = false;
+        boolean cyano_flag = false;
 
-            boolean cyano_flag;
-            if (useTwoArgsCyanoCheck) {
-                cyano_flag = isCyano(SICF_peak, SIPF_peak);
+        int immersed_eucaryotes = 0;
+        int immersed_cyano = 0;
+        int floating_cyano = 0;
+        int floating_vegetation = 0;
+
+        boolean calculatePolynomial = false;
+        boolean calculateExponential = false;
+
+        if (maxLambda_1 != MERIS_WAVELENGTHS[10]) {
+            if (isCyano(SICF_peak, SIPF_peak, BAIR_peak)) {
+                cyano_flag = true;
+                calculateExponential = true;
             } else {
-                final double BAIR_peak = r_9 - r_7 - ((r_14 - r_7) * RATIO_B);
-                cyano_flag = isCyano(SICF_peak, SIPF_peak, BAIR_peak);
-            }
-
-            int immersed_eucaryotes = 0;
-            int immersed_cyano = 0;
-            int floating_cyano = 0;
-            int floating_vegetation = 0;
-            double chl = Double.NaN;
-            if (!floating_flag && !cyano_flag) {
-                chl = computeChlPolynomial(mph);
                 immersed_eucaryotes = 1;
-            } else if (floating_flag && !adj_flag && !cyano_flag) {
-                setToInvalid(targetSamples, exportMph);
-                floating_vegetation = 1;
-            } else if (!adj_flag && cyano_flag) {
-                chl = computeChlExponential(mph);
-                if (floating_flag || chl > chlThreshForFloatFlag) {
-                    floating_cyano = 1;
-                } else if (!floating_flag && chl < chlThreshForFloatFlag) {
-                    immersed_cyano = 1;
-                }
-            }
-
-            if (chl > cyanoMaxValue) {
-                chl = cyanoMaxValue;
-            }
-
-            targetSamples[0].set(chl);
-            targetSamples[1].set(encodeFlags(cyano_flag, floating_flag, adj_flag));
-            targetSamples[2].set(immersed_eucaryotes);
-            targetSamples[3].set(immersed_cyano);
-            targetSamples[4].set(floating_cyano);
-            targetSamples[5].set(floating_vegetation);
-            if (exportMph) {
-                targetSamples[6].set(mph);
+                calculatePolynomial = true;
             }
         } else {
-            setToInvalid(targetSamples, exportMph);
+            if (mph_1 >= 0.02 || ndvi >= 0.2) {
+                floating_flag = true;
+                adj_flag = false;
+                if (isCyano(SICF_peak, SIPF_peak)) {
+                    cyano_flag = true;
+                    calculateExponential = true;
+                } else {
+                    cyano_flag = false;
+                    floating_vegetation = 1;
+                }
+            }
+            if (mph_1 < 0.02 && ndvi < 0.2) {
+                floating_flag = false;
+                adj_flag = true;
+                cyano_flag = false;
+                immersed_eucaryotes = 1;
+                calculatePolynomial = true;
+            }
+        }
+
+        double mph_chl = Double.NaN;
+        if (calculatePolynomial) {
+            mph_chl = computeChlPolynomial(mph_0);
+        }
+
+        if (calculateExponential) {
+            mph_chl = computeChlExponential(mph_1);
+            if (mph_0 < chlThreshForFloatFlag) {
+                immersed_cyano = 1;
+            } else {
+                floating_flag = true;
+                floating_cyano = 1;
+            }
+        }
+
+        if (mph_chl > cyanoMaxValue) {
+            mph_chl = cyanoMaxValue;
+        }
+
+        targetSamples[0].set(mph_chl);
+        targetSamples[1].set(encodeFlags(cyano_flag, floating_flag, adj_flag));
+        targetSamples[2].set(immersed_eucaryotes);
+        targetSamples[3].set(immersed_cyano);
+        targetSamples[4].set(floating_cyano);
+        targetSamples[5].set(floating_vegetation);
+        if (exportMph) {
+            targetSamples[6].set(mph_0);
         }
     }
 
@@ -164,11 +183,9 @@ public class MphChlOp extends PixelOperator {
 
     // package access for testing only tb 2014-01-30
     static double computeChlExponential(double mph) {
-        double chl;
         final double exponent = 35.79 * mph;
-        chl = 22.44 * Math.exp(exponent);
 
-        return chl;
+        return 22.44 * Math.exp(exponent);
     }
 
     // package access for testing only tb 2014-01-30
@@ -182,7 +199,7 @@ public class MphChlOp extends PixelOperator {
 
     // package access for testing only tb 2013-01-30
     static boolean isCyano(double SICF_peak, double SIPF_peak, double BAIR_peak) {
-        return SICF_peak < 0.0 && SIPF_peak > 0.0 && BAIR_peak > 0.001;
+        return SICF_peak < 0.0 && SIPF_peak > 0.0 && BAIR_peak > 0.002;
     }
 
     // package access for testing only tb 2013-01-30
