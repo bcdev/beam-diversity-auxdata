@@ -31,11 +31,11 @@ public class MphChlOp extends PixelOperator {
     private static final int REFL_10_IDX = 4;
     private static final int REFL_14_IDX = 5;
 
-    private static final String CYANO_FLAG_NAME = "CYANO";
+    private static final String CYANO_FLAG_NAME = "mph_cyano";
     private static final String CYANO_FLAG_DESCRIPTION = "Cyanobacteria dominated waters";
-    private static final String FLOATING_FLAG_NAME = "FLOATING";
+    private static final String FLOATING_FLAG_NAME = "mph_floating";
     private static final String FLOATING_FLAG_DESCRIPTION = "Floating vegetation or cyanobacteria on water surface";
-    private static final String ADJACENCY_FLAG_NAME = "ADJACENCY";
+    private static final String ADJACENCY_FLAG_NAME = "mph_adjacency";
     private static final String ADJACENCY_FLAG_DESCRIPTION = "Pixel suspect of adjacency effects";
 
     @SourceProduct

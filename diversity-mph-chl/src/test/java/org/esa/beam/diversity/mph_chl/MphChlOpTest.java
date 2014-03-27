@@ -127,38 +127,38 @@ public class MphChlOpTest {
         FlagCoding bandFlagcoding = flagBand.getFlagCoding();
         assertSame(flagCoding, bandFlagcoding);
 
-        final MetadataAttribute cyanoFlag = flagCoding.getFlag("CYANO");
-        assertEquals("CYANO", cyanoFlag.getName());
+        final MetadataAttribute cyanoFlag = flagCoding.getFlag("mph_cyano");
+        assertEquals("mph_cyano", cyanoFlag.getName());
         assertEquals("Cyanobacteria dominated waters", cyanoFlag.getDescription());
         assertEquals(1, cyanoFlag.getData().getElemInt());
 
-        final MetadataAttribute floatingFlag = flagCoding.getFlag("FLOATING");
+        final MetadataAttribute floatingFlag = flagCoding.getFlag("mph_floating");
         assertNotNull(floatingFlag);
-        assertEquals("FLOATING", floatingFlag.getName());
+        assertEquals("mph_floating", floatingFlag.getName());
         assertEquals("Floating vegetation or cyanobacteria on water surface", floatingFlag.getDescription());
         assertEquals(2, floatingFlag.getData().getElemInt());
 
-        final MetadataAttribute adjacencyFlag = flagCoding.getFlag("ADJACENCY");
+        final MetadataAttribute adjacencyFlag = flagCoding.getFlag("mph_adjacency");
         assertNotNull(adjacencyFlag);
-        assertEquals("ADJACENCY", adjacencyFlag.getName());
+        assertEquals("mph_adjacency", adjacencyFlag.getName());
         assertEquals("Pixel suspect of adjacency effects", adjacencyFlag.getDescription());
         assertEquals(4, adjacencyFlag.getData().getElemInt());
 
         final ProductNodeGroup<Mask> maskGroup = targetProduct.getMaskGroup();
         assertNotNull(maskGroup);
-        final Mask cyanoMask = maskGroup.get("CYANO");
+        final Mask cyanoMask = maskGroup.get("mph_cyano");
         assertNotNull(cyanoMask);
         assertEquals("Cyanobacteria dominated waters", cyanoMask.getDescription());
         assertEquals(Color.cyan, cyanoMask.getImageColor());
         assertEquals(0.5f, cyanoMask.getImageTransparency(), 1e-8);
 
-        final Mask floatingMask = maskGroup.get("FLOATING");
+        final Mask floatingMask = maskGroup.get("mph_floating");
         assertNotNull(floatingMask);
         assertEquals("Floating vegetation or cyanobacteria on water surface", floatingMask.getDescription());
         assertEquals(Color.green, floatingMask.getImageColor());
         assertEquals(0.5f, floatingMask.getImageTransparency(), 1e-8);
 
-        final Mask adjacencyMask = maskGroup.get("ADJACENCY");
+        final Mask adjacencyMask = maskGroup.get("mph_adjacency");
         assertNotNull(adjacencyMask);
         assertEquals("Pixel suspect of adjacency effects", adjacencyMask.getDescription());
         assertEquals(Color.red, adjacencyMask.getImageColor());
