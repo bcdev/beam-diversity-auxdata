@@ -1,13 +1,13 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
-    <symbolicName>beam-diversity-auxdata</symbolicName>
+    <symbolicName>beam-diversity-mph_chl</symbolicName>
     <version>1.0</version>
-    <name>Diversity Auxdata</name>
+    <name>Diversity Mph-CHl Processor</name>
 
     <description>
         <![CDATA[
             <p>todo</p>
-            <p>Software: O.Danne of Brockmann Consult</p>
+            <p>Software: Tom Block of Brockmann Consult</p>
     ]]>
     </description>
 
@@ -29,12 +29,6 @@
         <module>beam-gpf</module>
     </dependency>
     <dependency>
-        <module>beam-netcdf</module>
-    </dependency>
-    <dependency>
-        <module>beam-modis-reader</module>
-    </dependency>
-    <dependency>
         <module>beam-visat-rcp</module>
         <optional>true</optional>
     </dependency>
@@ -43,17 +37,17 @@
 
     <extension point="beam-ui:actions">
         <action>
-            <id>correctAtmosphereModis</id>
-            <class>org.esa.beam.ui.DiversityAuxdataAction</class>
-            <text>Diversity Auxdata...</text>
-            <shortDescr>Prepares various Diversity drylands auxdata sets</shortDescr>
-            <longDescr>Prepares various Diversity drylands auxdata sets</longDescr>
+            <id>Diversity.MPH.CHL</id>
+            <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
+            <operatorName>Diversity.MPH.CHL</operatorName>
+            <text>Diversity.MPH.CHL ...</text>
+            <shortDescr>Computes maximum peak height of chlorophyll</shortDescr>
+            <longDescr>Computes maximum peak height of chlorophyll</longDescr>
             <mnemonic/>
             <parent>tools</parent>
             <helpId>diversityAuxdata</helpId>
         </action>
     </extension>
-
     <!--<extension point="beam-ui:helpSets">-->
         <!--<helpSet>-->
             <!--<parent>beam-help</parent>-->
