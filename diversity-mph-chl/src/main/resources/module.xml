@@ -52,6 +52,7 @@
             <mnemonic/>
             <parent>tools</parent>
             <helpId>diversityAuxdata</helpId>
+            <targetProductNameSuffix>_MPH</targetProductNameSuffix>
         </action>
     </extension>
     <!--<extension point="beam-ui:helpSets">-->
