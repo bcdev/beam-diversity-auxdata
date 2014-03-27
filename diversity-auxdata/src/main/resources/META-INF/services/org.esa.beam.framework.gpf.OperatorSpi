@@ -11,4 +11,3 @@ org.esa.beam.operator.CmapOp$Spi
 org.esa.beam.operator.globveg.GlobvegOp$Spi
 org.esa.beam.operator.lakes.WaterStatisticsOp$Spi
 org.esa.beam.operator.lakes.WaterStatisticsL2Op$Spi
-org.esa.beam.operator.mph_chl.MphChlOp$Spi

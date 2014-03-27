@@ -1,4 +1,4 @@
-package org.esa.beam.operator.mph_chl;
+package org.esa.beam.diversity.mph_chl;
 
 import org.esa.beam.framework.datamodel.RasterDataNode;
 import org.esa.beam.framework.gpf.pointop.WritableSample;

@@ -1,4 +1,4 @@
-package org.esa.beam.operator.mph_chl;
+package org.esa.beam.diversity.mph_chl;
 
 
 import org.esa.beam.framework.datamodel.*;
@@ -310,26 +310,26 @@ public class MphChlOpTest {
 
     @Test
     public void testComputeChlPolynomial() {
-        assertEquals(353732.6926, MphChlOp.computeChlPolynomial(0.1), 1e-8);
-        assertEquals(8.2646992, MphChlOp.computeChlPolynomial(0.001), 1e-8);
-        assertEquals(1.9726, MphChlOp.computeChlPolynomial(0.0), 1e-8);
+        Assert.assertEquals(353732.6926, MphChlOp.computeChlPolynomial(0.1), 1e-8);
+        Assert.assertEquals(8.2646992, MphChlOp.computeChlPolynomial(0.001), 1e-8);
+        Assert.assertEquals(1.9726, MphChlOp.computeChlPolynomial(0.0), 1e-8);
     }
 
     @Test
     public void testComputeChlExponential() {
-        assertEquals(22.5204566512951240, MphChlOp.computeChlExponential(0.0001), 1e-8);
-        assertEquals(23.25767257114881, MphChlOp.computeChlExponential(0.001), 1e-8);
-        assertEquals(22.44, MphChlOp.computeChlExponential(0.0), 1e-8);
+        Assert.assertEquals(22.5204566512951240, MphChlOp.computeChlExponential(0.0001), 1e-8);
+        Assert.assertEquals(23.25767257114881, MphChlOp.computeChlExponential(0.001), 1e-8);
+        Assert.assertEquals(22.44, MphChlOp.computeChlExponential(0.0), 1e-8);
     }
 
     @Test
     public void testEncodeFlags() {
-        assertEquals(0, MphChlOp.encodeFlags(false, false, false));
-        assertEquals(1, MphChlOp.encodeFlags(true, false, false));
-        assertEquals(2, MphChlOp.encodeFlags(false, true, false));
-        assertEquals(4, MphChlOp.encodeFlags(false, false, true));
-        assertEquals(3, MphChlOp.encodeFlags(true, true, false));
-        assertEquals(5, MphChlOp.encodeFlags(true, false, true));
+        Assert.assertEquals(0, MphChlOp.encodeFlags(false, false, false));
+        Assert.assertEquals(1, MphChlOp.encodeFlags(true, false, false));
+        Assert.assertEquals(2, MphChlOp.encodeFlags(false, true, false));
+        Assert.assertEquals(4, MphChlOp.encodeFlags(false, false, true));
+        Assert.assertEquals(3, MphChlOp.encodeFlags(true, true, false));
+        Assert.assertEquals(5, MphChlOp.encodeFlags(true, false, true));
     }
 
     @Test
