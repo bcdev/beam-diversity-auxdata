@@ -10,6 +10,7 @@ import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.pointop.*;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
+import org.esa.beam.util.ProductUtils;
 
 import java.awt.*;
 
@@ -280,6 +281,8 @@ public class MphChlOp extends PixelOperator {
         maskGroup.add(mask(CYANO_FLAG_NAME, CYANO_FLAG_DESCRIPTION, "mph_chl_flags.CYANO", Color.cyan, 0.5f, targetProduct));
         maskGroup.add(mask(FLOATING_FLAG_NAME, FLOATING_FLAG_DESCRIPTION, "mph_chl_flags.FLOATING", Color.green, 0.5f, targetProduct));
         maskGroup.add(mask(ADJACENCY_FLAG_NAME, ADJACENCY_FLAG_DESCRIPTION, "mph_chl_flags.ADJACENCY", Color.red, 0.5f, targetProduct));
+
+        ProductUtils.copyFlagBands(productConfigurer.getSourceProduct(), productConfigurer.getTargetProduct(), true);
     }
 
     @Override

@@ -9,16 +9,18 @@ import org.esa.beam.framework.gpf.pointop.ProductConfigurer;
 public class TestProductConfigurer implements ProductConfigurer {
 
     private Product targetProduct;
+    private Product sourceProduct;
     private boolean isCopyGeoCodingCalled;
 
     public TestProductConfigurer() {
         targetProduct = new Product("ZAPP", "schnuffi", 2, 2);
+        sourceProduct = new Product("SOURCE", "hoppla", 2, 2);
         isCopyGeoCodingCalled = false;
     }
 
     @Override
     public Product getSourceProduct() {
-        return null;  //To change body of implemented methods use File | Settings | File Templates.
+        return sourceProduct;
     }
 
     @Override

@@ -101,6 +101,13 @@ public class MphChlOpAcceptanceTest {
 
             final Band mphBand = savedProduct.getBand("mph");
             assertNull(mphBand);
+
+            final Band l1_flagband = savedProduct.getBand("l1_flags");
+            assertNotNull(l1_flagband);
+            assertEquals(2, l1_flagband.getSampleInt(0, 0));
+            assertEquals(0, l1_flagband.getSampleInt(1, 0));
+            assertEquals(0, l1_flagband.getSampleInt(0, 1));
+            assertEquals(16, l1_flagband.getSampleInt(1, 1));
         } finally {
             if (savedProduct != null) {
                 savedProduct.dispose();
