@@ -33,7 +33,7 @@ import org.esa.beam.util.ProductUtils;
 
 import java.awt.*;
 
-@OperatorMetadata(alias = "Diversity.MPH.CHL",
+@OperatorMetadata(alias = "Diversity.MPH.CHL.Pixel",
         version = "1.3",
         authors = "Tom Block",
         copyright = "(c) 2013, 2014 by Brockmann Consult",

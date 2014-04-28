@@ -29,7 +29,7 @@ public class MphChlOpTest {
     public void testOperatorMetadata() {
         final OperatorMetadata operatorMetadata = MphChlOp.class.getAnnotation(OperatorMetadata.class);
         assertNotNull(operatorMetadata);
-        assertEquals("Diversity.MPH.CHL", operatorMetadata.alias());
+        assertEquals("Diversity.MPH.CHL.Pixel", operatorMetadata.alias());
         assertEquals("1.3", operatorMetadata.version());
         assertEquals("Tom Block", operatorMetadata.authors());
         assertEquals("(c) 2013, 2014 by Brockmann Consult", operatorMetadata.copyright());
