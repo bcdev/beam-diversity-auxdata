@@ -103,7 +103,9 @@ public class MphChlMasterOp extends Operator {
                     filteredProduct.getBand(b.getName()).setSourceImage(filteredImage);
                 } else {
                     // just copy bands
-                    ProductUtils.copyBand(b.getName(), mphChlProduct, filteredProduct, true);
+                    if (!filteredProduct.containsBand(b.getName())) {
+                        ProductUtils.copyBand(b.getName(), mphChlProduct, filteredProduct, true);
+                    }
                 }
             }
         }
