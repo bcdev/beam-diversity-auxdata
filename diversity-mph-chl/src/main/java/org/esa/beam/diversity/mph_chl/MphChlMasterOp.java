@@ -21,13 +21,14 @@ import java.util.HashMap;
 import java.util.Map;
 
 /**
- * Wrapper for MPH CHL pixel operator, i.e. allows for low-pass filtering
+ * Wrapper for MPH CHL pixel operator.
+ * Allows for post-processing of whole image (currently: JAI low-pass filtering).
  * todo: add tests!!
  *
  * @author olafd
  */
 @OperatorMetadata(alias = "Diversity.MPH.CHL",
-                  version = "1.3",
+                  version = "1.3.1",
                   authors = "Olaf Danne",
                   copyright = "(c) 2013, 2014 by Brockmann Consult",
                   description = "Wrapper for MPH CHL pixel operator")
