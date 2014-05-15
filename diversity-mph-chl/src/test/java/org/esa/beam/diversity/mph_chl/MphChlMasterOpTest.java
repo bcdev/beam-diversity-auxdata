@@ -107,10 +107,10 @@ public class MphChlMasterOpTest {
     public void testComputeMphChlProduct() throws IOException {
         final Product brrProduct = MerisBrrProduct.create();
 
-        final Product mphChlPixelProduct = GPF.createProduct("Diversity.MPH.CHL.Pixel", GPF.NO_PARAMS, brrProduct);
+        final Product mphChlPixelProduct = GPF.createProduct("Diversity.MPH.CHL", GPF.NO_PARAMS, brrProduct);
         assertNotNull(mphChlPixelProduct);
 
-        HashMap<String, Object> mphChlParams = new HashMap<String, Object>();
+        HashMap<String, Object> mphChlParams = new HashMap<>();
         mphChlParams.put("applyLowPassFilter", false);
         final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL", mphChlParams, brrProduct);
         assertNotNull(mphChlProduct);

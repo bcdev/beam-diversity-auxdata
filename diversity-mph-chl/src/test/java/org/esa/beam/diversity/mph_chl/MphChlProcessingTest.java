@@ -20,6 +20,7 @@ public class MphChlProcessingTest {
     @Before
     public void setUp() {
         mphChlOp = new MphChlOp();
+        mphChlOp.setParameterDefaultValues();
 
         // make sure that every pixel is always valid in this test
         final VirtualBandOpImage virtualBandOpImage = mock(VirtualBandOpImage.class);

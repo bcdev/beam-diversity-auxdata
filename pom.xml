@@ -4,7 +4,7 @@
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-diversity</artifactId>
     <packaging>pom</packaging>
-    <version>1.0</version>
+    <version>1.1-SNAPSHOT</version>
     <modules>
         <module>diversity-mph-chl</module>
         <module>diversity-auxdata</module>
@@ -66,8 +66,8 @@
            -->
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
 
-        <beam.version>4.11</beam.version>
-        <ceres.version>0.13.2</ceres.version>
+        <beam.version>5.0</beam.version>
+        <ceres.version>0.14</ceres.version>
     </properties>
     <dependencies>
 
@@ -113,28 +113,28 @@
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
-            <artifactId>beam-binning2</artifactId>
-            <version>0.8.4-SNAPSHOT</version>
+            <artifactId>beam-binning</artifactId>
+            <version>${beam.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-modis-reader</artifactId>
-            <version>1.3</version>
+            <version>${beam.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-netcdf</artifactId>
-            <version>1.1.2-SNAPSHOT</version>
+            <version>${beam.version}</version>
         </dependency>
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-collocation</artifactId>
-            <version>1.4.1</version>
+            <version>${beam.version}</version>
         </dependency>
         <dependency>
             <groupId>junit</groupId>
             <artifactId>junit</artifactId>
-            <version>4.8.1</version>
+            <version>4.11</version>
             <scope>test</scope>
         </dependency>
     </dependencies>
@@ -144,8 +144,8 @@
             <plugin>
                 <artifactId>maven-compiler-plugin</artifactId>
                 <configuration>
-                    <source>1.6</source>
-                    <target>1.6</target>
+                    <source>1.7</source>
+                    <target>1.7</target>
                     <debug>true</debug>
                     <fork>true</fork>
                     <encoding>ISO-8859-1</encoding>

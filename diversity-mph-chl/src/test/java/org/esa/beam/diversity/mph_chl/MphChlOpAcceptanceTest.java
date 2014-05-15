@@ -47,7 +47,7 @@ public class MphChlOpAcceptanceTest {
     public void testComputeMphChlProduct() throws IOException {
         final Product brrProduct = MerisBrrProduct.create();
 
-        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL.Pixel", GPF.NO_PARAMS, brrProduct);
+        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL", GPF.NO_PARAMS, brrProduct);
 
         Product savedProduct = null;
         try {
@@ -119,7 +119,7 @@ public class MphChlOpAcceptanceTest {
     public void testComputeMphChlProduct_withMph() throws IOException {
         final Product brrProduct = MerisBrrProduct.create();
 
-        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL.Pixel", createParameter(), brrProduct);
+        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL", createParameter(), brrProduct);
         Product savedProduct = null;
         try {
             final String targetProductPath = testOutDirectory.getAbsolutePath() + File.separator + "Diversity_MPHCHL.dim";
@@ -142,7 +142,7 @@ public class MphChlOpAcceptanceTest {
     }
 
     private Map<String, Object> createParameter() {
-        final HashMap<String, Object> parameterMap = new HashMap<String, Object>();
+        final HashMap<String, Object> parameterMap = new HashMap<>();
         parameterMap.put("exportMph", Boolean.TRUE);
         return parameterMap;
     }
@@ -151,11 +151,11 @@ public class MphChlOpAcceptanceTest {
     public void testWithFaultyValidPixelExpression() {
         final Product brrProduct = MerisBrrProduct.create();
 
-        HashMap<String, Object> params = new HashMap<String, Object>();
+        HashMap<String, Object> params = new HashMap<>();
         params.put("validPixelExpression", "extremely INVALID");
 
         try {
-            GPF.createProduct("Diversity.MPH.CHL.Pixel", params, brrProduct);
+            GPF.createProduct("Diversity.MPH.CHL", params, brrProduct);
             fail("OperatorException expected");
         } catch (OperatorException expected) {
         }

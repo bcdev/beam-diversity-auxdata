@@ -16,15 +16,7 @@
 
 package org.esa.beam.diversity;
 
-import org.esa.beam.binning.AbstractAggregator;
-import org.esa.beam.binning.Aggregator;
-import org.esa.beam.binning.AggregatorConfig;
-import org.esa.beam.binning.AggregatorDescriptor;
-import org.esa.beam.binning.BinContext;
-import org.esa.beam.binning.Observation;
-import org.esa.beam.binning.VariableContext;
-import org.esa.beam.binning.Vector;
-import org.esa.beam.binning.WritableVector;
+import org.esa.beam.binning.*;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 
 import java.util.Arrays;
@@ -41,9 +33,9 @@ public class AggregatorMajorityClass extends AbstractAggregator {
 
     public AggregatorMajorityClass(VariableContext varCtx, String varName, int[] classes) {
         super(Descriptor.NAME,
-              getIntermediateFeatureNames(varName, classes),
-              getIntermediateFeatureNames(varName, classes),
-              getOutputFeatureNames(varName, classes));
+                getIntermediateFeatureNames(varName, classes),
+                getIntermediateFeatureNames(varName, classes),
+                getOutputFeatureNames(varName, classes));
         this.classes = classes;
 
         if (varCtx == null) {
@@ -151,11 +143,11 @@ public class AggregatorMajorityClass extends AbstractAggregator {
     @Override
     public String toString() {
         return "AggregatorMajorityClass{" +
-               "varIndex=" + varIndex +
-               ", spatialFeatureNames=" + Arrays.toString(getSpatialFeatureNames()) +
-               ", temporalFeatureNames=" + Arrays.toString(getTemporalFeatureNames()) +
-               ", outputFeatureNames=" + Arrays.toString(getOutputFeatureNames()) +
-               '}';
+                "varIndex=" + varIndex +
+                ", spatialFeatureNames=" + Arrays.toString(getSpatialFeatureNames()) +
+                ", temporalFeatureNames=" + Arrays.toString(getTemporalFeatureNames()) +
+                ", outputFeatureNames=" + Arrays.toString(getOutputFeatureNames()) +
+                '}';
     }
 
     public static class Config extends AggregatorConfig {
@@ -167,11 +159,6 @@ public class AggregatorMajorityClass extends AbstractAggregator {
 
         public Config() {
             super(Descriptor.NAME);
-        }
-
-        @Override
-        public String[] getVarNames() {
-            return new String[]{varName};
         }
     }
 
@@ -195,6 +182,16 @@ public class AggregatorMajorityClass extends AbstractAggregator {
             return new Config();
         }
 
-    }
+        @Override
+        public String[] getSourceVarNames(AggregatorConfig aggregatorConfig) {
+            Config config = (Config) aggregatorConfig;
+            return new String[]{config.varName};
+        }
 
+        @Override
+        public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
+            Config config = (Config) aggregatorConfig;
+            return getOutputFeatureNames(config.varName, config.classes);
+        }
+    }
 }
