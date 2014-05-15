@@ -47,7 +47,7 @@ public class MphChlOpAcceptanceTest {
     public void testComputeMphChlProduct() throws IOException {
         final Product brrProduct = MerisBrrProduct.create();
 
-        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL", GPF.NO_PARAMS, brrProduct);
+        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL.Pixel", GPF.NO_PARAMS, brrProduct);
 
         Product savedProduct = null;
         try {
@@ -119,7 +119,7 @@ public class MphChlOpAcceptanceTest {
     public void testComputeMphChlProduct_withMph() throws IOException {
         final Product brrProduct = MerisBrrProduct.create();
 
-        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL", createParameter(), brrProduct);
+        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL.Pixel", createParameter(), brrProduct);
         Product savedProduct = null;
         try {
             final String targetProductPath = testOutDirectory.getAbsolutePath() + File.separator + "Diversity_MPHCHL.dim";
@@ -155,7 +155,7 @@ public class MphChlOpAcceptanceTest {
         params.put("validPixelExpression", "extremely INVALID");
 
         try {
-            GPF.createProduct("Diversity.MPH.CHL", params, brrProduct);
+            GPF.createProduct("Diversity.MPH.CHL.Pixel", params, brrProduct);
             fail("OperatorException expected");
         } catch (OperatorException expected) {
         }
