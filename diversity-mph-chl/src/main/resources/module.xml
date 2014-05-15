@@ -51,7 +51,7 @@
             <shortDescr>Computes maximum peak height of chlorophyll</shortDescr>
             <longDescr>Computes maximum peak height of chlorophyll</longDescr>
             <mnemonic/>
-            <parent>tools</parent>
+            <parent>processing.thematicWater</parent>
             <targetProductNameSuffix>_MPH</targetProductNameSuffix>
         </action>
     </extension>
