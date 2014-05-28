@@ -9,7 +9,6 @@ import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
-import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.util.ProductUtils;
@@ -27,31 +26,31 @@ import java.util.Map;
  *
  * @author olafd
  */
-@OperatorMetadata(alias = "Diversity.MPH.CHL",
-                  version = "1.3.1",
-                  authors = "Olaf Danne",
-                  copyright = "(c) 2013, 2014 by Brockmann Consult",
-                  description = "Wrapper for MPH CHL pixel operator")
+//@OperatorMetadata(alias = "Diversity.MPH.CHL",
+//                  version = "1.3.1",
+//                  authors = "Olaf Danne",
+//                  copyright = "(c) 2013, 2014 by Brockmann Consult",
+//                  description = "Wrapper for MPH CHL pixel operator")
 public class MphChlMasterOp extends Operator {
 
     @Parameter(defaultValue = "not (l1_flags.LAND_OCEAN or l1_flags.INVALID)",
-               description = "Expression defining pixels considered for processing.")
+            description = "Expression defining pixels considered for processing.")
     private String validPixelExpression;
 
     @Parameter(defaultValue = "1000.0",
-               description = "Maximum chlorophyll, arithmetically higher values are capped.")
+            description = "Maximum chlorophyll, arithmetically higher values are capped.")
     private double cyanoMaxValue;
 
     @Parameter(defaultValue = "500.0",
-               description = "Chlorophyll threshold, above which all cyanobacteria dominated waters are 'float.")
+            description = "Chlorophyll threshold, above which all cyanobacteria dominated waters are 'float.")
     private double chlThreshForFloatFlag;
 
     @Parameter(defaultValue = "false",
-               description = "Switch to true to write 'mph' band.")
+            description = "Switch to true to write 'mph' band.")
     boolean exportMph;
 
     @Parameter(defaultValue = "true",
-               description = "Switch to true to apply a 3x3 low-pass filter on the result.")
+            description = "Switch to true to apply a 3x3 low-pass filter on the result.")
     boolean applyLowPassFilter;
 
     @SourceProduct
@@ -72,9 +71,9 @@ public class MphChlMasterOp extends Operator {
 
     private Product createFilteredProduct(Product mphChlProduct) {
         Product filteredProduct = new Product(mphChlProduct.getName(),
-                                              mphChlProduct.getProductType(),
-                                              mphChlProduct.getSceneRasterWidth(),
-                                              mphChlProduct.getSceneRasterHeight());
+                mphChlProduct.getProductType(),
+                mphChlProduct.getSceneRasterWidth(),
+                mphChlProduct.getSceneRasterHeight());
 
         ProductUtils.copyMetadata(mphChlProduct, filteredProduct);
         ProductUtils.copyGeoCoding(mphChlProduct, filteredProduct);
@@ -128,19 +127,19 @@ public class MphChlMasterOp extends Operator {
             scaledData[i] = (float) (data[i] * factor);
         }
         return new KernelJAI(lowPassKernel.getWidth(), lowPassKernel.getHeight(),
-                             lowPassKernel.getXOrigin(), lowPassKernel.getYOrigin(),
-                             scaledData);
+                lowPassKernel.getXOrigin(), lowPassKernel.getYOrigin(),
+                scaledData);
     }
 
     private Product createMphChlPixelProduct(HashMap<String, Object> mphChlParams) {
-        Map<String, Product> sourceProducts = new HashMap<String, Product>(1);
+        Map<String, Product> sourceProducts = new HashMap<>(1);
         sourceProducts.put("sourceProduct", sourceProduct);
         return GPF.createProduct("Diversity.MPH.CHL.Pixel", mphChlParams, sourceProducts);
     }
 
 
     private HashMap<String, Object> createMphChlParameterMap() {
-        HashMap<String, Object> mphChlParams = new HashMap<String, Object>();
+        HashMap<String, Object> mphChlParams = new HashMap<>();
         mphChlParams.put("validPixelExpression", validPixelExpression);
         mphChlParams.put("cyanoMaxValue", cyanoMaxValue);
         mphChlParams.put("chlThreshForFloatFlag", chlThreshForFloatFlag);

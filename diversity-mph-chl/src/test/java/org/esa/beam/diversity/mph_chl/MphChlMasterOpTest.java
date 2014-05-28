@@ -8,6 +8,7 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 
 import java.io.IOException;
@@ -34,6 +35,7 @@ public class MphChlMasterOpTest {
     }
 
     @Test
+    @Ignore // remove when activating the MaterOp again tb 2014-05-28
     public void testOperatorMetadata() {
         final OperatorMetadata operatorMetadata = MphChlMasterOp.class.getAnnotation(OperatorMetadata.class);
         assertNotNull(operatorMetadata);

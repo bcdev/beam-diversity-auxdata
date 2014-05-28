@@ -6,6 +6,7 @@ import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
+import org.esa.beam.framework.ui.BooleanExpressionConverter;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -43,6 +44,7 @@ public class MphChlOpTest {
 
         final SourceProduct productFieldAnnotation = productField.getAnnotation(SourceProduct.class);
         assertNotNull(productFieldAnnotation);
+        assertEquals("Name", productFieldAnnotation.alias());
     }
 
     @Test
@@ -53,6 +55,7 @@ public class MphChlOpTest {
         assertNotNull(annotation);
         assertEquals("not (l1_flags.LAND_OCEAN or l1_flags.INVALID)", annotation.defaultValue());
         assertEquals("Expression defining pixels considered for processing.", annotation.description());
+        assertEquals(BooleanExpressionConverter.class, annotation.converter());
     }
 
     @Test

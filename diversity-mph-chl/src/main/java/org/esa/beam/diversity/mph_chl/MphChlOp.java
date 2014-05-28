@@ -27,9 +27,11 @@ import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.framework.gpf.pointop.*;
+import org.esa.beam.framework.ui.BooleanExpressionConverter;
 import org.esa.beam.jai.ResolutionLevel;
 import org.esa.beam.jai.VirtualBandOpImage;
 import org.esa.beam.util.ProductUtils;
+import org.esa.beam.util.StringUtils;
 
 import java.awt.*;
 
@@ -58,10 +60,11 @@ public class MphChlOp extends PixelOperator {
     private static final String ADJACENCY_FLAG_NAME = "mph_adjacency";
     private static final String ADJACENCY_FLAG_DESCRIPTION = "Pixel suspect of adjacency effects";
 
-    @SourceProduct
+    @SourceProduct(alias = "Name")
     private Product sourceProduct;
     @Parameter(defaultValue = "not (l1_flags.LAND_OCEAN or l1_flags.INVALID)",
-            description = "Expression defining pixels considered for processing.")
+            description = "Expression defining pixels considered for processing.",
+            converter = BooleanExpressionConverter.class)
     private String validPixelExpression;
 
     @Parameter(defaultValue = "1000.0",
@@ -306,6 +309,9 @@ public class MphChlOp extends PixelOperator {
 
     @Override
     protected void prepareInputs() throws OperatorException {
+        if (StringUtils.isNullOrEmpty(validPixelExpression)) {
+            return;
+        }
         if (!sourceProduct.isCompatibleBandArithmeticExpression(validPixelExpression)) {
             final String message = String.format("The given expression '%s' is not compatible with the source product.", validPixelExpression);
             throw new OperatorException(message);
@@ -314,6 +320,9 @@ public class MphChlOp extends PixelOperator {
     }
 
     private boolean isSampleValid(int x, int y) {
+        if (invalidOpImage == null) {
+            return true;
+        }
         return invalidOpImage.getData(new Rectangle(x, y, 1, 1)).getSample(x, y, 0) != 0;
     }
 
