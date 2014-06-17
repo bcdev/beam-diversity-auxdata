@@ -71,7 +71,7 @@ public class MphChlOp extends PixelOperator {
             description = "Maximum chlorophyll, arithmetically higher values are capped.")
     private double cyanoMaxValue;
 
-    @Parameter(defaultValue = "500.0",
+    @Parameter(defaultValue = "350.0",
             description = "Chlorophyll threshold, above which all cyanobacteria dominated waters are 'float.")
     private double chlThreshForFloatFlag;
 
@@ -122,7 +122,6 @@ public class MphChlOp extends PixelOperator {
         boolean adj_flag = false;
         boolean cyano_flag = false;
 
-        int immersed_eucaryotes = 0;
         int immersed_cyano = 0;
         int floating_cyano = 0;
         int floating_vegetation = 0;
@@ -135,7 +134,6 @@ public class MphChlOp extends PixelOperator {
                 cyano_flag = true;
                 calculateExponential = true;
             } else {
-                immersed_eucaryotes = 1;
                 calculatePolynomial = true;
             }
         } else {
@@ -154,7 +152,6 @@ public class MphChlOp extends PixelOperator {
                 floating_flag = false;
                 adj_flag = true;
                 cyano_flag = false;
-                immersed_eucaryotes = 1;
                 calculatePolynomial = true;
             }
         }
@@ -180,12 +177,11 @@ public class MphChlOp extends PixelOperator {
 
         targetSamples[0].set(mph_chl);
         targetSamples[1].set(encodeFlags(cyano_flag, floating_flag, adj_flag));
-        targetSamples[2].set(immersed_eucaryotes);
-        targetSamples[3].set(immersed_cyano);
-        targetSamples[4].set(floating_cyano);
-        targetSamples[5].set(floating_vegetation);
+        targetSamples[2].set(immersed_cyano);
+        targetSamples[3].set(floating_cyano);
+        targetSamples[4].set(floating_vegetation);
         if (exportMph) {
-            targetSamples[6].set(mph_0);
+            targetSamples[5].set(mph_0);
         }
     }
 
@@ -234,12 +230,11 @@ public class MphChlOp extends PixelOperator {
     static void setToInvalid(WritableSample[] targetSamples, boolean exportMph) {
         targetSamples[0].set(Double.NaN);
         targetSamples[1].set(0.0);  // mph_chl_flag
-        targetSamples[2].set(0.0);  // immersed eucaryotes
-        targetSamples[3].set(0.0);  // immersed cyanobacteria
-        targetSamples[4].set(0.0);  // floating cyanobacteria
-        targetSamples[5].set(0.0);  // floating vegetation
+        targetSamples[2].set(0.0);  // immersed cyanobacteria
+        targetSamples[3].set(0.0);  // floating cyanobacteria
+        targetSamples[4].set(0.0);  // floating vegetation
         if (exportMph) {
-            targetSamples[6].set(Double.NaN);
+            targetSamples[5].set(Double.NaN);
         }
     }
 
@@ -262,12 +257,11 @@ public class MphChlOp extends PixelOperator {
     protected void configureTargetSamples(SampleConfigurer sampleConfigurer) throws OperatorException {
         sampleConfigurer.defineSample(0, "chl");
         sampleConfigurer.defineSample(1, "mph_chl_flags");
-        sampleConfigurer.defineSample(2, "immersed_eucaryotes");
-        sampleConfigurer.defineSample(3, "immersed_cyanobacteria");
-        sampleConfigurer.defineSample(4, "floating_cyanobacteria");
-        sampleConfigurer.defineSample(5, "floating_vegetation");
+        sampleConfigurer.defineSample(2, "immersed_cyanobacteria");
+        sampleConfigurer.defineSample(3, "floating_cyanobacteria");
+        sampleConfigurer.defineSample(4, "floating_vegetation");
         if (exportMph) {
-            sampleConfigurer.defineSample(6, "mph");
+            sampleConfigurer.defineSample(5, "mph");
         }
     }
 
@@ -277,7 +271,6 @@ public class MphChlOp extends PixelOperator {
         chlBand.setUnit("mg/m^3");
         chlBand.setGeophysicalNoDataValue(Double.NaN);
 
-        productConfigurer.addBand("immersed_eucaryotes", ProductData.TYPE_INT8);
         productConfigurer.addBand("immersed_cyanobacteria", ProductData.TYPE_INT8);
         productConfigurer.addBand("floating_cyanobacteria", ProductData.TYPE_INT8);
         productConfigurer.addBand("floating_vegetation", ProductData.TYPE_INT8);

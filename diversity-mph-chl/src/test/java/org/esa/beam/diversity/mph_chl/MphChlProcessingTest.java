@@ -41,10 +41,9 @@ public class MphChlProcessingTest {
 
         assertEquals(1.829924038664355, outputSamples[0].getDouble(), 1e-8);  // chl
         assertEquals(0, outputSamples[1].getInt());                           // flags
-        assertEquals(1, outputSamples[2].getInt());                           // immersed_eucaryotes
-        assertEquals(0, outputSamples[3].getInt());                           // immersed_cyano
-        assertEquals(0, outputSamples[4].getInt());                           // floating_cyano
-        assertEquals(0, outputSamples[5].getInt());                           // floating_vegetation
+        assertEquals(0, outputSamples[2].getInt());                           // immersed_cyano
+        assertEquals(0, outputSamples[3].getInt());                           // floating_cyano
+        assertEquals(0, outputSamples[4].getInt());                           // floating_vegetation
     }
 
     @Test
@@ -57,10 +56,9 @@ public class MphChlProcessingTest {
 
         assertEquals(8.382890811688007, outputSamples[0].getDouble(), 1e-8);  // chl
         assertEquals(0, outputSamples[1].getInt());                           // flags
-        assertEquals(1, outputSamples[2].getInt());                           // immersed_eucaryotes
-        assertEquals(0, outputSamples[3].getInt());                           // immersed_cyano
-        assertEquals(0, outputSamples[4].getInt());                           // floating_cyano
-        assertEquals(0, outputSamples[5].getInt());                           // floating_vegetation
+        assertEquals(0, outputSamples[2].getInt());                           // immersed_cyano
+        assertEquals(0, outputSamples[3].getInt());                           // floating_cyano
+        assertEquals(0, outputSamples[4].getInt());                           // floating_vegetation
     }
 
     @Test
@@ -73,10 +71,9 @@ public class MphChlProcessingTest {
 
         assertEquals(8.382890811688007, outputSamples[0].getDouble(), 1e-8);  // chl
         assertEquals(4, outputSamples[1].getInt());                           // flags
-        assertEquals(1, outputSamples[2].getInt());                           // immersed_eucaryotes
-        assertEquals(0, outputSamples[3].getInt());                           // immersed_cyano
-        assertEquals(0, outputSamples[4].getInt());                           // floating_cyano
-        assertEquals(0, outputSamples[5].getInt());                           // floating_vegetation
+        assertEquals(0, outputSamples[2].getInt());                           // immersed_cyano
+        assertEquals(0, outputSamples[3].getInt());                           // floating_cyano
+        assertEquals(0, outputSamples[4].getInt());                           // floating_vegetation
     }
 
     private TestSample[] createInputSamples(double[] brrs) {

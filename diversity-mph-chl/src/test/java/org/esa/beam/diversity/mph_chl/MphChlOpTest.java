@@ -74,7 +74,7 @@ public class MphChlOpTest {
 
         final Parameter annotation = chlThreshForFloatFlagField.getAnnotation(Parameter.class);
         assertNotNull(annotation);
-        assertEquals("500.0", annotation.defaultValue());
+        assertEquals("350.0", annotation.defaultValue());
         assertEquals("Chlorophyll threshold, above which all cyanobacteria dominated waters are 'float.", annotation.description());
     }
 
@@ -102,10 +102,6 @@ public class MphChlOpTest {
         assertEquals(ProductData.TYPE_FLOAT32, chlBand.getDataType());
         assertEquals("mg/m^3", chlBand.getUnit());
         assertEquals(Double.NaN, chlBand.getGeophysicalNoDataValue(), 1e-8);
-
-        final Band immersed_eucaryotesBand = targetProduct.getBand("immersed_eucaryotes");
-        assertNotNull(immersed_eucaryotesBand);
-        assertEquals(ProductData.TYPE_INT8, immersed_eucaryotesBand.getDataType());
 
         final Band immersed_cyanobacteriaBand = targetProduct.getBand("immersed_cyanobacteria");
         assertNotNull(immersed_cyanobacteriaBand);
@@ -207,13 +203,12 @@ public class MphChlOpTest {
         mphChlOp.configureTargetSamples(sampleConfigurer);
 
         final HashMap<Integer, String> sampleMap = sampleConfigurer.getSampleMap();
-        assertEquals(6, sampleMap.size());
+        assertEquals(5, sampleMap.size());
         assertEquals("chl", sampleMap.get(0));
         assertEquals("mph_chl_flags", sampleMap.get(1));
-        assertEquals("immersed_eucaryotes", sampleMap.get(2));
-        assertEquals("immersed_cyanobacteria", sampleMap.get(3));
-        assertEquals("floating_cyanobacteria", sampleMap.get(4));
-        assertEquals("floating_vegetation", sampleMap.get(5));
+        assertEquals("immersed_cyanobacteria", sampleMap.get(2));
+        assertEquals("floating_cyanobacteria", sampleMap.get(3));
+        assertEquals("floating_vegetation", sampleMap.get(4));
     }
 
     @Test
@@ -224,14 +219,13 @@ public class MphChlOpTest {
         mphChlOp.configureTargetSamples(sampleConfigurer);
 
         final HashMap<Integer, String> sampleMap = sampleConfigurer.getSampleMap();
-        assertEquals(7, sampleMap.size());
+        assertEquals(6, sampleMap.size());
         assertEquals("chl", sampleMap.get(0));
         assertEquals("mph_chl_flags", sampleMap.get(1));
-        assertEquals("immersed_eucaryotes", sampleMap.get(2));
-        assertEquals("immersed_cyanobacteria", sampleMap.get(3));
-        assertEquals("floating_cyanobacteria", sampleMap.get(4));
-        assertEquals("floating_vegetation", sampleMap.get(5));
-        assertEquals("mph", sampleMap.get(6));
+        assertEquals("immersed_cyanobacteria", sampleMap.get(2));
+        assertEquals("floating_cyanobacteria", sampleMap.get(3));
+        assertEquals("floating_vegetation", sampleMap.get(4));
+        assertEquals("mph", sampleMap.get(5));
     }
 
     @Test
@@ -259,8 +253,7 @@ public class MphChlOpTest {
         assertEquals(0.0, samples[2].getDouble(), 1e-8);
         assertEquals(0.0, samples[3].getDouble(), 1e-8);
         assertEquals(0.0, samples[4].getDouble(), 1e-8);
-        assertEquals(0.0, samples[5].getDouble(), 1e-8);
-        assertEquals(Double.NaN, samples[6].getDouble(), 1e-8);
+        assertEquals(Double.NaN, samples[5].getDouble(), 1e-8);
     }
 
     @Test

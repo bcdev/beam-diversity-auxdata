@@ -71,13 +71,6 @@ public class MphChlOpAcceptanceTest {
             assertEquals(1, flagBand.getSampleInt(0, 1));
             assertEquals(0, flagBand.getSampleInt(1, 1));
 
-            final Band immersed_eucaryotes = savedProduct.getBand("immersed_eucaryotes");
-            assertNotNull(immersed_eucaryotes);
-            assertEquals(1, immersed_eucaryotes.getSampleInt(0, 0));
-            assertEquals(1, immersed_eucaryotes.getSampleInt(1, 0));
-            assertEquals(0, immersed_eucaryotes.getSampleInt(0, 1));
-            assertEquals(0, immersed_eucaryotes.getSampleInt(1, 1));
-
             final Band immersed_cyanobacteria = savedProduct.getBand("immersed_cyanobacteria");
             assertNotNull(immersed_cyanobacteria);
             assertEquals(0, immersed_cyanobacteria.getSampleInt(0, 0));
