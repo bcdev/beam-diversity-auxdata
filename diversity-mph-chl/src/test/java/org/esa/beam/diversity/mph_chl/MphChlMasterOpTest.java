@@ -21,7 +21,6 @@ import static org.junit.Assert.assertNotNull;
 
 public class MphChlMasterOpTest {
 
-
     @Before
     public void setUp() {
         GPF.getDefaultInstance().getOperatorSpiRegistry().addOperatorSpi(new MphChlMasterOp.Spi());
@@ -109,12 +108,12 @@ public class MphChlMasterOpTest {
     public void testComputeMphChlProduct() throws IOException {
         final Product brrProduct = MerisBrrProduct.create();
 
-        final Product mphChlPixelProduct = GPF.createProduct("Diversity.MPH.CHL", GPF.NO_PARAMS, brrProduct);
+        final Product mphChlPixelProduct = GPF.createProduct("MERIS.MPH", GPF.NO_PARAMS, brrProduct);
         assertNotNull(mphChlPixelProduct);
 
         HashMap<String, Object> mphChlParams = new HashMap<>();
         mphChlParams.put("applyLowPassFilter", false);
-        final Product mphChlProduct = GPF.createProduct("Diversity.MPH.CHL", mphChlParams, brrProduct);
+        final Product mphChlProduct = GPF.createProduct("MERIS.MPH", mphChlParams, brrProduct);
         assertNotNull(mphChlProduct);
 
         final Band chlBand = mphChlProduct.getBand("chl");

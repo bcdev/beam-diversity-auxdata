@@ -6,7 +6,9 @@
 
     <description>
         <![CDATA[
-            <p>Software: Tom Block of Brockmann Consult</p>
+            A processor performing chl-a retrieval and water type characterization for MERIS BRR data.
+            <p>Algorithm development: Mark W. Matthews (Univ. of Cape Town) and Daniel Odermatt (Brockmann Consult)</p>
+            <p>Software: Tom Block (Brockmann Consult)</p>
     ]]>
     </description>
 
@@ -37,16 +39,16 @@
         <module>beam-visat-rcp</module>
         <optional>true</optional>
     </dependency>
-   
+
     <categories>Processor</categories>
 
     <extension point="beam-ui:actions">
         <action>
-            <id>Diversity.MPH.CHL</id>
+            <id>MERIS.MPH</id>
             <helpId>diversityMphChlOp</helpId>
             <class>org.esa.beam.visat.actions.DefaultOperatorAction</class>
-            <operatorName>Diversity.MPH.CHL</operatorName>
-            <text>Diversity.MPH.CHL ...</text>
+            <operatorName>MERIS.MPH</operatorName>
+            <text>MERIS MPH Processor ...</text>
             <shortDescr>Computes maximum peak height of chlorophyll</shortDescr>
             <longDescr>Computes maximum peak height of chlorophyll</longDescr>
             <mnemonic/>

@@ -35,9 +35,9 @@ import org.esa.beam.util.StringUtils;
 
 import java.awt.*;
 
-@OperatorMetadata(alias = "Diversity.MPH.CHL",
-        version = "1.3.2",
-        authors = "Tom Block, Mark William Matthews, Daniel Odermatt",
+@OperatorMetadata(alias = "MERIS.MPH",
+        version = "1.3.3",
+        authors = "Mark William Matthews, Daniel Odermatt, Tom Block",
         copyright = "(c) 2013, 2014 by Brockmann Consult",
         description = "Computes maximum peak height of chlorophyll")
 public class MphChlOp extends PixelOperator {
