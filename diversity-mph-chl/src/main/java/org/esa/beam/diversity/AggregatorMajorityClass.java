@@ -58,12 +58,16 @@ public class AggregatorMajorityClass extends AbstractAggregator {
     @Override
     public void aggregateSpatial(BinContext binContext, Observation observation, WritableVector writableVector) {
         float value = observation.get(varIndex);
+        if (Float.isNaN(value)) {
+            return; // don't aggregate NaN at all
+        }
         for (int i = 0; i < classes.length; i++) {
             if (value == classes[i]) {
                 writableVector.set(i, writableVector.get(i) + 1);
                 return;
             }
         }
+        // value is not NaN, but another class
         writableVector.set(classes.length, writableVector.get(classes.length) + 1);
     }
 
@@ -92,31 +96,46 @@ public class AggregatorMajorityClass extends AbstractAggregator {
 
     @Override
     public void computeOutput(Vector temporalVector, WritableVector outputVector) {
-        int majorityClassIndex = -1;
-        float majorityClassCounts = -1;
-        float sum_all = 0f;
-        float sum_analyzed = 0f;
-        for (int i = 0; i < classes.length; i++) {
+        // test for valid observations
+        boolean hasValidObservation = false;
+        for (int i = 0; i < classes.length + 1; i++) {
             float counts = temporalVector.get(i);
-            outputVector.set(i, counts);
-            sum_analyzed += counts;
-            sum_all += counts;
-            if (counts > majorityClassCounts) {
-                majorityClassCounts = counts;
-                majorityClassIndex = i;
-            } else if (counts == majorityClassCounts) {
-                // TODO decide (cb,do) if this is the right thing (TM)
-                // TODO random decision are not predictable science
-                if (random.nextBoolean()) {
-                    majorityClassCounts = counts;
-                    majorityClassIndex = i;
-                }
+            if (counts > 0) {
+                hasValidObservation = true;
+                break;
             }
         }
-        sum_all += temporalVector.get(classes.length);
-        outputVector.set(classes.length, sum_all);
-        outputVector.set(classes.length + 1, sum_analyzed);
-        outputVector.set(classes.length + 2, classes[majorityClassIndex]);
+        if (hasValidObservation) {
+            int majorityClassIndex = -1;
+            float majorityClassCounts = -1;
+            float sum_all = 0f;
+            float sum_analyzed = 0f;
+            for (int i = 0; i < classes.length; i++) {
+                float counts = temporalVector.get(i);
+                outputVector.set(i, counts);
+                sum_analyzed += counts;
+                sum_all += counts;
+                if (counts > majorityClassCounts) {
+                    majorityClassCounts = counts;
+                    majorityClassIndex = i;
+                } else if (counts == majorityClassCounts) {
+                    // TODO decide (cb,do) if this is the right thing (TM)
+                    // TODO random decision are not predictable science
+                    if (random.nextBoolean()) {
+                        majorityClassCounts = counts;
+                        majorityClassIndex = i;
+                    }
+                }
+            }
+            sum_all += temporalVector.get(classes.length);
+            outputVector.set(classes.length, sum_all);
+            outputVector.set(classes.length + 1, sum_analyzed);
+            outputVector.set(classes.length + 2, classes[majorityClassIndex]);
+        } else {
+            for (int i = 0; i < outputVector.size(); i++) {
+                outputVector.set(i, Float.NaN);
+            }
+        }
     }
 
     static String[] getIntermediateFeatureNames(String varName, int[] classes) {
