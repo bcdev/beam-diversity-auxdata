@@ -9,5 +9,3 @@ org.esa.beam.operator.GpcpOp$Spi
 org.esa.beam.operator.SoilMoistureOp$Spi
 org.esa.beam.operator.CmapOp$Spi
 org.esa.beam.operator.globveg.GlobvegOp$Spi
-org.esa.beam.operator.lakes.WaterStatisticsOp$Spi
-org.esa.beam.operator.lakes.WaterStatisticsL2Op$Spi

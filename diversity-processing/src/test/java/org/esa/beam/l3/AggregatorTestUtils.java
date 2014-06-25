@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.diversity;
+package org.esa.beam.l3;
 
 import org.esa.beam.binning.BinContext;
 import org.esa.beam.binning.Observation;

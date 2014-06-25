@@ -4,10 +4,11 @@
     <groupId>org.esa.beam</groupId>
     <artifactId>beam-diversity</artifactId>
     <packaging>pom</packaging>
-    <version>1.1-SNAPSHOT</version>
+    <version>1.2-SNAPSHOT</version>
     <modules>
         <module>diversity-mph-chl</module>
         <module>diversity-auxdata</module>
+		<module>diversity-processing</module>
     </modules>
     <name>Diversity Project</name>
 

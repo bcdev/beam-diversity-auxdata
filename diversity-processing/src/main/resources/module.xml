@@ -1,8 +1,8 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
-    <symbolicName>beam-diversity-auxdata</symbolicName>
+    <symbolicName>beam-diversity-processing</symbolicName>
     <version>1.2-SNAPSHOT</version>
-    <name>Diversity Auxdata</name>
+    <name>Diversity Processing</name>
 
     <description>
         <![CDATA[
@@ -19,10 +19,7 @@
     <changelog>
         <![CDATA[
         <p>Changes in version 1.2-SNAPSHOT<br/>
-        - Cleanup of project structure, i.e. introduced new module diversity-processing
-        </p>
-        <p>Changes in version 1.0<br/>
-        - Initial version
+        - Introduced this new module 'Diversity Processing' for a more reasonable project structure (has version of current parent module)
         </p>
         ]]>
     </changelog>
@@ -42,19 +39,6 @@
     </dependency>
    
     <categories>Processor</categories>
-
-    <extension point="beam-ui:actions">
-        <action>
-            <id>correctAtmosphereModis</id>
-            <class>org.esa.beam.ui.DiversityAuxdataAction</class>
-            <text>Diversity Auxdata...</text>
-            <shortDescr>Prepares various Diversity drylands auxdata sets</shortDescr>
-            <longDescr>Prepares various Diversity drylands auxdata sets</longDescr>
-            <mnemonic/>
-            <parent>tools</parent>
-            <helpId>diversityAuxdata</helpId>
-        </action>
-    </extension>
 
     <!--<extension point="beam-ui:helpSets">-->
         <!--<helpSet>-->

@@ -1,9 +1,7 @@
 package org.esa.beam.operator.globveg;
 
 import org.esa.beam.Constants;
-import org.esa.beam.DataCategory;
 import org.esa.beam.framework.datamodel.Band;
-import org.esa.beam.framework.datamodel.FlagCoding;
 import org.esa.beam.framework.datamodel.Product;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
@@ -13,7 +11,6 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProducts;
 import org.esa.beam.framework.gpf.annotations.TargetProduct;
 import org.esa.beam.operator.ReferenceReprojection;
-import org.esa.beam.util.DiversityAuxdataUtils;
 import org.esa.beam.util.ProductNameComparator;
 import org.esa.beam.util.ProductUtils;
 
@@ -58,9 +55,9 @@ public class GlobvegOp extends Operator {
                 yearlyGlobvegProduct.getBand(targetBandName).setNoDataValueUsed(true);
             }
         }
-        DiversityAuxdataUtils.addPatternToAutoGrouping(yearlyGlobvegProduct, "fapar");
-        DiversityAuxdataUtils.addPatternToAutoGrouping(yearlyGlobvegProduct, "lai");
-        DiversityAuxdataUtils.addPatternToAutoGrouping(yearlyGlobvegProduct, "ndvi_kg");
+        addPatternToAutoGrouping(yearlyGlobvegProduct, "fapar");
+        addPatternToAutoGrouping(yearlyGlobvegProduct, "lai");
+        addPatternToAutoGrouping(yearlyGlobvegProduct, "ndvi_kg");
 
         final Product yearlyGlobvegReprojectedProduct =
                 ReferenceReprojection.reproject(yearlyGlobvegProduct,
@@ -105,6 +102,13 @@ public class GlobvegOp extends Operator {
 
         return yearlyProduct;
     }
+
+    private static void addPatternToAutoGrouping(Product targetProduct, String groupPattern) {
+        Product.AutoGrouping autoGrouping = targetProduct.getAutoGrouping();
+        String stringPattern = autoGrouping != null ? autoGrouping.toString() + ":" + groupPattern : groupPattern;
+        targetProduct.setAutoGrouping(stringPattern);
+    }
+
 
     public static class Spi extends OperatorSpi {
 

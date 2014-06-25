@@ -14,7 +14,7 @@
  * with this program; if not, see http://www.gnu.org/licenses/
  */
 
-package org.esa.beam.diversity;
+package org.esa.beam.l3;
 
 import org.esa.beam.binning.Aggregator;
 import org.esa.beam.binning.BinContext;
@@ -23,9 +23,9 @@ import org.junit.Before;
 import org.junit.Test;
 
 import static java.lang.Float.NaN;
-import static org.esa.beam.diversity.AggregatorTestUtils.obsNT;
-import static org.esa.beam.diversity.AggregatorTestUtils.vec;
-import static org.junit.Assert.*;
+import static org.esa.beam.l3.AggregatorTestUtils.obsNT;
+import static org.esa.beam.l3.AggregatorTestUtils.vec;
+import static org.junit.Assert.assertEquals;
 
 public class AggregatorMajorityClassTest {
     BinContext ctx;

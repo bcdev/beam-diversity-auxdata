@@ -1,7 +1,7 @@
 <module>
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-diversity-mph_chl</symbolicName>
-    <version>1.3.3</version>
+    <version>1.3.4-SNAPSHOT</version>
     <name>Diversity Mph-CHl Processor</name>
 
     <description>
@@ -20,6 +20,9 @@
 
     <changelog>
         <![CDATA[
+        <p>Changes in version 1.3.4-SNAPSHOT<br/>
+        - Moved AggregatorMajorityClass in new diversity-processing module
+        </p>
         <p>Changes in version 1.3<br/>
         - added ndvi calculation to detect floating vegetation<br/>
         - adapted thresholds<br/>
