@@ -2,13 +2,13 @@
     <manifestVersion>1.0.0</manifestVersion>
     <symbolicName>beam-diversity-mph_chl</symbolicName>
     <version>1.3.4-SNAPSHOT</version>
-    <name>Diversity Mph-CHl Processor</name>
+    <name>MERIS MPH Processor</name>
 
     <description>
         <![CDATA[
-            A processor performing chl-a retrieval and water type characterization for MERIS BRR data.
-            <p>Algorithm development: Mark W. Matthews (Univ. of Cape Town) and Daniel Odermatt (Brockmann Consult)</p>
-            <p>Software: Tom Block (Brockmann Consult)</p>
+            <p>A processor performing chl-a retrieval and water type characterization for MERIS BRR data.</p
+            <p>Algorithm development: Mark W. Matthews (Univ. of Cape Town) and Daniel Odermatt (Brockmann Consult)<br>
+            Software: Tom Block (Brockmann Consult)</p>
     ]]>
     </description>
 
@@ -20,7 +20,7 @@
 
     <changelog>
         <![CDATA[
-        <p>Changes in version 1.3.4-SNAPSHOT<br/>
+        <p>Changes in version 1.3.4<br/>
         - Moved AggregatorMajorityClass in new diversity-processing module
         </p>
         <p>Changes in version 1.3<br/>
