@@ -1,0 +1,312 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<wps:Execute service="WPS"
+             version="1.0.0"
+             xmlns:wps="http://www.opengis.net/wps/1.0.0"
+             xmlns:ows="http://www.opengis.net/ows/1.1"
+             xmlns:xlink="http://www.w3.org/1999/xlink">
+
+  <ows:Identifier>L3</ows:Identifier>
+
+  <wps:DataInputs>
+
+    <wps:Input>
+      <ows:Identifier>productionName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Diversity l3 monthly ${region}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>minDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${startDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+   <wps:Input>
+      <ows:Identifier>maxDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${stopDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>periodLength</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${period}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>regionWKT</ows:Identifier> 
+      <wps:Data>
+        <wps:LiteralData>${wkt}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>inputPath</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${inputDir}/L2_of_MER_..._1.*${yyyy}${MM}${dd}.*.seq$</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.output.dir</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${outputDir}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    
+    <wps:Input>
+      <ows:Identifier>calvalus.output.prefix</ows:Identifier>
+      <wps:Data>                
+        <wps:LiteralData>${region}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.reducers</ows:Identifier>
+      <wps:Data>                
+        <wps:LiteralData>1</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.output.format</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>GeoTIFF</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.output.compression</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>none</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    
+    
+    <wps:Input>
+      <ows:Identifier>processorBundleName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>diversity</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>processorBundleVersion</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>3.0-SNAPSHOT</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>processorName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>merge-four-l2</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>processorParameters</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData>
+          <parameters>
+             <mphDir>${mphDir}</mphDir>
+             <fubDir>${fubDir}</fubDir>
+             <ccl2wDir>${ccl2wDir}</ccl2wDir>
+             <shallowDir>/calvalus/projects/diversity/aux/shallow_new/</shallowDir>
+             <region>${region}</region>
+          </parameters>
+        </wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+    
+
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.parameters</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData>
+          <parameters>
+            <compositingType>MOSAICKING</compositingType>
+            <planetaryGrid>org.esa.beam.binning.support.PlateCarreeGrid</planetaryGrid>
+            <numRows>64800</numRows>
+            <superSampling>1</superSampling>
+            
+            <maskExpr>not (l1_flags.INVALID or cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_SNOW_ICE ) and shallow == 0 and extent == 1 and sun_zenith &lt; 70 </maskExpr>    
+            <variables>
+              <variable>
+                  <name>chl_mph</name>
+                  <expr>cloud_classif_flags.F_MIXED_PIXEL ? NaN : (chl &gt; 1000.0 ? 1000.0 : chl)</expr>
+              </variable>
+
+              <variable>
+                  <name>chl_fub</name>
+                  <expr>feq(algal_2,5.0) or result_flags.CHL_OUT or cloud_classif_flags.F_MIXED_PIXEL ? NaN : exp10(algal_2)</expr>
+              </variable>
+              <variable>
+                  <name>cdom_fub</name>
+                  <expr>feq(yellow_subs,5.0) or result_flags.YEL_OUT or cloud_classif_flags.F_MIXED_PIXEL ? NaN : exp10(yellow_subs)</expr>
+              </variable>
+              <variable>
+                  <name>tsm_cc</name>
+                  <expr>cloud_classif_flags.F_MIXED_PIXEL ? NaN : conc_tsm</expr>
+              </variable>
+
+	      <variable>
+                  <name>owt_dominant_class_cc</name>
+                  <expr>cloud_classif_flags.F_MIXED_PIXEL ? NaN : owt_dominant_class</expr>
+              </variable>
+
+              <variable>
+                  <name>turbidity_cc</name>
+                  <expr>cloud_classif_flags.F_MIXED_PIXEL ? NaN : turbidity</expr>
+              </variable>
+
+              <variable>
+                  <name>immersed_cyanobacteria_mph</name>
+                  <expr>immersed_cyanobacteria</expr>
+              </variable>
+
+              <variable>
+                  <name>floating_cyanobacteria_mph</name>
+                  <expr>floating_cyanobacteria</expr>
+              </variable>
+
+              <variable>
+                  <name>floating_vegetation_mph</name>
+                  <expr>floating_vegetation</expr>
+              </variable>
+
+            </variables>
+            
+            <aggregators>
+              <aggregator>
+                <type>AVG</type>
+                <varName>chl_mph</varName>
+              </aggregator>
+              <aggregator>
+                <type>AVG</type>
+                <varName>chl_fub</varName>
+              </aggregator>
+              <aggregator>
+                <type>AVG</type>
+                <varName>cdom_fub</varName>
+              </aggregator>
+
+          <aggregator>
+                <type>AVG</type>
+                <varName>tsm_cc</varName>
+              </aggregator>
+          <aggregator>
+                <type>AVG</type>
+                <varName>turbidity_cc</varName>
+              </aggregator>
+              
+              <aggregator>
+                <type>AVG</type>
+                <varName>immersed_cyanobacteria</varName>
+              </aggregator>
+              <aggregator>
+                <type>AVG</type>
+                <varName>floating_cyanobacteria</varName>
+              </aggregator>
+              <aggregator>
+                <type>AVG</type>
+                <varName>floating_vegetation</varName>
+              </aggregator>
+
+              <aggregator>
+                <type>MAJORITY_CLASS</type>
+                <varName>owt_dominant_class_cc</varName>
+                <classes>1,2,3,4,5,6,7</classes>
+              </aggregator>
+            </aggregators>
+
+            <postProcessor>
+              <type>Selection</type>
+              <varNames>chl_mph_mean,chl_mph_sigma,chl_fub_mean,chl_fub_sigma,cdom_fub_mean,cdom_fub_sigma,tsm_cc_mean,tsm_cc_sigma,turbidity_cc_mean,turbidity_cc_sigma,immersed_cyanobacteria_mean,floating_cyanobacteria_mean,floating_vegetation_mean,owt_cc_dominant_class_mode=owt_dominant_class_cc_majority_class</varNames>
+            </postProcessor>
+              
+          </parameters>
+        </wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.format.parameters</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData>
+          <parameters>
+              <productCustomizer>
+                  <type>MonthlyProductDiversity</type>
+                  
+                  <writeNumObs>true</writeNumObs>
+                  <writeNumPasses>false</writeNumPasses>
+                  
+                  <shallowProduct>/calvalus/projects/diversity/aux/shallow_new/${region}_shallow-extent-mask.tif</shallowProduct>
+                  
+                  <arcDayProduct>/calvalus/projects/diversity/aux/${arcDayProduct}</arcDayProduct>
+                  <arcNightProduct>/calvalus/projects/diversity/aux/${arcNightProduct}</arcNightProduct>
+                  <arcBand>${arcBand}</arcBand>
+              </productCustomizer>
+          </parameters>
+        </wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+    
+    <wps:Input>
+      <ows:Identifier>calvalus.system.beam.pixelGeoCoding.useTiling</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>true</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+     <wps:Input>
+      <ows:Identifier>calvalus.system.beam.useAlternatePixelGeoCoding</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>true</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.memory.mb</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>3072</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.java.opts</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>-Djava.awt.headless=true -Xmx3072M</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>lc</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.priority</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>HIGH</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.reduce.slowstart.completedmaps</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>0.9</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.task.timeout</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>7200000</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.fs.permissions.umask-mode</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>002</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+  </wps:DataInputs>
+
+</wps:Execute>

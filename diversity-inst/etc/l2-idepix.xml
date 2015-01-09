@@ -1,0 +1,148 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<wps:Execute service="WPS"
+             version="1.0.0"
+             xmlns:wps="http://www.opengis.net/wps/1.0.0"
+             xmlns:ows="http://www.opengis.net/ows/1.1"
+             xmlns:xlink="http://www.w3.org/1999/xlink">
+
+  <ows:Identifier>L2</ows:Identifier>
+
+  <wps:DataInputs>
+    <wps:Input>
+      <ows:Identifier>productionName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Diversity idepix ${region} ${year}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>processorBundleName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>beam-idepix</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>processorBundleVersion</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>2.1.1</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>processorName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Idepix.Water</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>processorParameters</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData>
+          <parameters>
+            <ccOutputRayleigh>true</ccOutputRayleigh>
+            <ccIgnoreSeaIceClimatology>true</ccIgnoreSeaIceClimatology>
+          </parameters>
+        </wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>inputPath</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${input}/MER_..._1.*${yyyy}${MM}${dd}.*.N1$</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.output.dir</ows:Identifier>
+      <wps:Data>
+          <wps:LiteralData>${output}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>minDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${year}-01-01</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>maxDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${year}-12-31</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>regionWKT</ows:Identifier>
+         <wps:Data>
+             <wps:LiteralData>${wkt}</wps:LiteralData>
+         </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.system.beam.reader.tileHeight</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>16</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.system.beam.reader.tileWidth</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>*</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.system.beam.pixelGeoCoding.useTiling</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>true</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.system.beam.pixelGeoCoding.fractionAccuracy</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>true</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.system.beam.envisat.usePixelGeoCoding</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>true</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+       <ows:Identifier>calvalus.system.beam.useAlternatePixelGeoCoding</ows:Identifier>
+       <wps:Data>
+         <wps:LiteralData>true</wps:LiteralData>
+       </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.failures.maxpercent</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>0</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.priority</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>LOW</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>lc</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.fs.permissions.umask-mode</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>002</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+  </wps:DataInputs>
+
+</wps:Execute>
+

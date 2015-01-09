@@ -1,0 +1,15 @@
+ 
+# Diversity environment setup
+# usage:  . mydiversity
+
+export DIVERSITY_INST=/home/marcoz/Projects/BC/Beam-Ops/beam-diversity-auxdata/diversity-inst
+export DIVERSITY_LOG=$DIVERSITY_INST/log
+
+export DIVERSITY_PRODUCTION_JAR=$DIVERSITY_INST/lib/cpt.jar
+export DIVERSITY_BEAM_VERSION=beam-SNAPSHOT-mz
+export DIVERSITY_CALVALUS_VERSION=calvalus-SNAPSHOT-mz
+
+export PYTHONPATH=$DIVERSITY_INST:$DIVERSITY_INST/src:$PYTHONPATH
+export PATH=$DIVERSITY_INST:$DIVERSITY_INST/bin:$PATH
+
+PS1="\[\e]0;\u@\h: \w\a\]\[\e[1;32m\]\u \[\e[1;34m\]\w\[\e[0m\] \[\e[0;31m\](DIVERSITY)\[\e[0m\]$ "
