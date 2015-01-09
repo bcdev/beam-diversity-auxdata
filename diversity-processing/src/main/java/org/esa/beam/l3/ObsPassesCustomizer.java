@@ -26,12 +26,12 @@ import org.esa.beam.framework.gpf.annotations.Parameter;
 /**
  * Removes num_obs and num_passes bands, depending on configuration.
  */
-public class DiversityProductCustomizer extends ProductCustomizer {
+public class ObsPassesCustomizer extends ProductCustomizer {
 
     private final boolean writeNumObs;
     private final boolean writeNumPasses;
 
-    public DiversityProductCustomizer(boolean writeNumObs, boolean writeNumPasses) {
+    public ObsPassesCustomizer(boolean writeNumObs, boolean writeNumPasses) {
         this.writeNumObs = writeNumObs;
         this.writeNumPasses = writeNumPasses;
     }
@@ -67,12 +67,12 @@ public class DiversityProductCustomizer extends ProductCustomizer {
             Config numWriterConfig = (Config) config;
             boolean writeNumObs = numWriterConfig.writeNumObs != null ? numWriterConfig.writeNumObs : true;
             boolean writeNumPasses = numWriterConfig.writeNumPasses != null ? numWriterConfig.writeNumPasses : true;
-            return new DiversityProductCustomizer(writeNumObs, writeNumPasses);
+            return new ObsPassesCustomizer(writeNumObs, writeNumPasses);
         }
 
         @Override
         public String getName() {
-            return "DL10_Colorize";
+            return "ObsPasses";
         }
 
         @Override

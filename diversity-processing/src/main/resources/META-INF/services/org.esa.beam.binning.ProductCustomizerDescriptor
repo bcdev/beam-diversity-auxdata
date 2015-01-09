@@ -1,1 +1,2 @@
-org.esa.beam.l3.DiversityProductCustomizer$Descriptor
+org.esa.beam.l3.ObsPassesCustomizer$Descriptor
+org.esa.beam.l3.MonthlyProductCustomizer$Descriptor
