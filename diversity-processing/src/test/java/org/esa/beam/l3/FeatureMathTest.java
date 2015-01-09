@@ -16,18 +16,53 @@
 
 package org.esa.beam.l3;
 
+import org.esa.beam.binning.CellProcessorConfig;
+import org.esa.beam.binning.operator.BinningConfig;
 import org.esa.beam.binning.operator.VariableConfig;
 import org.esa.beam.binning.support.VectorImpl;
+import org.esa.beam.util.io.FileUtils;
 import org.junit.Test;
+
+import java.io.IOException;
+import java.io.InputStreamReader;
 
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertSame;
 
 public class FeatureMathTest {
 
     static VectorImpl vec(float... values) {
         return new VectorImpl(values);
     }
+
+    @Test
+    public void testConfig() throws Exception {
+        BinningConfig binningConfig = loadConfig("math-config.xml");
+        CellProcessorConfig postProcessorConfig = binningConfig.getPostProcessorConfig();
+        assertNotNull(postProcessorConfig);
+        assertSame(FeatureMath.Config.class, postProcessorConfig.getClass());
+        FeatureMath.Config mathConfig = (FeatureMath.Config) postProcessorConfig;
+        VariableConfig[] variableConfigs = mathConfig.getVariableConfigs();
+        assertNotNull(variableConfigs);
+        assertEquals(2, variableConfigs.length);
+        assertEquals("num_obs", variableConfigs[0].getName());
+        assertEquals("num_obs_mean * num_obs_counts", variableConfigs[0].getExpr());
+        assertEquals("chl_mph_mean", variableConfigs[1].getName());
+        assertEquals("chl_mph_mean_mean", variableConfigs[1].getExpr());
+    }
+
+
+    static BinningConfig loadConfig(String configPath) throws Exception {
+            return BinningConfig.fromXml(loadConfigAsXML(configPath));
+    }
+
+        private static String loadConfigAsXML(String configPath) throws IOException {
+            try (InputStreamReader inputStreamReader = new InputStreamReader(FeatureMathTest.class.getResourceAsStream(configPath))) {
+                return FileUtils.readText(inputStreamReader).trim();
+            }
+        }
 
     @Test
     public void testAssignment() throws Exception {

@@ -70,8 +70,13 @@ public class FeatureMath extends CellProcessor {
     }
 
     public static class Config extends CellProcessorConfig {
+
         @Parameter(alias = "variables", itemAlias = "variable")
         private VariableConfig[] variableConfigs;
+
+        public VariableConfig[] getVariableConfigs() {
+            return variableConfigs;
+        }
     }
 
     public static class Descriptor implements CellProcessorDescriptor {
