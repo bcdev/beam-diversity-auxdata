@@ -27,7 +27,7 @@ extension = 'nc'
 if outputFormat == 'GeoTIFF':
     extension = 'tif'
 
-inputs = ['dummy']
+inputs = ['childs']
 hosts = [('localhost', 8)]
 
 pm = PMonitor(inputs, request='lake_products', logdir='log', hosts=hosts, script='template.py')
@@ -56,7 +56,7 @@ for region in regions:
             'input', geoChildDir,
             'output', l2IdepixDir,
         ]
-        pm.execute('l2-idepix.xml', ['dummy'], [l2_idepix_name], parameters=params, logprefix=l2_idepix_name)
+        pm.execute('l2-idepix.xml', ['childs'], [l2_idepix_name], parameters=params, logprefix=l2_idepix_name)
 
         l2MphDir = BASE_NEW + region + '/l2-mph/' + year
         l2_mph_name = 'l2_mph-' + year + '-' + region
@@ -72,7 +72,7 @@ for region in regions:
             'input', geoChildDir,
             'output', l2FubDir,
         ]
-        pm.execute('l2-fub.xml', ['dummy'], [l2_fub_name], parameters=params, logprefix=l2_fub_name)
+        pm.execute('l2-fub.xml', ['childs'], [l2_fub_name], parameters=params, logprefix=l2_fub_name)
 
         l2Ccl2wDir = BASE_NEW + region + '/l2-ccl2w/' + year
         l2_ccl2w_name = 'l2_ccl2w-' + year + '-' + region
@@ -80,7 +80,7 @@ for region in regions:
             'input', geoChildDir,
             'output', l2Ccl2wDir,
         ]
-        pm.execute('l2-ccl2w.xml', ['dummy'], [l2_ccl2w_name], parameters=params, logprefix=l2_ccl2w_name)
+        pm.execute('l2-ccl2w.xml', ['childs'], [l2_ccl2w_name], parameters=params, logprefix=l2_ccl2w_name)
 
         all_l2_names = [l2_idepix_name, l2_mph_name, l2_fub_name, l2_ccl2w_name]
         l3_month_names = []
