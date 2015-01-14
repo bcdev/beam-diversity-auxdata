@@ -20,7 +20,17 @@ def generateRequest(templateFileName, requestFileName, keywords):
 def main(templateName, requestName, parameters):
     parameterDict = {}
     for key, value in zip(parameters[0::2], parameters[1::2]):
-        parameterDict[key] = value
+        if value.startswith('include:'):
+            includeFile = value[len('include:'):]
+            print 'includeFile.1 ( for key='+key+' ) = ' + includeFile
+            if includeFile[0] != '/':
+                includeFile = BASE_DIR + '/' + includeFile
+            print 'includeFile.2 ( for key='+key+' ) = ' + includeFile
+            with open(includeFile, 'r') as textFile:
+                valueFromFile = textFile.read()
+            parameterDict[key] = valueFromFile
+        else:
+            parameterDict[key] = value
     templateFileName = BASE_DIR + '/etc/' + templateName
     fileExtension = os.path.splitext(templateFileName)[1]
     requestFileName = BASE_DIR + '/requests/' + requestName + fileExtension
