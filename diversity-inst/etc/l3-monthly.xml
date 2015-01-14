@@ -82,7 +82,6 @@
       </wps:Data>
     </wps:Input>
     
-    
     <wps:Input>
       <ows:Identifier>processorBundleName</ows:Identifier>
       <wps:Data>
@@ -95,6 +94,7 @@
         <wps:LiteralData>3.0-SNAPSHOT</wps:LiteralData>
       </wps:Data>
     </wps:Input>
+
     <wps:Input>
       <ows:Identifier>processorName</ows:Identifier>
       <wps:Data>
@@ -147,7 +147,7 @@
                   <expr>cloud_classif_flags.F_MIXED_PIXEL ? NaN : conc_tsm</expr>
               </variable>
 
-	      <variable>
+	          <variable>
                   <name>owt_dominant_class_cc</name>
                   <expr>cloud_classif_flags.F_MIXED_PIXEL ? NaN : owt_dominant_class</expr>
               </variable>
@@ -248,7 +248,8 @@
         </wps:ComplexData>
       </wps:Data>
     </wps:Input>
-    
+
+
     <wps:Input>
       <ows:Identifier>calvalus.system.beam.pixelGeoCoding.useTiling</ows:Identifier>
       <wps:Data>
@@ -273,7 +274,6 @@
         <wps:LiteralData>-Djava.awt.headless=true -Xmx3072M</wps:LiteralData>
       </wps:Data>
     </wps:Input>
-
 
     <wps:Input>
       <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>

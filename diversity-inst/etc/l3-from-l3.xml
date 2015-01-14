@@ -146,7 +146,7 @@
               <aggregator>
                 <type>AVG</type>
                 <varName>num_obs</varName>
-		<outputCounts>true</outputCounts>
+		        <outputCounts>true</outputCounts>
               </aggregator>
               <aggregator>
                 <type>AVG</type>

@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<wps:Execute service="WPS"
+             version="1.0.0"
+             xmlns:wps="http://www.opengis.net/wps/1.0.0"
+             xmlns:ows="http://www.opengis.net/ows/1.1"
+             xmlns:xlink="http://www.w3.org/1999/xlink">
+
+  <ows:Identifier>L3</ows:Identifier>
+
+  <wps:DataInputs>
+
+    <wps:Input>
+      <ows:Identifier>productionName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Diversity shallow ${region}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>minDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${startDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+   <wps:Input>
+      <ows:Identifier>maxDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${stopDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>periodLength</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${period}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>regionWKT</ows:Identifier> 
+      <wps:Data>
+        <wps:LiteralData>${wkt}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>inputPath</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${inputDir}/L2_of_MER_..._1.*${yyyy}${MM}${dd}.*.seq$</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.output.dir</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${outputDir}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.output.prefix</ows:Identifier>
+      <wps:Data>                
+        <wps:LiteralData>${region}-shallow</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.reducers</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>1</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.output.format</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>NetCDF</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.output.compression</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>none</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>processorBundleName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>diversity</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>processorBundleVersion</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>3.0-SNAPSHOT</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.parameters</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData>
+          <parameters>
+            <compositingType>MOSAICKING</compositingType>
+            <planetaryGrid>org.esa.beam.binning.support.PlateCarreeGrid</planetaryGrid>
+            <numRows>64800</numRows>
+            <superSampling>1</superSampling>
+            <maskExpr>not l1_flags.INVALID and not cloud_classif_flags.F_LAND and not cloud_classif_flags.F_CLOUD and not cloud_classif_flags.F_CLOUD_BUFFER and not cloud_classif_flags.F_CLOUD_SHADOW and not cloud_classif_flags.F_MIXED_PIXEL</maskExpr>
+            
+            <variables>              
+              <variable>
+                  <name>ratio490</name>
+                  <expr>(radiance_3 * radiance_7)/(radiance_5 * radiance_5)</expr>
+              </variable>
+            </variables>
+            
+            <aggregators>
+              <aggregator>
+                <type>AVG</type>
+                <varName>ratio490</varName>
+              </aggregator>
+            </aggregators>
+
+              <postProcessor>
+                  <type>Math</type>
+                  <variables>
+                      <variable>
+                          <name>shallow</name>
+                          <expr>ratio490_mean &gt; ${ratio490thresh} ? 0.0 : (ratio490_mean &gt; 0.0 ? 1.0 : NaN)</expr>
+                      </variable>
+                      <variable>
+                          <name>ratio490_mean</name>
+                          <expr>ratio490_mean</expr>
+                      </variable>
+                  </variables>
+              </postProcessor>
+          </parameters>
+        </wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+      <!--
+      <wps:Input>
+          <ows:Identifier>calvalus.l3.format.parameters</ows:Identifier>
+          <wps:Data>
+              <wps:ComplexData>
+                  <parameters>
+                      <productCustomizer>
+                          <type>ObsPasses</type>
+                          <writeNumObs>false</writeNumObs>
+                          <writeNumPasses>false</writeNumPasses>
+                      </productCustomizer>
+                  </parameters>
+              </wps:ComplexData>
+          </wps:Data>
+      </wps:Input>
+    -->
+      <wps:Input>
+      <ows:Identifier>calvalus.system.beam.pixelGeoCoding.useTiling</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>true</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+     <wps:Input>
+      <ows:Identifier>calvalus.system.beam.useAlternatePixelGeoCoding</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>true</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.memory.mb</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>3072</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.java.opts</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>-Djava.awt.headless=true -Xmx3072M</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>lc</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.priority</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>HIGH</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.reduce.slowstart.completedmaps</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>0.9</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.task.timeout</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>7200000</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.fs.permissions.umask-mode</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>002</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+  </wps:DataInputs>
+<!--
+  <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.failures.maxpercent</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>5</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+-->
+</wps:Execute>

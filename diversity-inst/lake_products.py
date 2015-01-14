@@ -1,8 +1,7 @@
 from pmonitor import PMonitor
 from datetime import date
 from calendar import monthrange, isleap
-from auxdata_arc import arcAuxdata
-from auxdata_wkt import lakeBoxPolygon
+from auxdata import lakeBoxPolygon, ratio490Threshold, arcAuxdata
 
 years = ['2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012']
 allMonths = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
@@ -16,8 +15,9 @@ def getMonth(year):
     return allMonths
 
 
-# ears  = [ '2005', '2006', '2007' ]
+# years  = [ '2005', '2006', '2007' ]
 years  = [ '2005' ]
+years  = [ '2008', '2009' ]
 
 regions = ['Lake-Balaton']
 #   must be one of 'GeoTIFF' 'NetCDF' or 'NetCDF4'
@@ -30,13 +30,48 @@ if outputFormat == 'GeoTIFF':
 inputs = ['childs']
 hosts = [('localhost', 8)]
 
+#   , simulation=True
 pm = PMonitor(inputs, request='lake_products', logdir='log', hosts=hosts, script='template.py')
 
 BASE_OLD = '/calvalus/projects/diversity/prototype/'
-BASE_NEW = '/calvalus/home/marcoz/diversity_lakes/'
+BASE_NEW = '/calvalus/home/marcoz/diversity_lakes_2/'
 
 for region in regions:
+    # =============== auxdata =======================
+    # maybe, ensure auxdata files are available ???
+
     wkt = lakeBoxPolygon(region)
+    shallowDir = BASE_NEW + region + '/l3-shallow/'
+    # =============== shallow =======================
+    # L3 aggregation of ratio490
+    isNorthRegion = True
+    if isNorthRegion:
+        start = date(2008, 05, 01)
+        stop = date(2008, 10, 31)
+        requiredIdepix = ['l2_idepix-2008-' + region]
+    else:
+        start = date(2008, 11, 01)
+        stop = date(2009, 04, 30)
+        requiredIdepix = ['l2_idepix-2008-' + region, 'l2_idepix-2009-' + region]
+    period = stop - start
+    period = period.days
+
+    # TODO use high-res WKT for shallow
+    shallowInputDir = BASE_NEW + region + '/l2-idepix/\${yyyy}'
+    shallowParams = [
+        'startDate', str(start),
+        'stopDate', str(stop),
+        'period', str(period),
+        'region', region,
+        'wkt', '"' + wkt + '"',
+        'ratio490thresh', ratio490Threshold(region),
+        'inputDir', shallowInputDir,
+        'outputDir', shallowDir,
+    ]
+    shallow_name = 'shallow_name-' + region
+    pm.execute('l3-shallow.xml', requiredIdepix, [shallow_name], parameters=shallowParams, logprefix=shallow_name)
+
+
     l3_year_names = []
     for year in years:
         startDate = year + '-01-01'
@@ -57,6 +92,10 @@ for region in regions:
             'output', l2IdepixDir,
         ]
         pm.execute('l2-idepix.xml', ['childs'], [l2_idepix_name], parameters=params, logprefix=l2_idepix_name)
+
+        continue
+        # TODO actually use new shallow product in l3
+        # TODO simplify and harmonize parameters
 
         l2MphDir = BASE_NEW + region + '/l2-mph/' + year
         l2_mph_name = 'l2_mph-' + year + '-' + region
@@ -82,7 +121,9 @@ for region in regions:
         ]
         pm.execute('l2-ccl2w.xml', ['childs'], [l2_ccl2w_name], parameters=params, logprefix=l2_ccl2w_name)
 
-        all_l2_names = [l2_idepix_name, l2_mph_name, l2_fub_name, l2_ccl2w_name]
+
+
+        all_l2_names = [shallow_name, l2_idepix_name, l2_mph_name, l2_fub_name, l2_ccl2w_name]
         l3_month_names = []
         for month in getMonth(year):
             # =============== l3month =======================
@@ -132,23 +173,25 @@ for region in regions:
             ]
             pm.execute('l3-from-l3.xml', l3_month_names, [l3_year_name], parameters=params, logprefix=l3_year_name)
             l3_year_names.append(l3_year_name)
-    # =============== l3decade =======================
-    startDate = '2003-01-01'
-    stopDate = '2011-12-31'
-    period = '3287'
-    l3DecadeDir = BASE_NEW + region + '/l3-decade/'
 
-    l3_decade_name = 'l3-decade-' + region
-    params = [
-        'startDate', startDate,
-        'stopDate', stopDate,
-        'period', period,
-        'region', region,
-        'wkt', '"' + wkt + '"',
-        'input', BASE_NEW + region + '/l3-yearly/.*-1/.*.' + extension + '$',
-        'output', l3DecadeDir,
-        'outputFormat', outputFormat
-    ]
-    pm.execute('l3-from-l3.xml', l3_year_names, [l3_decade_name], parameters=params, logprefix=l3_decade_name)
+    if l3_year_names:
+        # =============== l3decade =======================
+        startDate = '2003-01-01'
+        stopDate = '2011-12-31'
+        period = '3287'
+        l3DecadeDir = BASE_NEW + region + '/l3-decade/'
+
+        l3_decade_name = 'l3-decade-' + region
+        params = [
+            'startDate', startDate,
+            'stopDate', stopDate,
+            'period', period,
+            'region', region,
+            'wkt', '"' + wkt + '"',
+            'input', BASE_NEW + region + '/l3-yearly/.*-1/.*.' + extension + '$',
+            'output', l3DecadeDir,
+            'outputFormat', outputFormat
+        ]
+        pm.execute('l3-from-l3.xml', l3_year_names, [l3_decade_name], parameters=params, logprefix=l3_decade_name)
 
 pm.wait_for_completion()

@@ -1,4 +1,29 @@
-from datetime import date 
+from datetime import date
+
+boxWKT = {
+    'Lake-Balaton': 'POLYGON ((17.244438921600022 46.7055567678, 18.166661118000007 46.7055567678, 18.166661118000007 47.0583345357, 17.244438921600022 47.0583345357, 17.244438921600022 46.7055567678))'
+}
+
+# enter here k490 thresholds other than default for certain lakes:
+ratio490Threshholds = {
+    'Lake-Alakol': '0.5',
+    'Lake-Alexandrina': '0.5',
+    'Lake-Balaton': '0.5',
+    'Lake-Egirdir': '0.5',
+    'Lake-Neuchatel': '0.5',
+    'Lake-Caspian': '0.5',
+    'Lake-Nicaragua': '0.7',
+    'Lake-Turkana': '0.6',
+    'Lake-Argyle': '0.5',
+    'Lake-Atlin': '0.5',
+    'Lake-Bosten': '0.5',
+    'Lake-Brisas': '0.5',
+    'Lake-Carbora-Bassa': '0.6',
+    'Lake-Canitzan': '0.6',
+    'Lake-Hyargas': '0.6',
+    'Lake-Ngoring': '0.6',
+    'Lake-Tsimlyanskoye': '0.6'
+}
 
 arcFileIdByRegion = {'Lake-Balaton' : '0310'}
 
@@ -37,9 +62,20 @@ base = date(1970,01,01)
 arcMap =  {}
 index = 1
 for aBandtime in arcBandTime:
-    d = date.fromordinal(int(base.toordinal() + aBandtime))  
+    d = date.fromordinal(int(base.toordinal() + aBandtime))
     arcMap[d.strftime('%Y-%m')] = str(index)
     index += 1
+
+############################################################################
+
+def ratio490Threshold(region):
+    if region in ratio490Threshholds:
+        return ratio490Threshholds.get(region)
+    else:
+        return  '0.65'  # default
+
+def lakeBoxPolygon(region):
+    return boxWKT[region]
 
 def arcAuxdata(region, year, month):
     if region in arcFileIdByRegion:
@@ -49,3 +85,5 @@ def arcAuxdata(region, year, month):
         return (arcDayFile, arcNightFile, arcBand)
     else:
         return ('', '', '')
+
+ 
