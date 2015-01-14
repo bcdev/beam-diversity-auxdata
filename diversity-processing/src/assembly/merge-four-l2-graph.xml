@@ -1,0 +1,92 @@
+#set( $filename = $inputPath.name )
+<graph id="g">
+    <version>1.0</version>
+
+    <header>
+      <target refid="collocate" />
+      <source name="l1p">${inputPath}</source>
+      <source name="mph">$parameters.getProperty("mphDir")/L2_of_${filename}</source>
+      <source name="fub">$parameters.getProperty("fubDir")/${filename}</source>
+      <source name="ccl2w">$parameters.getProperty("ccl2wDir")/${filename}</source>
+      
+      <source name="shallow">$parameters.getProperty("shallowDir")/${region}_shallow-extent-mask.tif</source>
+    </header>
+
+    <node id="merged">
+        <operator>Merge</operator>
+        <sources>
+            <masterProduct>l1p</masterProduct>
+            <sourceProducts>mph,fub,ccl2w</sourceProducts>
+        </sources>
+
+        <parameters>
+            <includes>
+                <include>
+                    <productId>sourceProducts0</productId>
+                    <name>chl</name>
+                </include>
+                <include>
+                    <productId>sourceProducts0</productId>
+                    <name>mph_chl_flags</name>
+                </include>
+                <include>
+                    <productId>sourceProducts0</productId>
+                    <name>immersed_cyanobacteria</name>
+                </include>
+                <include>
+                    <productId>sourceProducts0</productId>
+                    <name>floating_cyanobacteria</name>
+                </include>
+                <include>
+                    <productId>sourceProducts0</productId>
+                    <name>floating_vegetation</name>
+                </include>
+                
+                <include>
+                    <productId>sourceProducts1</productId>
+                    <name>algal_2</name>
+                </include>
+                <include>
+                    <productId>sourceProducts1</productId>
+                    <name>yellow_subs</name>
+                </include>
+                <include>
+                    <productId>sourceProducts1</productId>
+                    <name>result_flags</name>
+                </include>
+
+                <include>
+                    <productId>sourceProducts2</productId>
+                    <name>l2w_flags</name>
+                </include>
+		 <include>
+                    <productId>sourceProducts2</productId>
+                    <name>owt_dominant_class</name>
+                </include>
+                <include>
+                    <productId>sourceProducts2</productId>
+                    <name>conc_tsm</name>
+                </include>
+                <include>
+                    <productId>sourceProducts2</productId>
+                    <name>turbidity</name>
+                </include>
+                
+            </includes>
+            <geographicError>0.01</geographicError>
+        </parameters>
+    </node>
+    
+    <node id="collocate">
+        <operator>Collocate</operator>
+        <sources>
+            <masterProduct>merged</masterProduct>
+            <slaveProduct>shallow</slaveProduct>
+        </sources>
+
+        <parameters>
+          <renameMasterComponents>false</renameMasterComponents>
+          <renameSlaveComponents>false</renameSlaveComponents>
+        </parameters>
+    </node>
+</graph>
