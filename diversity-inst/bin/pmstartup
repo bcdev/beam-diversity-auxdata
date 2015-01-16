@@ -1,0 +1,30 @@
+#!/bin/bash
+
+if [ -z "$DIVERSITY_INST" ]; then
+    DIVERSITY_INST=`pwd`
+    . $DIVERSITY_INST/mydiversity
+fi
+
+if [ -z "$1" ]; then
+    echo "call   : pmstartup <workflow>"
+    echo "example: pmstartup modis.py"
+    exit 1
+fi
+
+workflow=$(basename ${1%.py})
+
+if [ -e ${workflow}.pid ]
+then
+    if kill -0 $(cat ${workflow}.pid) > /dev/null 2>&1
+    then
+        ps -elf | grep $(cat ${workflow}.pid) | grep -v grep
+        echo "process already running"
+        echo "delete ${workflow}.pid file if running process is not the workflow"
+        exit 1
+    fi
+fi
+
+nohup python $DIVERSITY_INST/${workflow}.py > $DIVERSITY_INST/${workflow}.out 2>&1 &
+echo $! > $DIVERSITY_INST/${workflow}.pid
+sleep 2
+cat $DIVERSITY_INST/${workflow}.status

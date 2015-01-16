@@ -1,0 +1,22 @@
+#!/bin/bash
+
+if [ -z "$DIVERSITY_INST" ]; then
+    DIVERSITY_INST=`pwd`
+    . $DIVERSITY_INST/mydiversity
+fi
+
+if [ -z "$1" ]; then
+    echo "call   : pmshutdown <workflow>"
+    echo "example: pmshutdown modis.py"
+    exit 1
+fi
+
+workflow=$(basename ${1%.py})
+
+if [ ! -e $DIVERSITY_INST/${workflow}.pid ]; then
+    echo "missing ${workflow}.pid file in $DIVERSITY_INST"
+    ps -elf|grep python
+    exit 1
+fi
+
+kill $(cat $DIVERSITY_INST/${workflow}.pid)
