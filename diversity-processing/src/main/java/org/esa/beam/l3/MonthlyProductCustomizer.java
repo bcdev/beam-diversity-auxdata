@@ -61,7 +61,7 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
         }
         Product shallowCollocated = collocate(product, shallowProduct);
         ProductUtils.copyBand("shallow", shallowCollocated, product, true);
-        ProductUtils.copyBand("extent", shallowCollocated, product, true);
+//        ProductUtils.copyBand("extent", shallowCollocated, product, true);
 
         if (arcDayProduct != null) {
             Product arcDayCollocated = collocate(product, arcDayProduct);

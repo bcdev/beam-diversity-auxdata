@@ -109,8 +109,7 @@
              <mphDir>${mphDir}</mphDir>
              <fubDir>${fubDir}</fubDir>
              <ccl2wDir>${ccl2wDir}</ccl2wDir>
-             <shallowDir>/calvalus/projects/diversity/aux/shallow_new/</shallowDir>
-             <region>${region}</region>
+             <shallowFile>${shallowFile}</shallowFile>
           </parameters>
         </wps:ComplexData>
       </wps:Data>
@@ -127,7 +126,7 @@
             <numRows>64800</numRows>
             <superSampling>1</superSampling>
             
-            <maskExpr>not (l1_flags.INVALID or cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_SNOW_ICE ) and shallow == 0 and extent == 1 and sun_zenith &lt; 70 </maskExpr>    
+            <maskExpr>not (l1_flags.INVALID or cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_SNOW_ICE ) and shallow == 0 and sun_zenith &lt; 70 </maskExpr>
             <variables>
               <variable>
                   <name>chl_mph</name>

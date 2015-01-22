@@ -17,7 +17,7 @@ def getMonth(year):
 
 
 # years  = [ '2005', '2006', '2007' ]
-years  = [ '2005' ]
+#years  = [ '2005' ]
 years  = [ '2008', '2009' ]
 
 regions = ['Lake-Balaton']
@@ -45,7 +45,7 @@ hosts = [('localhost', 8)]
 pm = PMonitor(inputs, request='lake_products', logdir='log', hosts=hosts, script='template.py')
 
 BASE_OLD = '/calvalus/projects/diversity/prototype/'
-BASE_NEW = '/calvalus/home/marcoz/diversity_lakes_2/'
+BASE_NEW = '/calvalus/home/marcoz/diversity_lakes_3/'
 
 for region in regions:
     # =============== auxdata =======================
@@ -59,20 +59,20 @@ for region in regions:
     # L3 aggregation of ratio490
     isNorthRegion = True
     if isNorthRegion:
-        start = date(2008, 05, 01)
-        stop = date(2008, 10, 31)
+        shallowStart = date(2008, 05, 01)
+        shallowStop = date(2008, 10, 31)
         requiredIdepix = ['l2_idepix-2008-' + region]
     else:
-        start = date(2008, 11, 01)
-        stop = date(2009, 04, 30)
+        shallowStart = date(2008, 11, 01)
+        shallowStop = date(2009, 04, 30)
         requiredIdepix = ['l2_idepix-2008-' + region, 'l2_idepix-2009-' + region]
-    period = stop - start
-    period = period.days
+    period = shallowStop - shallowStart
+    period = period.days + 1
 
     shallowInputDir = BASE_NEW + region + '/l2-idepix/\${yyyy}'
     shallowParams = [
-        'startDate', str(start),
-        'stopDate', str(stop),
+        'startDate', str(shallowStart),
+        'stopDate', str(shallowStop),
         'period', str(period),
         'region', region,
         'wkt', 'include:'+shapeWktFile,
@@ -105,8 +105,7 @@ for region in regions:
         ]
         pm.execute('l2-idepix.xml', ['childs'], [l2_idepix_name], parameters=params, logprefix=l2_idepix_name)
 
-        continue
-        # TODO actually use new shallow product in l3
+        #continue
         # TODO simplify and harmonize parameters
 
         l2MphDir = BASE_NEW + region + '/l2-mph/' + year
@@ -146,6 +145,8 @@ for region in regions:
             (arcDayFile, arcNightFile, arcBand) = arcAuxdata(region, year, month)
             l3MonthDir = BASE_NEW + region + '/l3-monthly/' + year + '/' + month
 
+            shallowFile = region + '-shallow_' + str(shallowStart) + '_' + str(shallowStop) + '.nc'
+
             l3_month_name = 'l3-monthly-' + year + '-' + month + '-' + region
             params = [
                 'startDate', startDate,
@@ -156,9 +157,12 @@ for region in regions:
                 'inputDir', l2IdepixDir,
                 'outputDir', l3MonthDir,
                 'outputFormat', outputFormat,
+
                 'mphDir', l2MphDir,
                 'fubDir', l2FubDir,
                 'ccl2wDir', l2Ccl2wDir,
+                'shallowFile', BASE_NEW + region + '/l3-shallow-L3-1/' + shallowFile,
+
                 'arcDayProduct', arcDayFile,
                 'arcNightProduct', arcNightFile,
                 'arcBand', arcBand,

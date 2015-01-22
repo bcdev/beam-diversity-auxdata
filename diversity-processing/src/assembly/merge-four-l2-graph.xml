@@ -9,7 +9,7 @@
       <source name="fub">$parameters.getProperty("fubDir")/${filename}</source>
       <source name="ccl2w">$parameters.getProperty("ccl2wDir")/${filename}</source>
       
-      <source name="shallow">$parameters.getProperty("shallowDir")/${region}_shallow-extent-mask.tif</source>
+      <source name="shallow">$parameters.getProperty("shallowFile")</source>
     </header>
 
     <node id="merged">
