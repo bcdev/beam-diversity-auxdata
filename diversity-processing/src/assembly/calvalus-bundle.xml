@@ -19,6 +19,7 @@
             <scope>runtime</scope>
             <includes>
                 <include>org.esa.beam:diversity-processing</include>
+                <include>org.esa.beam:beam-collocation</include>
             </includes>
         </dependencySet>
     </dependencySets>
