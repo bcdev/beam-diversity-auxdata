@@ -46,7 +46,7 @@
     <wps:Input>
       <ows:Identifier>inputPath</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>${inputDir}/L2_of_MER_..._1.*${yyyy}${MM}${dd}.*.seq$</wps:LiteralData>
+        <wps:LiteralData>${projectRoot}/${region}/l2-idepix/${yyyy}/L2_of_MER_..._1.*${yyyy}${MM}${dd}.*.seq$</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>

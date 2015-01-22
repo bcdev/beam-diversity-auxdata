@@ -44,9 +44,6 @@ BASE_OLD = '/calvalus/projects/diversity/prototype/'
 BASE_NEW = '/calvalus/home/marcoz/diversity_lakes_4/'
 
 for region in regions:
-    # =============== auxdata =======================
-    # maybe, ensure auxdata files are available ???
-
     shapeWktFile = 'wkt/' + region + '.shape'
     boxWktFile = 'wkt/' + region + '.bbox'
 
@@ -65,15 +62,14 @@ for region in regions:
     period = shallowStop - shallowStart
     period = period.days + 1
 
-    shallowInputDir = BASE_NEW + region + '/l2-idepix/\${yyyy}'
     shallowParams = [
         'startDate', str(shallowStart),
         'stopDate', str(shallowStop),
         'period', str(period),
         'region', region,
-        'wkt', 'include:'+shapeWktFile,
+        'projectRoot', BASE_NEW,
+        'wkt', 'include:' + shapeWktFile,
         'ratio490thresh', ratio490Threshold(region),
-        'inputDir', shallowInputDir,
         'outputDir', shallowDir,
     ]
     shallow_name = 'shallow_name-' + region
@@ -90,7 +86,7 @@ for region in regions:
         l2Params = [
             'year', year,
             'region', region,
-            'projectRoot', BASE_NEW + region,
+            'projectRoot', BASE_NEW,
             'wkt', 'include:'+boxWktFile
         ]
         params = l2Params + [
