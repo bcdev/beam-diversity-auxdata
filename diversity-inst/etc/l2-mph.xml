@@ -37,14 +37,14 @@
     <wps:Input>
       <ows:Identifier>inputPath</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>${input}/L2_of_MER_..._1.*${yyyy}${MM}${dd}.*.seq$</wps:LiteralData>
+        <wps:LiteralData>${projectRoot}/${region}/l2-idepix/${year}/L2_of_MER_..._1.*${yyyy}${MM}${dd}.*.seq$</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
     <wps:Input>
       <ows:Identifier>calvalus.output.dir</ows:Identifier>
       <wps:Data>
-          <wps:LiteralData>${output}</wps:LiteralData>
+          <wps:LiteralData>${projectRoot}/${region}/l2-mph/${year}</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 

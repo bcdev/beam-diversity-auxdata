@@ -16,10 +16,6 @@ def getMonth(year):
     return allMonths
 
 
-# years  = [ '2005', '2006', '2007' ]
-#years  = [ '2005' ]
-years  = [ '2008', '2009' ]
-
 regions = ['Lake-Balaton']
 
 DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
@@ -45,7 +41,7 @@ hosts = [('localhost', 8)]
 pm = PMonitor(inputs, request='lake_products', logdir='log', hosts=hosts, script='template.py')
 
 BASE_OLD = '/calvalus/projects/diversity/prototype/'
-BASE_NEW = '/calvalus/home/marcoz/diversity_lakes_3/'
+BASE_NEW = '/calvalus/home/marcoz/diversity_lakes_4/'
 
 for region in regions:
     # =============== auxdata =======================
@@ -89,49 +85,28 @@ for region in regions:
         startDate = year + '-01-01'
         stopDate = year + '-12-31'
 
-        # =============== level2 =======================
         geoChildDir = BASE_OLD + region + '/geochilds/\${yyyy}/\${MM}/'
+        # =============== level2 =======================
         l2Params = [
             'year', year,
             'region', region,
+            'projectRoot', BASE_NEW + region,
             'wkt', 'include:'+boxWktFile
         ]
-
-        l2IdepixDir = BASE_NEW + region + '/l2-idepix/' + year
-        l2_idepix_name = 'l2_idepix-' + year + '-' + region
         params = l2Params + [
             'input', geoChildDir,
-            'output', l2IdepixDir,
         ]
+        l2_idepix_name = 'l2_idepix-' + year + '-' + region
         pm.execute('l2-idepix.xml', ['childs'], [l2_idepix_name], parameters=params, logprefix=l2_idepix_name)
 
-        #continue
-        # TODO simplify and harmonize parameters
-
-        l2MphDir = BASE_NEW + region + '/l2-mph/' + year
         l2_mph_name = 'l2_mph-' + year + '-' + region
-        params = l2Params + [
-            'input', l2IdepixDir,
-            'output', l2MphDir,
-        ]
-        pm.execute('l2-mph.xml', [l2_idepix_name], [l2_mph_name], parameters=params, logprefix=l2_mph_name)
+        pm.execute('l2-mph.xml', [l2_idepix_name], [l2_mph_name], parameters=l2Params, logprefix=l2_mph_name)
 
-        l2FubDir = BASE_NEW + region + '/l2-fub/' + year
         l2_fub_name = 'l2_fub-' + year + '-' + region
-        params = l2Params + [
-            'input', geoChildDir,
-            'output', l2FubDir,
-        ]
         pm.execute('l2-fub.xml', ['childs'], [l2_fub_name], parameters=params, logprefix=l2_fub_name)
 
-        l2Ccl2wDir = BASE_NEW + region + '/l2-ccl2w/' + year
         l2_ccl2w_name = 'l2_ccl2w-' + year + '-' + region
-        params = l2Params + [
-            'input', geoChildDir,
-            'output', l2Ccl2wDir,
-        ]
         pm.execute('l2-ccl2w.xml', ['childs'], [l2_ccl2w_name], parameters=params, logprefix=l2_ccl2w_name)
-
 
 
         all_l2_names = [shallow_name, l2_idepix_name, l2_mph_name, l2_fub_name, l2_ccl2w_name]
@@ -153,16 +128,12 @@ for region in regions:
                 'stopDate', stopDate,
                 'period', period,
                 'region', region,
+                'year', year,
+                'projectRoot', BASE_NEW,
                 'wkt', 'include:'+boxWktFile,
-                'inputDir', l2IdepixDir,
                 'outputDir', l3MonthDir,
                 'outputFormat', outputFormat,
-
-                'mphDir', l2MphDir,
-                'fubDir', l2FubDir,
-                'ccl2wDir', l2Ccl2wDir,
-                'shallowFile', BASE_NEW + region + '/l3-shallow-L3-1/' + shallowFile,
-
+                'shallowFile', shallowFile,
                 'arcDayProduct', arcDayFile,
                 'arcNightProduct', arcNightFile,
                 'arcBand', arcBand,

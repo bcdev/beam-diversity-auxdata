@@ -46,7 +46,7 @@
     <wps:Input>
       <ows:Identifier>inputPath</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>${inputDir}/L2_of_MER_..._1.*${yyyy}${MM}${dd}.*.seq$</wps:LiteralData>
+        <wps:LiteralData>${projectRoot}/${region}/l2-idepix/${year}/L2_of_MER_..._1.*${yyyy}${MM}${dd}.*.seq$</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>
@@ -106,10 +106,10 @@
       <wps:Data>
         <wps:ComplexData>
           <parameters>
-             <mphDir>${mphDir}</mphDir>
-             <fubDir>${fubDir}</fubDir>
-             <ccl2wDir>${ccl2wDir}</ccl2wDir>
-             <shallowFile>${shallowFile}</shallowFile>
+             <mphDir>${projectRoot}/${region}/l2-mph/${year}</mphDir>
+             <fubDir>${projectRoot}/${region}/l2-fub/${year}</fubDir>
+             <ccl2wDir>${projectRoot}/${region}/l2-ccl2w/${year}</ccl2wDir>
+             <shallowFile>${projectRoot}/${region}/l3-shallow-L3-1/${shallowFile}</shallowFile>
           </parameters>
         </wps:ComplexData>
       </wps:Data>

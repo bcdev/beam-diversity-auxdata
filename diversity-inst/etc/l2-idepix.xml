@@ -56,7 +56,7 @@
     <wps:Input>
       <ows:Identifier>calvalus.output.dir</ows:Identifier>
       <wps:Data>
-          <wps:LiteralData>${output}</wps:LiteralData>
+          <wps:LiteralData>${projectRoot}/${region}/l2-idepix/${year}</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
