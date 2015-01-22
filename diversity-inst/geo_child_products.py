@@ -1,7 +1,7 @@
 from pmonitor import PMonitor
 from datetime import date
 from calendar import monthrange
-from auxdata import lakeBoxPolygon
+import os
 
 years = ['2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012']
 allMonths = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
@@ -20,6 +20,14 @@ years = ['2005']
 
 regions = ['Lake-Balaton']
 
+DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
+# before starting, check if WKT files are available
+for region in regions:
+    boxWktFile = DIVERSITY_INST_DIR + '/wkt/' + region + '.bbox'
+    if not os.access(boxWktFile, os.R_OK):
+        raise IOError('Unable to access ' + boxWktFile)
+
+
 inputs = ['dummy']
 hosts = [('localhost', 8)]
 
@@ -29,7 +37,7 @@ BASE_OLD = '/calvalus/projects/diversity/prototype/'
 BASE_NEW = '/calvalus/home/marcoz/diversity_lakes/'
 
 for region in regions:
-    wkt = lakeBoxPolygon(region)
+    boxWktFile = 'wkt/' + region + '.bbox'
     for year in years:
         for month in getMonth(year):
             (_, lastdayofmonth) = monthrange(int(year), int(month))
@@ -42,7 +50,7 @@ for region in regions:
                 'startDate', startDate,
                 'stopDate', stopDate,
                 'region', region,
-                'wkt', '"' + wkt + '"',
+                'wkt', 'include:'+boxWktFile,
                 'output', geoChildDir,
             ]
             pm.execute('l1-child.xml', ['dummy'], [l1_geo_name], parameters=params, logprefix=l1_geo_name)

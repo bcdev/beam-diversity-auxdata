@@ -25,7 +25,7 @@ def main(templateName, requestName, parameters):
             print 'includeFile.1 ( for key='+key+' ) = ' + includeFile
             if includeFile[0] != '/':
                 includeFile = BASE_DIR + '/' + includeFile
-            print 'includeFile.2 ( for key='+key+' ) = ' + includeFile
+                print 'includeFile.absolute ( for key='+key+' ) = ' + includeFile
             with open(includeFile, 'r') as textFile:
                 valueFromFile = textFile.read()
             parameterDict[key] = valueFromFile

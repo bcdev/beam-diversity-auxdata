@@ -1,9 +1,5 @@
 from datetime import date
 
-boxWKT = {
-    'Lake-Balaton': 'POLYGON ((17.244438921600022 46.7055567678, 18.166661118000007 46.7055567678, 18.166661118000007 47.0583345357, 17.244438921600022 47.0583345357, 17.244438921600022 46.7055567678))'
-}
-
 # enter here k490 thresholds other than default for certain lakes:
 ratio490Threshholds = {
     'Lake-Alakol': '0.5',
@@ -73,9 +69,6 @@ def ratio490Threshold(region):
         return ratio490Threshholds.get(region)
     else:
         return  '0.65'  # default
-
-def lakeBoxPolygon(region):
-    return boxWKT[region]
 
 def arcAuxdata(region, year, month):
     if region in arcFileIdByRegion:

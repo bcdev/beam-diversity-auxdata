@@ -1,7 +1,8 @@
 from pmonitor import PMonitor
 from datetime import date
 from calendar import monthrange, isleap
-from auxdata import lakeBoxPolygon, ratio490Threshold, arcAuxdata
+import os
+from auxdata import ratio490Threshold, arcAuxdata
 
 years = ['2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012']
 allMonths = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
@@ -20,6 +21,17 @@ years  = [ '2005' ]
 years  = [ '2008', '2009' ]
 
 regions = ['Lake-Balaton']
+
+DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
+# before starting, check if WKT files are available
+for region in regions:
+    boxWktFile = DIVERSITY_INST_DIR + '/wkt/' + region + '.bbox'
+    if not os.access(boxWktFile, os.R_OK):
+        raise IOError('Unable to access ' + boxWktFile)
+    shapeWktFile = DIVERSITY_INST_DIR + '/wkt/' + region + '.shape'
+    if not os.access(shapeWktFile, os.R_OK):
+        raise IOError('Unable to access ' + shapeWktFile)
+
 #   must be one of 'GeoTIFF' 'NetCDF' or 'NetCDF4'
 outputFormat = 'GeoTIFF'
 
@@ -29,7 +41,6 @@ if outputFormat == 'GeoTIFF':
 
 inputs = ['childs']
 hosts = [('localhost', 8)]
-
 #   , simulation=True
 pm = PMonitor(inputs, request='lake_products', logdir='log', hosts=hosts, script='template.py')
 
@@ -40,7 +51,9 @@ for region in regions:
     # =============== auxdata =======================
     # maybe, ensure auxdata files are available ???
 
-    wkt = lakeBoxPolygon(region)
+    shapeWktFile = 'wkt/' + region + '.shape'
+    boxWktFile = 'wkt/' + region + '.bbox'
+
     shallowDir = BASE_NEW + region + '/l3-shallow/'
     # =============== shallow =======================
     # L3 aggregation of ratio490
@@ -56,14 +69,13 @@ for region in regions:
     period = stop - start
     period = period.days
 
-    # TODO use high-res WKT for shallow
     shallowInputDir = BASE_NEW + region + '/l2-idepix/\${yyyy}'
     shallowParams = [
         'startDate', str(start),
         'stopDate', str(stop),
         'period', str(period),
         'region', region,
-        'wkt', '"' + wkt + '"',
+        'wkt', 'include:'+shapeWktFile,
         'ratio490thresh', ratio490Threshold(region),
         'inputDir', shallowInputDir,
         'outputDir', shallowDir,
@@ -82,7 +94,7 @@ for region in regions:
         l2Params = [
             'year', year,
             'region', region,
-            'wkt', '"' + wkt + '"'
+            'wkt', 'include:'+boxWktFile
         ]
 
         l2IdepixDir = BASE_NEW + region + '/l2-idepix/' + year
@@ -140,7 +152,7 @@ for region in regions:
                 'stopDate', stopDate,
                 'period', period,
                 'region', region,
-                'wkt', '"' + wkt + '"',
+                'wkt', 'include:'+boxWktFile,
                 'inputDir', l2IdepixDir,
                 'outputDir', l3MonthDir,
                 'outputFormat', outputFormat,
@@ -166,7 +178,7 @@ for region in regions:
                 'stopDate', stopDate,
                 'period', period,
                 'region', region,
-                'wkt', '"' + wkt + '"',
+                'wkt', 'include:'+boxWktFile,
                 'input', BASE_NEW + region + '/l3-monthly/' + year + '/.*-1/.*.' + extension + '$',
                 'output', l3YearDir,
                 'outputFormat', outputFormat
@@ -187,7 +199,7 @@ for region in regions:
             'stopDate', stopDate,
             'period', period,
             'region', region,
-            'wkt', '"' + wkt + '"',
+            'wkt', 'include:'+boxWktFile,
             'input', BASE_NEW + region + '/l3-yearly/.*-1/.*.' + extension + '$',
             'output', l3DecadeDir,
             'outputFormat', outputFormat
