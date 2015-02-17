@@ -50,6 +50,12 @@
       </wps:Data>
     </wps:Input>
     <wps:Input>
+      <ows:Identifier>calvalus.input.format</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${outputFormat}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
       <ows:Identifier>calvalus.output.dir</ows:Identifier>
       <wps:Data>
         <wps:LiteralData>${output}</wps:LiteralData>
@@ -71,7 +77,7 @@
     <wps:Input>
       <ows:Identifier>calvalus.output.format</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>GeoTIFF</wps:LiteralData>
+        <wps:LiteralData>${outputFormat}</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>

@@ -72,7 +72,7 @@
     <wps:Input>
       <ows:Identifier>calvalus.output.format</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>GeoTIFF</wps:LiteralData>
+        <wps:LiteralData>${outputFormat}</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>
@@ -237,7 +237,7 @@
                   <writeNumObs>true</writeNumObs>
                   <writeNumPasses>false</writeNumPasses>
                   
-                  <shallowProduct>/calvalus/projects/diversity/aux/shallow_new/${region}_shallow-extent-mask.tif</shallowProduct>
+                  <shallowProduct>${projectRoot}/${region}/l3-shallow-L3-1/${shallowFile}</shallowProduct>
                   
                   <arcDayProduct>/calvalus/projects/diversity/aux/${arcDayProduct}</arcDayProduct>
                   <arcNightProduct>/calvalus/projects/diversity/aux/${arcNightProduct}</arcNightProduct>
