@@ -16,7 +16,8 @@ def getMonth(year):
     return allMonths
 
 
-regions = ['Lake-Balaton']
+#regions = ['Lake-Balaton']
+regions = ['Lake-Aral']
 
 DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
 # before starting, check if WKT files are available
@@ -40,14 +41,13 @@ hosts = [('localhost', 8)]
 #   , simulation=True
 pm = PMonitor(inputs, request='lake_products', logdir='log', hosts=hosts, script='template.py')
 
-BASE_OLD = '/calvalus/projects/diversity/prototype/'
-BASE_NEW = '/calvalus/home/marcoz/diversity_lakes_4/'
+BASE = '/calvalus/projects/diversity/lake_products/'
 
 for region in regions:
     shapeWktFile = 'wkt/' + region + '.shape'
     boxWktFile = 'wkt/' + region + '.bbox'
 
-    shallowDir = BASE_NEW + region + '/l3-shallow/'
+    shallowDir = BASE + region + '/l3-shallow/'
     # =============== shallow =======================
     # L3 aggregation of ratio490
     isNorthRegion = True
@@ -67,7 +67,7 @@ for region in regions:
         'stopDate', str(shallowStop),
         'period', str(period),
         'region', region,
-        'projectRoot', BASE_NEW,
+        'projectRoot', BASE,
         'wkt', 'include:' + shapeWktFile,
         'ratio490thresh', ratio490Threshold(region),
         'outputDir', shallowDir,
@@ -81,12 +81,12 @@ for region in regions:
         startDate = year + '-01-01'
         stopDate = year + '-12-31'
 
-        geoChildDir = BASE_OLD + region + '/geochilds/\${yyyy}/\${MM}/'
+        geoChildDir = BASE + region + '/l1-child/\${yyyy}/\${MM}/'
         # =============== level2 =======================
         l2Params = [
             'year', year,
             'region', region,
-            'projectRoot', BASE_NEW,
+            'projectRoot', BASE,
             'wkt', 'include:'+boxWktFile
         ]
         params = l2Params + [
@@ -114,7 +114,7 @@ for region in regions:
             stopDate = str(date(int(year), int(month), lastdayofmonth))
             period = str(lastdayofmonth)
             (arcDayFile, arcNightFile, arcBand) = arcAuxdata(region, year, month)
-            l3MonthDir = BASE_NEW + region + '/l3-monthly/' + year + '/' + month
+            l3MonthDir = BASE + region + '/l3-monthly/' + year + '/' + month
 
             shallowFile = region + '-shallow_' + str(shallowStart) + '_' + str(shallowStop) + '.nc'
 
@@ -125,7 +125,7 @@ for region in regions:
                 'period', period,
                 'region', region,
                 'year', year,
-                'projectRoot', BASE_NEW,
+                'projectRoot', BASE,
                 'wkt', 'include:'+boxWktFile,
                 'outputDir', l3MonthDir,
                 'outputFormat', outputFormat,
@@ -141,7 +141,7 @@ for region in regions:
             startDate = year + '-01-01'
             stopDate = year + '-12-31'
             period = '366' if isleap(int(year)) else '365'
-            l3YearDir = BASE_NEW + region + '/l3-yearly/' + year
+            l3YearDir = BASE + region + '/l3-yearly/' + year
 
             l3_year_name = 'l3-yearly-' + year + '-' + region
             params = [
@@ -150,7 +150,7 @@ for region in regions:
                 'period', period,
                 'region', region,
                 'wkt', 'include:'+boxWktFile,
-                'input', BASE_NEW + region + '/l3-monthly/' + year + '/.*-1/.*.' + extension + '$',
+                'input', BASE + region + '/l3-monthly/' + year + '/.*-1/.*.' + extension + '$',
                 'output', l3YearDir,
                 'outputFormat', outputFormat
             ]
@@ -162,7 +162,7 @@ for region in regions:
         startDate = '2003-01-01'
         stopDate = '2011-12-31'
         period = '3287'
-        l3DecadeDir = BASE_NEW + region + '/l3-decade/'
+        l3DecadeDir = BASE + region + '/l3-decade/'
 
         l3_decade_name = 'l3-decade-' + region
         params = [
@@ -171,7 +171,7 @@ for region in regions:
             'period', period,
             'region', region,
             'wkt', 'include:'+boxWktFile,
-            'input', BASE_NEW + region + '/l3-yearly/.*-1/.*.' + extension + '$',
+            'input', BASE + region + '/l3-yearly/.*-1/.*.' + extension + '$',
             'output', l3DecadeDir,
             'outputFormat', outputFormat
         ]

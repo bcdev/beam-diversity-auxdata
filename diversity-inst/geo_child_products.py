@@ -16,7 +16,7 @@ def getMonth(year):
 
 
 # years  = [ '2005', '2006', '2007' ]
-years = ['2005']
+#years = ['2003']
 
 regions = ['Lake-Balaton']
 
@@ -33,24 +33,20 @@ hosts = [('localhost', 8)]
 
 pm = PMonitor(inputs, request='geo_child_products', logdir='log', hosts=hosts, script='template.py')
 
-BASE_OLD = '/calvalus/projects/diversity/prototype/'
-BASE_NEW = '/calvalus/home/marcoz/diversity_lakes/'
+BASE = '/calvalus/projects/diversity/lake_products/'
 
 for region in regions:
     boxWktFile = 'wkt/' + region + '.bbox'
     for year in years:
         for month in getMonth(year):
-            (_, lastdayofmonth) = monthrange(int(year), int(month))
-            startDate = str(date(int(year), int(month), 1))
-            stopDate = str(date(int(year), int(month), lastdayofmonth))
-
-            geoChildDir = BASE_NEW + region + '/l1-child/' + year + "/" + month
+            geoChildDir = BASE + region + '/l1-child/' + year + "/" + month
             l1_geo_name = 'l1_geo-' + year + "-" + month + '-' + region
             params = [
-                'startDate', startDate,
-                'stopDate', stopDate,
+                'year', year,
+                'month', month,
                 'region', region,
                 'wkt', 'include:'+boxWktFile,
+                'input', '/calvalus/eodata/MER_FSG_1P/v2013/' + year + '/' + month,
                 'output', geoChildDir,
             ]
             pm.execute('l1-child.xml', ['dummy'], [l1_geo_name], parameters=params, logprefix=l1_geo_name)

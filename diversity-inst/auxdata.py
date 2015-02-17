@@ -21,7 +21,8 @@ ratio490Threshholds = {
     'Lake-Tsimlyanskoye': '0.6'
 }
 
-arcFileIdByRegion = {'Lake-Balaton' : '0310'}
+arcFileIdByRegion = {'Lake-Balaton' : '0310',
+                     'Lake-Aral' : '0004'}
 
 # ARC band times for v3: start 1995-06-16, end 2012-06-16
 arcBandTime = [
