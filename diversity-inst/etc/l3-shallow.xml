@@ -181,7 +181,7 @@
     <wps:Input>
       <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>lc</wps:LiteralData>
+        <wps:LiteralData>cc</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
