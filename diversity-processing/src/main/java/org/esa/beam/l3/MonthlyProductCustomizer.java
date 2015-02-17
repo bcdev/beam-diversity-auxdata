@@ -80,7 +80,7 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
     private Product collocate(Product masterProduct, Product slaveProduct) {
         CollocateOp collocateOp = new CollocateOp();
         collocateOp.setParameterDefaultValues();
-        collocateOp.setRenameMasterComponents(false);
+        collocateOp.setRenameMasterComponents(true);
         collocateOp.setRenameSlaveComponents(false);
         collocateOp.setMasterProduct(masterProduct);
         collocateOp.setSlaveProduct(slaveProduct);
