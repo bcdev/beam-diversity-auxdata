@@ -16,8 +16,8 @@ def getMonth(year):
     return allMonths
 
 
-#regions = ['Lake-Balaton']
-regions = ['Lake-Aral']
+regions = ['Lake-Balaton']
+#regions = ['Lake-Aral']
 
 DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
 # before starting, check if WKT files are available
@@ -113,7 +113,12 @@ for region in regions:
             startDate = str(date(int(year), int(month), 1))
             stopDate = str(date(int(year), int(month), lastdayofmonth))
             period = str(lastdayofmonth)
+
             (arcDayFile, arcNightFile, arcBand) = arcAuxdata(region, year, month)
+            if arcDayFile != '""':
+                arcDayFile = '/calvalus/projects/diversity/aux/' + arcDayFile
+                arcNightFile = '/calvalus/projects/diversity/aux/' + arcNightFile
+
             l3MonthDir = BASE + region + '/l3-monthly/' + year + '/' + month
 
             shallowFile = region + '-shallow_' + str(shallowStart) + '_' + str(shallowStop) + '.nc'
@@ -132,7 +137,7 @@ for region in regions:
                 'shallowFile', shallowFile,
                 'arcDayProduct', arcDayFile,
                 'arcNightProduct', arcNightFile,
-                'arcBand', arcBand,
+                'arcBand', arcBand
             ]
             pm.execute('l3-monthly.xml', all_l2_names, [l3_month_name], parameters=params, logprefix=l3_month_name)
             l3_month_names.append(l3_month_name)

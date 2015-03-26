@@ -78,6 +78,6 @@ def arcAuxdata(region, year, month):
         arcBand = 'lswt_time' + arcMap[year + '-' + month]
         return (arcDayFile, arcNightFile, arcBand)
     else:
-        return ('', '', '')
+        return ('""', '""', '""')
 
  

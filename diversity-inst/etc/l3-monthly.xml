@@ -239,8 +239,8 @@
                   
                   <shallowProduct>${projectRoot}/${region}/l3-shallow-L3-1/${shallowFile}</shallowProduct>
                   
-                  <arcDayProduct>/calvalus/projects/diversity/aux/${arcDayProduct}</arcDayProduct>
-                  <arcNightProduct>/calvalus/projects/diversity/aux/${arcNightProduct}</arcNightProduct>
+                  <arcDayProduct>${arcDayProduct}</arcDayProduct>
+                  <arcNightProduct>${arcNightProduct}</arcNightProduct>
                   <arcBand>${arcBand}</arcBand>
               </productCustomizer>
           </parameters>
