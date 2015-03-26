@@ -41,6 +41,6 @@ if __name__ == "__main__":
         print 'Usage: template.py template [param value] [param2 value2] input output'
         sys.exit(1)
     templateName = sys.argv[1]
-    parameters = sys.argv[2:len(sys.argv)-2]
+    parameters = sys.argv[2:len(sys.argv)-1]
     requestName = sys.argv[-1]
     sys.exit(main(templateName, requestName, parameters))
