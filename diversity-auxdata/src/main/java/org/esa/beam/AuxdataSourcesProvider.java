@@ -3,6 +3,7 @@ package org.esa.beam;
 import org.esa.beam.framework.dataio.ProductIO;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.operator.CmorphSumOp;
 import org.esa.beam.operator.SoilMoistureOp;
 import org.esa.beam.operator.TrmmBiweeklySumOp;
@@ -205,6 +206,63 @@ public class AuxdataSourcesProvider {
 
         if (productIndex == 0) {
             System.out.println("No NDVI source products found for year " + year + " - nothing to do.");
+        }
+
+        return ndviSourceProductsList.toArray(new Product[ndviSourceProductsList.size()]);
+    }
+
+    public static Product[] getNdviProbavSourceProducts(File inputDataDir,
+                                                        final String year,
+                                                        final String probavMonth,
+                                                        final String probavTile) {
+        final FileFilter ndviProductFileFilter = new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                // e.g. PROBAV_S10_TOC_X18Y07_20140501_333M_NDVI_V001.hdf5
+                return file.isFile() &&
+                        file.getName().startsWith("PROBAV_S10_TOC_" + probavTile + "_" + year) &&
+                        file.getName().toUpperCase().endsWith("_333M_NDVI_V001.HDF5");
+            }
+        };
+
+        final FileFilter ndviProductDirectoryFilter = new FileFilter() {
+            @Override
+            public boolean accept(File file) {
+                // e.g. PV_S10_TOC_NDVI_20140501_333M_V001
+                return file.isDirectory() &&
+                        file.getName().startsWith("PV_S10_TOC_NDVI_" + year + probavMonth) &&
+                        file.getName().toUpperCase().endsWith("_333M_V001");
+            }
+        };
+
+        final String ndviDir = inputDataDir + File.separator + year;
+        List<Product> ndviSourceProductsList = new ArrayList<Product>();
+        int productIndex = 0;
+
+        final File[] ndviProductDirs = (new File(ndviDir)).listFiles(ndviProductDirectoryFilter);
+        if (ndviProductDirs != null && ndviProductDirs.length > 0) {
+            for (File ndviProductDir : ndviProductDirs) {
+                final File[] ndviSourceProductFiles = (ndviProductDir.listFiles(ndviProductFileFilter));
+                if (ndviSourceProductFiles.length != 1) {
+                    throw new OperatorException("Unexpected directory structure - cannot proceed.");
+                }
+                final File ndviSourceProductFile = ndviSourceProductFiles[0];
+                try {
+                    final Product product = ProductIO.readProduct(ndviSourceProductFile.getAbsolutePath());
+                    if (product != null) {
+                        ndviSourceProductsList.add(product);
+                        productIndex++;
+                    }
+                } catch (IOException e) {
+                    System.err.println("WARNING: new NDVI tif file '" +
+                                               ndviSourceProductFile.getName() + "' could not be read - skipping.");
+                }
+            }
+        }
+
+        if (productIndex == 0) {
+            System.out.println("No NDVI source products found for year " + year + ", month " +
+                                       probavMonth + "  - nothing to do.");
         }
 
         return ndviSourceProductsList.toArray(new Product[ndviSourceProductsList.size()]);

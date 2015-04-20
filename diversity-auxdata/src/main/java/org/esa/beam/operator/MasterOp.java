@@ -24,9 +24,9 @@ import java.util.List;
  * @author olafd
  */
 @OperatorMetadata(alias = "Diversity.Auxdata", version = "1.0",
-        authors = "Olaf Danne",
-        copyright = "(c) 2013 Brockmann Consult",
-        description = "Master operator for preparation/modification of various Diversity auxdata.")
+                  authors = "Olaf Danne",
+                  copyright = "(c) 2013 Brockmann Consult",
+                  description = "Master operator for preparation/modification of various Diversity auxdata.")
 public class MasterOp extends Operator {
     public static final String VERSION = "1.0-SNAPSHOT";
 
@@ -40,7 +40,7 @@ public class MasterOp extends Operator {
     private String year;
 
     @Parameter(defaultValue = "01", description = "The month to process (used for CMORPH_BIWEEKLY)",
-            valueSet = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"})
+               valueSet = {"01", "02", "03", "04", "05", "06", "07", "08", "09", "10", "11", "12"})
     private String month;
 
     @Parameter(defaultValue = "1", description = "The day to process (used for CMORPH_DAILY)", interval = "[1,31]")
@@ -50,20 +50,33 @@ public class MasterOp extends Operator {
     private boolean writeNdviFlags;
 
     @Parameter(valueSet = {"NDVI", "NDVI_NEW", "NDVI_MAXCOMPOSIT", "NDVI_MAXCOMPOSIT_NEW",
-                    "TRMM_YEARLY", "TRMM_BIWEEKLY",
-                    "CMORPH_DAILY", "CMORPH_BIWEEKLY", "CMORPH_YEARLY",
-                    "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE", "GLOBVEG",
-                    "GPCP", "CMAP"
-            },
-            description = "Processing mode (i.e. the data to process")
+            "NDVI_PROBAV", "NDVI_WEIGHTAVE_PROBAV",
+            "TRMM_YEARLY", "TRMM_BIWEEKLY",
+            "CMORPH_DAILY", "CMORPH_BIWEEKLY", "CMORPH_YEARLY",
+            "SOIL_MOISTURE", "ACTUAL_EVAPOTRANSPIRATION", "AIR_TEMPERATURE", "GLOBVEG",
+            "GPCP", "CMAP"
+    },
+               description = "Processing mode (i.e. the data to process")
     private DataCategory category;
 
     @Parameter(valueSet = {"10-iberia", "12-southafrica", "13-west-sudanian-savanna", "15-caatinga", "20-australia"},
-            description = "The site to process in 'Globveg' mode (to be given as 'hYYvXX')")
+               description = "The site to process in 'Globveg' mode (to be given as 'hYYvXX')")
     private String globvegSite;
 
     @Parameter(description = "The tile to process in 'Globveg' mode (to be given as 'hYYvXX')")
     private String globvegTile;
+
+    @Parameter(description = "The tile to process in 'NDVI_PROBAV' mode (to be given as 'XnnYmm')")
+    private String probavTile;
+
+    @Parameter(interval="[1,12]",
+               description = "The month to process in 'NDVI_PROBAV' mode (to be given as integer from 1-12)")
+    private int probavMonth;
+
+    @Parameter(valueSet = {"0", "1"},
+               defaultValue = "0",
+               description = "Biweekly index: 0 = days 1-15, 1 = days 16-30")
+    private int probavBiweeklyIndex;
 
     @Parameter(valueSet = {"MERGED", "COMBINED"},
                defaultValue = "MERGED",
@@ -80,6 +93,10 @@ public class MasterOp extends Operator {
             case NDVI_NEW:
                 final Product ndviNewProduct = getNewNdviProduct();
                 setTargetProduct(ndviNewProduct);
+                break;
+            case NDVI_PROBAV:
+                final Product ndviProbavProduct = getNdviProbavProduct();
+                setTargetProduct(ndviProbavProduct);
                 break;
             case GLOBVEG:
                 final Product globvegProduct = getGlobvegProduct();
@@ -249,9 +266,9 @@ public class MasterOp extends Operator {
     private Product getNdviMaxcompositProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNdviSourceProducts(inputDataDir,
-                year,
-                category,
-                writeNdviFlags);
+                                                                          year,
+                                                                          category,
+                                                                          writeNdviFlags);
         NdviMaxCompositOp ndviMaxCompositOp = new NdviMaxCompositOp();
         ndviMaxCompositOp.setSourceProducts(ndviSourceProducts);
         ndviMaxCompositOp.setParameter("year", year);
@@ -264,9 +281,9 @@ public class MasterOp extends Operator {
     private Product getNewNdviMaxcompositProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNewNdviSourceProducts(inputDataDir,
-                year,
-                category,
-                writeNdviFlags);
+                                                                             year,
+                                                                             category,
+                                                                             writeNdviFlags);
         NdviMaxCompositOp ndviMaxCompositOp = new NdviMaxCompositOp();
         ndviMaxCompositOp.setSourceProducts(ndviSourceProducts);
         ndviMaxCompositOp.setParameter("year", year);
@@ -287,9 +304,9 @@ public class MasterOp extends Operator {
     private Product getNdviProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNdviSourceProducts(inputDataDir,
-                year,
-                category,
-                writeNdviFlags);
+                                                                          year,
+                                                                          category,
+                                                                          writeNdviFlags);
         NdviOp ndviOp = new NdviOp();
         ndviOp.setSourceProducts(ndviSourceProducts);
         ndviOp.setParameter("year", year);
@@ -302,9 +319,9 @@ public class MasterOp extends Operator {
     private Product getNewNdviProduct() {
         Product[] ndviSourceProducts;
         ndviSourceProducts = AuxdataSourcesProvider.getNewNdviSourceProducts(inputDataDir,
-                year,
-                category,
-                writeNdviFlags);
+                                                                             year,
+                                                                             category,
+                                                                             writeNdviFlags);
         NdviOp ndviOp = new NdviOp();
         ndviOp.setSourceProducts(ndviSourceProducts);
         ndviOp.setParameter("year", year);
@@ -314,12 +331,27 @@ public class MasterOp extends Operator {
         return ndviOp.getTargetProduct();
     }
 
+    private Product getNdviProbavProduct() {
+        Product[] ndviSourceProducts;
+        ndviSourceProducts = AuxdataSourcesProvider.getNdviProbavSourceProducts(inputDataDir,
+                                                                             year,
+                                                                             String.format("%02d", probavMonth),
+                                                                             probavTile);
+        NdviProbaVOp ndviOp = new NdviProbaVOp();
+        ndviOp.setSourceProducts(ndviSourceProducts);
+        ndviOp.setParameter("year", year);
+        ndviOp.setParameter("month", probavMonth);
+        ndviOp.setParameter("biweeklyIndex", probavBiweeklyIndex);
+
+        return ndviOp.getTargetProduct();
+    }
+
     private Product getGlobvegProduct() {
         Product[] globvegSourceProducts;
         globvegSourceProducts = AuxdataSourcesProvider.getGlobvegSourceProducts(inputDataDir,
-                year,
-                globvegSite,
-                globvegTile);
+                                                                                year,
+                                                                                globvegSite,
+                                                                                globvegTile);
         GlobvegOp globvegOp = new GlobvegOp();
         globvegOp.setSourceProducts(globvegSourceProducts);
         globvegOp.setParameter("globvegTile", globvegTile);
@@ -339,10 +371,10 @@ public class MasterOp extends Operator {
             Product[] smDailySourceProducts;
             try {
                 smDailySourceProducts = AuxdataSourcesProvider.getSmDailySourceProducts(inputDataDir,
-                        year,
-                        smDataType,
-                        startdateString,
-                        enddateString);
+                                                                                        year,
+                                                                                        smDataType,
+                                                                                        startdateString,
+                                                                                        enddateString);
                 if (smDailySourceProducts != null && smDailySourceProducts.length > 0) {
                     smAveOp.setSourceProducts(smDailySourceProducts);
                     smAveOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
@@ -379,7 +411,7 @@ public class MasterOp extends Operator {
 
             final SubBiweeklyProductFraction pentadProductFractions =
                     DiversityAuxdataUtils.getPentadProductFractionsForBiweeklyPeriods(startDateString,
-                            endDateString);
+                                                                                      endDateString);
 
             if (cmapPentadSplittedSourceProducts != null && cmapPentadSplittedSourceProducts.length > 0) {
                 cmapAveOp.setSourceProducts(cmapPentadSplittedSourceProducts);
@@ -411,13 +443,13 @@ public class MasterOp extends Operator {
 
             final SubBiweeklyProductFraction eightDayProductFractions =
                     DiversityAuxdataUtils.get8DayProductFractionsForBiweeklyPeriods(startDateString,
-                            endDateString);
+                                                                                    endDateString);
             try {
                 ae8DaySourceProducts = AuxdataSourcesProvider.getAe8DaySourceProducts(inputDataDir,
-                        year,
-                        eightDayProductFractions,
-                        startDateString,
-                        endDateString);
+                                                                                      year,
+                                                                                      eightDayProductFractions,
+                                                                                      startDateString,
+                                                                                      endDateString);
                 if (ae8DaySourceProducts != null && ae8DaySourceProducts.length > 0) {
                     aeAveOp.setSourceProducts(ae8DaySourceProducts);
                     aeAveOp.setParameter("startdateString", Constants.HALFMONTHS[i]);
@@ -426,7 +458,7 @@ public class MasterOp extends Operator {
                 }
             } catch (ParseException e) {
                 throw new OperatorException("Problems while parsing Actual Evapotranspiration input - cannot proceed: " +
-                        e.getMessage());
+                                                    e.getMessage());
             }
         }
         Product[] biweeklyAverageProducts = biweeklyAverageProductList.toArray(new Product[biweeklyAverageProductList.size()]);
