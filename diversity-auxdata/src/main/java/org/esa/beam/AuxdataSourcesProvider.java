@@ -243,19 +243,18 @@ public class AuxdataSourcesProvider {
         if (ndviProductDirs != null && ndviProductDirs.length > 0) {
             for (File ndviProductDir : ndviProductDirs) {
                 final File[] ndviSourceProductFiles = (ndviProductDir.listFiles(ndviProductFileFilter));
-                if (ndviSourceProductFiles.length != 1) {
-                    throw new OperatorException("Unexpected directory structure - cannot proceed.");
-                }
-                final File ndviSourceProductFile = ndviSourceProductFiles[0];
-                try {
-                    final Product product = ProductIO.readProduct(ndviSourceProductFile.getAbsolutePath());
-                    if (product != null) {
-                        ndviSourceProductsList.add(product);
-                        productIndex++;
+                if (ndviSourceProductFiles.length > 0) {
+                    final File ndviSourceProductFile = ndviSourceProductFiles[0];
+                    try {
+                        final Product product = ProductIO.readProduct(ndviSourceProductFile.getAbsolutePath());
+                        if (product != null) {
+                            ndviSourceProductsList.add(product);
+                            productIndex++;
+                        }
+                    } catch (IOException e) {
+                        System.err.println("WARNING: new NDVI HDF5 file '" +
+                                                   ndviSourceProductFile.getName() + "' could not be read - skipping.");
                     }
-                } catch (IOException e) {
-                    System.err.println("WARNING: new NDVI tif file '" +
-                                               ndviSourceProductFile.getName() + "' could not be read - skipping.");
                 }
             }
         }

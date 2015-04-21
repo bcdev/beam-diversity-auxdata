@@ -59,21 +59,42 @@ public class NdviProbaVOp extends Operator {
         Arrays.sort(sourceProducts, new ProductNameComparator());
         sortedDataSourceProducts = sourceProducts;
 
-        if (sortedDataSourceProducts.length != 3) {
-            throw new OperatorException("Month " + month + " does not contain 3 source products - cannot proceed.");
-        }
+//        if (sortedDataSourceProducts.length != 3) {
+//            throw new OperatorException("Month " + month + " does not contain 3 source products - cannot proceed.");
+//        }
 
-        // we have 3 products per month: days 1-10, 11-20, 21-30
-        fiveDaySourceProduct = sortedDataSourceProducts[1];
-        if (probavBiweeklyIndex == 0) {
-            tenDaySourceProduct = sortedDataSourceProducts[0];
-        } else {
-            tenDaySourceProduct = sortedDataSourceProducts[2];
-        }
+        // we *should* have 3 products per month: days 1-10, 11-20, 21-30
+        // if there's only one, fill both biweekly target products with this
+        // if there's two products, set biweekly target products accordingly
+        setTenDayPeriodSourceProducts();
 
         final Product monthlyNdviProduct = createMonthlyProduct();
-
         setTargetProduct(monthlyNdviProduct);
+    }
+
+    private void setTenDayPeriodSourceProducts() {
+        if (sortedDataSourceProducts.length == 3) {
+            // the normal case
+            fiveDaySourceProduct = sortedDataSourceProducts[1];
+            if (probavBiweeklyIndex == 0) {
+                tenDaySourceProduct = sortedDataSourceProducts[0];
+            } else {
+                tenDaySourceProduct = sortedDataSourceProducts[2];
+            }
+
+        } else if (sortedDataSourceProducts.length == 2) {
+            // one product missing for given month
+            tenDaySourceProduct = sortedDataSourceProducts[0];
+            fiveDaySourceProduct = sortedDataSourceProducts[1];
+        } else if (sortedDataSourceProducts.length == 1) {
+            // two products missing for given month
+            tenDaySourceProduct = sortedDataSourceProducts[0];
+            fiveDaySourceProduct = sortedDataSourceProducts[0];
+        } else {
+            throw new OperatorException("Month " + month + ": inconsistent number (" +
+                                                sortedDataSourceProducts.length +
+                                                ") of source products - cannot proceed.");
+        }
     }
 
     @Override
@@ -91,13 +112,18 @@ public class NdviProbaVOp extends Operator {
             for (int x = targetRectangle.x; x < targetRectangle.x + targetRectangle.width; x++) {
 
                 if (tenDayNdviBand.isPixelValid(x, y) && fiveDayNdviBand.isPixelValid(x, y)) {
-                    final float tenDayNdvi = tenDayNdviTile.getSampleFloat(x, y);
-                    final float fiveDayNdvi = fiveDayNdviTile.getSampleFloat(x, y);
-                    final float ndviAve = (float) ((2.0*tenDayNdvi + fiveDayNdvi)/3.0);
+                    float tenDayNdvi = tenDayNdviTile.getSampleFloat(x, y);
+                    float fiveDayNdvi = fiveDayNdviTile.getSampleFloat(x, y);
+                    float ndviAve;
+                    if (sortedDataSourceProducts.length == 3) {
+                        ndviAve = (float) ((2.0 * tenDayNdvi + fiveDayNdvi) / 3.0);
+                    } else  {
+                        ndviAve = (float) ((tenDayNdvi + fiveDayNdvi) / 2.0);
+                    }
                     targetTile.setSample(x, y, ndviAve);
                 } else if (tenDayNdviBand.isPixelValid(x, y)) {
                     targetTile.setSample(x, y, tenDayNdviTile.getSampleFloat(x, y));
-                } else if(fiveDayNdviBand.isPixelValid(x, y)) {
+                } else if (fiveDayNdviBand.isPixelValid(x, y)) {
                     targetTile.setSample(x, y, fiveDayNdviTile.getSampleFloat(x, y));
                 } else {
                     targetTile.setSample(x, y, ndviSourceBand.getNoDataValue());
