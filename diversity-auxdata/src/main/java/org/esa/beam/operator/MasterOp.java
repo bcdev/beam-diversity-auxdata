@@ -73,10 +73,10 @@ public class MasterOp extends Operator {
                description = "The month to process in 'NDVI_PROBAV' mode (to be given as integer from 1-12)")
     private int probavMonth;
 
-    @Parameter(valueSet = {"0", "1"},
-               defaultValue = "0",
-               description = "Biweekly index: 0 = days 1-15, 1 = days 16-30")
-    private int probavBiweeklyIndex;
+    @Parameter(valueSet = {"01", "16"},
+               defaultValue = "01",
+               description = "Biweekly start day: 01 for days 1-15, 16 for days 16-30(31)")
+    private String probavBiweeklyStartDay;
 
     @Parameter(valueSet = {"MERGED", "COMBINED"},
                defaultValue = "MERGED",
@@ -341,7 +341,7 @@ public class MasterOp extends Operator {
         ndviOp.setSourceProducts(ndviSourceProducts);
         ndviOp.setParameter("year", year);
         ndviOp.setParameter("month", probavMonth);
-        ndviOp.setParameter("biweeklyIndex", probavBiweeklyIndex);
+        ndviOp.setParameter("probavBiweeklyStartDay", probavBiweeklyStartDay);
 
         return ndviOp.getTargetProduct();
     }
