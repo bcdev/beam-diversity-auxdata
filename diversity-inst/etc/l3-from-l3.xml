@@ -177,7 +177,7 @@
             <postProcessor>
               <type>Math</type>
               <variables>
-                  <variable><name>num_obs</name><expr>num_obs_mean * num_obs_counts</expr></variable>
+                  <variable><name>num_obs</name><expr>nan(shallow_mean) ? -1 : num_obs_mean * num_obs_counts</expr></variable>
                   <variable><name>chl_mph_mean</name><expr>chl_mph_mean_mean</expr></variable>
                   <variable><name>chl_mph_sigma</name><expr>chl_mph_mean_sigma</expr></variable>
                   <variable><name>chl_fub_mean</name><expr>chl_fub_mean_mean</expr></variable>

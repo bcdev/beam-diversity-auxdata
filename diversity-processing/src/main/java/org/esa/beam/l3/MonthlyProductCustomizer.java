@@ -72,8 +72,8 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
             Band lswt_n_mean = ProductUtils.copyBand(arcBand, arcNightCollocated, "lswt_n_mean", product, true);
             lswt_n_mean.setValidPixelExpression("lswt_n_mean > 0");
         } else {
-            product.addBand("lswt_d_mean", "0.0");
-            product.addBand("lswt_n_mean", "0.0");
+            product.addBand("lswt_d_mean", "NaN");
+            product.addBand("lswt_n_mean", "NaN");
         }
     }
 
