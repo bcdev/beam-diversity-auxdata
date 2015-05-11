@@ -21,8 +21,27 @@ ratio490Threshholds = {
     'Lake-Tsimlyanskoye': '0.6'
 }
 
-arcFileIdByRegion = {'Lake-Balaton' : '0310',
-                     'Lake-Aral' : '0004'}
+#arcFileIdByRegion = {'Lake-Balaton' : '0310',
+#                     'Lake-Aral' : '0004'}
+
+
+# todo: check this for one lake which has ARCs
+arcFileIdByRegion = {}
+for line in open("./ARC/arc-lakes-alids.txt","r"):
+    name, alid = line.split(':')
+    name = name.strip().replace('\'', '')
+    alid = alid.strip().replace('\'', '')
+    arcFileIdByRegion[name] = alid
+    #print 'arcFiles: ',arcFileIdByRegion[name]
+#print 'arcFiles: ',arcFileIdByRegion
+
+# the ARC product netcdf files:
+lakes_alid_ncfiles = []
+for line in open("./ARC/alid-nc-list.txt","r"):
+    # alid-nc-list.txt is a directory listing retrieved on cvfeeder01 from:
+    # for i in `ls /calvalus/projects/diversity/aux/ALID*PLREC*.nc`; do basename $i; done > alid_nc_list.txt
+    ncfile = line.strip()
+    lakes_alid_ncfiles.append(ncfile)
 
 # ARC band times for v3: start 1995-06-16, end 2012-06-16
 arcBandTime = [
@@ -76,6 +95,11 @@ def arcAuxdata(region, year, month):
         arcDayFile = 'ALID' + arcFileIdByRegion[region] + '_PLREC9D_TS012SR.nc'
         arcNightFile = 'ALID' + arcFileIdByRegion[region] + '_PLREC9N_TS012SR.nc'
         arcBand = 'lswt_time' + arcMap[year + '-' + month]
+
+        # check also if arcDayFile AND arcNightFile exist as netcdf products:
+        if not arcDayFile in lakes_alid_ncfiles or not arcNightFile in lakes_alid_ncfiles:
+            return ('""', '""', '""')
+
         return (arcDayFile, arcNightFile, arcBand)
     else:
         return ('""', '""', '""')

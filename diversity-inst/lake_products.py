@@ -5,8 +5,9 @@ import os
 from auxdata import ratio490Threshold, arcAuxdata
 
 years = ['2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012']
+#years = ['2004','2010']
+#years = ['2005']
 allMonths = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
-
 
 def getMonth(year):
     if year == '2002':
@@ -15,21 +16,44 @@ def getMonth(year):
         return ['01', '02', '03', '04']
     return allMonths
 
+# read the regions from Northern and Southern hemisphere:
+northRegionsFile = open("./wkt/lakes-north-regions.txt","r")
+#northRegionsFile = open("./wkt/lakes-north-regions_DtoM.txt","r")
+#northRegionsFile = open("./wkt/lakes-north-regions_AtoM.txt","r")
+#northRegionsFile = open("./wkt/lakes-north-regions_NtoZ.txt","r")
+northRegions = []
+for line in northRegionsFile:
+    name = line.strip().replace('\'', '')
+    northRegions.append(name)
 
+southRegionsFile = open("./wkt/lakes-south-regions.txt","r")
+#southRegionsFile = open("./wkt/lakes-south-regions_DtoM.txt","r")
+#southRegionsFile = open("./wkt/lakes-south-regions_AtoM.txt","r")
+#southRegionsFile = open("./wkt/lakes-south-regions_NtoZ.txt","r")
+southRegions = []
+for line in southRegionsFile:
+    name = line.strip().replace('\'', '')
+    southRegions.append(name)
+
+regions = northRegions + southRegions
+
+### definition of single lakes for testing - overwrites regions from files above ###
 regions = ['Lake-Balaton']
+#regions = ['Lake-Bear']
 #regions = ['Lake-Aral']
+#regions = ['Lake-Elmenteita']
+#regions = ['Lake-Bogoria', 'Lake-Elmenteita', 'Lake-Nakuru', 'Lake-Tuusulanjarvi', 'Lake-Ulemiste']
+### end of test lakes
 
 DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
-# before starting, check if WKT files are available
+# before starting, check if WKT files are available. 
+# From now on we always use the full polygons (*.shape) rather than just rectangular boxes. 
 for region in regions:
-    boxWktFile = DIVERSITY_INST_DIR + '/wkt/' + region + '.bbox'
-    if not os.access(boxWktFile, os.R_OK):
-        raise IOError('Unable to access ' + boxWktFile)
     shapeWktFile = DIVERSITY_INST_DIR + '/wkt/' + region + '.shape'
     if not os.access(shapeWktFile, os.R_OK):
         raise IOError('Unable to access ' + shapeWktFile)
 
-#   must be one of 'GeoTIFF' 'NetCDF' or 'NetCDF4'
+#   output format must be one of 'GeoTIFF' 'NetCDF' or 'NetCDF4'
 outputFormat = 'GeoTIFF'
 
 extension = 'nc'
@@ -37,15 +61,15 @@ if outputFormat == 'GeoTIFF':
     extension = 'tif'
 
 inputs = ['childs']
-hosts = [('localhost', 8)]
+hosts = [('localhost', 16)]
 #   , simulation=True
 pm = PMonitor(inputs, request='lake_products', logdir='log', hosts=hosts, script='template.py')
 
-BASE = '/calvalus/projects/diversity/lake_products/'
+BASE = '/calvalus/projects/diversity/prototype/'
 
 for region in regions:
     shapeWktFile = 'wkt/' + region + '.shape'
-    boxWktFile = 'wkt/' + region + '.bbox'
+    boxWktFile = shapeWktFile
 
     shallowDir = BASE + region + '/l3-shallow/'
     # =============== shallow =======================

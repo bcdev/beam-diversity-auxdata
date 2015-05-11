@@ -14,29 +14,28 @@ def getMonth(year):
         return ['01', '02', '03', '04']
     return allMonths
 
-
-# years  = [ '2005', '2006', '2007' ]
-#years = ['2003']
-
+# manually specify regions to process here. If full set of > 300 lakes shall be re-processed, read from files and
+# use notation as in 'lakes_products.py'
 regions = ['Lake-Balaton']
+#regions = ['Lake-Bogoria', 'Lake-Elmenteita', 'Lake-Nakuru', 'Lake-Tuusulanjarvi', 'Lake-Ulemiste']
 
 DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
 # before starting, check if WKT files are available
+# From now on we always use the full polygons (*.shape) rather than just rectangular boxes.
 for region in regions:
-    boxWktFile = DIVERSITY_INST_DIR + '/wkt/' + region + '.bbox'
+    boxWktFile = DIVERSITY_INST_DIR + '/wkt/' + region + '.shape'
     if not os.access(boxWktFile, os.R_OK):
         raise IOError('Unable to access ' + boxWktFile)
-
 
 inputs = ['dummy']
 hosts = [('localhost', 8)]
 
 pm = PMonitor(inputs, request='geo_child_products', logdir='log', hosts=hosts, script='template.py')
 
-BASE = '/calvalus/projects/diversity/lake_products/'
+BASE = '/calvalus/projects/diversity/prototype/'
 
 for region in regions:
-    boxWktFile = 'wkt/' + region + '.bbox'
+    boxWktFile = 'wkt/' + region + '.shape'
     for year in years:
         for month in getMonth(year):
             geoChildDir = BASE + region + '/l1-child/' + year + "/" + month

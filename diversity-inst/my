@@ -2,7 +2,8 @@
 # Diversity environment setup
 # usage:  . mydiversity
 
-export DIVERSITY_INST=/home/marcoz/Projects/BC/Beam-Ops/beam-diversity-auxdata/diversity-inst
+#export DIVERSITY_INST=/home/marcoz/Projects/BC/Beam-Ops/beam-diversity-auxdata/diversity-inst
+export DIVERSITY_INST=$PWD
 export DIVERSITY_LOG=$DIVERSITY_INST/log
 
 export DIVERSITY_PRODUCTION_JAR=$DIVERSITY_INST/lib/cpt.jar
