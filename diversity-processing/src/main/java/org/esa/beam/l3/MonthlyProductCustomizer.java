@@ -22,8 +22,11 @@ import org.esa.beam.binning.ProductCustomizerDescriptor;
 import org.esa.beam.collocation.CollocateOp;
 import org.esa.beam.framework.datamodel.Band;
 import org.esa.beam.framework.datamodel.Product;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.beam.gpf.operators.standard.BandMathsOp;
 import org.esa.beam.util.ProductUtils;
+
 
 /**
  * Removes num_obs and num_passes bands, depending on configuration.
@@ -61,16 +64,37 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
         }
         Product shallowCollocated = collocate(product, shallowProduct);
         ProductUtils.copyBand("shallow", shallowCollocated, product, true);
-//        ProductUtils.copyBand("extent", shallowCollocated, product, true);
 
         if (arcDayProduct != null) {
             Product arcDayCollocated = collocate(product, arcDayProduct);
-            Band lswt_d_mean = ProductUtils.copyBand(arcBand, arcDayCollocated, "lswt_d_mean", product, true);
-            lswt_d_mean.setValidPixelExpression("lswt_d_mean > 0");
+//            Band lswt_d_mean = ProductUtils.copyBand(arcBand, arcDayCollocated, "lswt_d_mean", product, true);
+//            lswt_d_mean.setValidPixelExpression("lswt_d_mean > 0");
 
             Product arcNightCollocated = collocate(product, arcNightProduct);
-            Band lswt_n_mean = ProductUtils.copyBand(arcBand, arcNightCollocated, "lswt_n_mean", product, true);
-            lswt_n_mean.setValidPixelExpression("lswt_n_mean > 0");
+//            Band lswt_n_mean = ProductUtils.copyBand(arcBand, arcNightCollocated, "lswt_n_mean", product, true);
+//            lswt_n_mean.setValidPixelExpression("lswt_n_mean > 0");
+
+            BandMathsOp.BandDescriptor dbDay = new BandMathsOp.BandDescriptor();
+            dbDay.name = "lswt_d_mean";
+            dbDay.expression = "$day." + arcBand + " > 0 and $shallow.shallow == 0 ? $day." + arcBand + " : NaN";
+            dbDay.type = ProductData.TYPESTRING_FLOAT32;
+
+            BandMathsOp.BandDescriptor dbNight = new BandMathsOp.BandDescriptor();
+            dbNight.name = "lswt_n_mean";
+            dbNight.expression = "$night." + arcBand + " > 0 and $shallow.shallow == 0 ? $night." + arcBand + " : NaN";
+            dbNight.type = ProductData.TYPESTRING_FLOAT32;
+
+            BandMathsOp bandMathsOp = new BandMathsOp();
+            bandMathsOp.setParameterDefaultValues();
+            bandMathsOp.setSourceProduct("day", arcDayCollocated);
+            bandMathsOp.setSourceProduct("night", arcNightCollocated);
+            bandMathsOp.setSourceProduct("shallow", shallowCollocated);
+            bandMathsOp.setTargetBandDescriptors(dbDay, dbNight);
+            final Product bandMathProduct = bandMathsOp.getTargetProduct();
+
+            ProductUtils.copyBand("lswt_d_mean", bandMathProduct, product, true);
+            ProductUtils.copyBand("lswt_n_mean", bandMathProduct, product, true);
+
         } else {
             product.addBand("lswt_d_mean", "NaN");
             product.addBand("lswt_n_mean", "NaN");
