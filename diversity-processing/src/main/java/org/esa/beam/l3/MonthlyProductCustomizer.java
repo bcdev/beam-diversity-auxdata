@@ -73,16 +73,19 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
             bdShallow.name = "shallow";
             bdShallow.expression = "$shallow.shallow";
             bdShallow.type = ProductData.TYPESTRING_FLOAT32;
+            bdShallow.noDataValue = Double.NaN;
 
             BandMathsOp.BandDescriptor bdDay = new BandMathsOp.BandDescriptor();
             bdDay.name = "lswt_d_mean";
             bdDay.expression = "$day." + arcBand + " > 0 and $shallow.shallow == 0 ? $day." + arcBand + " : NaN";
             bdDay.type = ProductData.TYPESTRING_FLOAT32;
+            bdDay.noDataValue = Double.NaN;
 
             BandMathsOp.BandDescriptor dbNight = new BandMathsOp.BandDescriptor();
             dbNight.name = "lswt_n_mean";
             dbNight.expression = "$night." + arcBand + " > 0 and $shallow.shallow == 0 ? $night." + arcBand + " : NaN";
             dbNight.type = ProductData.TYPESTRING_FLOAT32;
+            dbNight.noDataValue = Double.NaN;
 
             BandMathsOp bandMathsOp = new BandMathsOp();
             bandMathsOp.setParameterDefaultValues();
@@ -98,8 +101,13 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
 
         } else {
             ProductUtils.copyBand("shallow", shallowCollocated, product, true);
-            product.addBand("lswt_d_mean", "NaN");
-            product.addBand("lswt_n_mean", "NaN");
+
+            Band band = product.addBand("lswt_d_mean", "NaN");
+            band.setNoDataValue(Float.NaN);
+            band.setNoDataValueUsed(true);
+            band = product.addBand("lswt_n_mean", "NaN");
+            band.setNoDataValue(Float.NaN);
+            band.setNoDataValueUsed(true);
         }
     }
 
