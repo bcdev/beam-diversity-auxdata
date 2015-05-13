@@ -63,21 +63,21 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
             }
         }
         Product shallowCollocated = collocate(product, shallowProduct);
-        ProductUtils.copyBand("shallow", shallowCollocated, product, true);
+
 
         if (arcDayProduct != null) {
             Product arcDayCollocated = collocate(product, arcDayProduct);
-//            Band lswt_d_mean = ProductUtils.copyBand(arcBand, arcDayCollocated, "lswt_d_mean", product, true);
-//            lswt_d_mean.setValidPixelExpression("lswt_d_mean > 0");
-
             Product arcNightCollocated = collocate(product, arcNightProduct);
-//            Band lswt_n_mean = ProductUtils.copyBand(arcBand, arcNightCollocated, "lswt_n_mean", product, true);
-//            lswt_n_mean.setValidPixelExpression("lswt_n_mean > 0");
 
-            BandMathsOp.BandDescriptor dbDay = new BandMathsOp.BandDescriptor();
-            dbDay.name = "lswt_d_mean";
-            dbDay.expression = "$day." + arcBand + " > 0 and $shallow.shallow == 0 ? $day." + arcBand + " : NaN";
-            dbDay.type = ProductData.TYPESTRING_FLOAT32;
+            BandMathsOp.BandDescriptor bdShallow = new BandMathsOp.BandDescriptor();
+            bdShallow.name = "shallow";
+            bdShallow.expression = "$shallow.shallow";
+            bdShallow.type = ProductData.TYPESTRING_FLOAT32;
+
+            BandMathsOp.BandDescriptor bdDay = new BandMathsOp.BandDescriptor();
+            bdDay.name = "lswt_d_mean";
+            bdDay.expression = "$day." + arcBand + " > 0 and $shallow.shallow == 0 ? $day." + arcBand + " : NaN";
+            bdDay.type = ProductData.TYPESTRING_FLOAT32;
 
             BandMathsOp.BandDescriptor dbNight = new BandMathsOp.BandDescriptor();
             dbNight.name = "lswt_n_mean";
@@ -89,13 +89,15 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
             bandMathsOp.setSourceProduct("day", arcDayCollocated);
             bandMathsOp.setSourceProduct("night", arcNightCollocated);
             bandMathsOp.setSourceProduct("shallow", shallowCollocated);
-            bandMathsOp.setTargetBandDescriptors(dbDay, dbNight);
+            bandMathsOp.setTargetBandDescriptors(bdShallow, bdDay, dbNight);
             final Product bandMathProduct = bandMathsOp.getTargetProduct();
 
+            ProductUtils.copyBand("shallow", bandMathProduct, product, true);
             ProductUtils.copyBand("lswt_d_mean", bandMathProduct, product, true);
             ProductUtils.copyBand("lswt_n_mean", bandMathProduct, product, true);
 
         } else {
+            ProductUtils.copyBand("shallow", shallowCollocated, product, true);
             product.addBand("lswt_d_mean", "NaN");
             product.addBand("lswt_n_mean", "NaN");
         }
