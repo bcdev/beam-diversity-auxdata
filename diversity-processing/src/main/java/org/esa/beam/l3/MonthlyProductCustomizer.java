@@ -77,13 +77,17 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
 
             BandMathsOp.BandDescriptor bdDay = new BandMathsOp.BandDescriptor();
             bdDay.name = "lswt_d_mean";
-            bdDay.expression = "$day." + arcBand + " > 0 and $shallow.shallow == 0 ? $day." + arcBand + " : NaN";
+//            bdDay.expression = "$day." + arcBand + " > 0 and $shallow.shallow == 0 ? $day." + arcBand + " : NaN";
+            bdDay.expression = "$day." + arcBand +
+                    " > 0 and ($shallow.shallow == 0 || $shallow.shallow == 1) ? $day." + arcBand + " : NaN";
             bdDay.type = ProductData.TYPESTRING_FLOAT32;
             bdDay.noDataValue = Double.NaN;
 
             BandMathsOp.BandDescriptor dbNight = new BandMathsOp.BandDescriptor();
             dbNight.name = "lswt_n_mean";
-            dbNight.expression = "$night." + arcBand + " > 0 and $shallow.shallow == 0 ? $night." + arcBand + " : NaN";
+//            dbNight.expression = "$night." + arcBand + " > 0 and $shallow.shallow == 0 ? $night." + arcBand + " : NaN";
+            dbNight.expression = "$night." + arcBand +
+                    " > 0 and ($shallow.shallow == 0 || $shallow.shallow == 1) ? $night." + arcBand + " : NaN";
             dbNight.type = ProductData.TYPESTRING_FLOAT32;
             dbNight.noDataValue = Double.NaN;
 
