@@ -33,7 +33,7 @@ import org.esa.beam.gpf.operators.standard.MergeOp;
 import org.esa.beam.util.ProductUtils;
 
 /**
- * Extends the basic MErging Operator with the option
+ * Extends the basic Merging Operator with the option
  * to get a PixelGeocoing from a dedicated source product
  *
  * @author marcoz

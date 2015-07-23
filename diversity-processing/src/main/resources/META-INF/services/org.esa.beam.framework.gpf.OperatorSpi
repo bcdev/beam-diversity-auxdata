@@ -1,3 +1,4 @@
 org.esa.beam.operator.lakes.WaterStatisticsOp$Spi
 org.esa.beam.operator.lakes.WaterStatisticsL2Op$Spi
 org.esa.beam.operator.lakes.LakeMergeOp$Spi
+org.esa.beam.operator.lakes.LakeAggregateOp$Spi
