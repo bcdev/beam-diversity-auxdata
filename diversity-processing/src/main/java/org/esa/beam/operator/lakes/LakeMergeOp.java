@@ -38,7 +38,7 @@ import org.esa.beam.util.ProductUtils;
  *
  * @author marcoz
  */
-@OperatorMetadata(alias = "MergeLake",
+@OperatorMetadata(alias = "LakeMerge",
         description = "Allows copying raster data from any number of source products to a specified 'master'" +
                 " product. Enhanced for lakes.",
         authors = "Marco Zuehlke",
