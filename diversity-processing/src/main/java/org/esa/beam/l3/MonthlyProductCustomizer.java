@@ -48,6 +48,12 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
         this.shallowProduct = shallowProduct;
     }
 
+    public void setArcData(Product arcDayProduct, Product arcNightProduct, String arcBand) {
+        this.arcDayProduct = arcDayProduct;
+        this.arcNightProduct = arcNightProduct;
+        this.arcBand = arcBand;
+    }
+
     @Override
     public void customizeProduct(Product product) {
         if (!writeNumObs) {
@@ -154,9 +160,7 @@ public class MonthlyProductCustomizer extends ProductCustomizer {
 
             MonthlyProductCustomizer productCustomizer = new MonthlyProductCustomizer(writeNumObs, writeNumPasses, config.shallowProduct);
             if (config.arcDayProduct != null && config.arcNightProduct != null && config.arcBand != null) {
-                productCustomizer.arcDayProduct = config.arcDayProduct;
-                productCustomizer.arcNightProduct = config.arcNightProduct;
-                productCustomizer.arcBand = config.arcBand;
+                productCustomizer.setArcData(config.arcDayProduct, config.arcNightProduct, config.arcBand);
             }
             return productCustomizer;
         }
