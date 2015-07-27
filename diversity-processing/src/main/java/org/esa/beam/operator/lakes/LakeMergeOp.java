@@ -80,7 +80,6 @@ public class LakeMergeOp extends Operator {
         Product targetProduct = mergeOp.getTargetProduct();
 
         if (geoProduct != null) {
-            System.out.println("Creating pixel geocoding");
             Band lat = ProductUtils.copyBand("corrected_latitude", geoProduct, targetProduct, true);
             Band lon = ProductUtils.copyBand("corrected_longitude", geoProduct, targetProduct, true);
             GeoCoding pixelGeocoding = GeoCodingFactory.createPixelGeoCoding(lat, lon, "NOT l1_flags.INVALID", 6);
