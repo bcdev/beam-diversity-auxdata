@@ -9,6 +9,7 @@ import org.esa.beam.framework.gpf.GPF;
 import org.esa.beam.framework.gpf.Operator;
 import org.esa.beam.framework.gpf.OperatorException;
 import org.esa.beam.framework.gpf.OperatorSpi;
+import org.esa.beam.framework.gpf.annotations.OperatorMetadata;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.framework.gpf.annotations.SourceProduct;
 import org.esa.beam.util.ProductUtils;
@@ -26,11 +27,11 @@ import java.util.Map;
  *
  * @author olafd
  */
-//@OperatorMetadata(alias = "Diversity.MPH.CHL",
-//                  version = "1.3.1",
-//                  authors = "Olaf Danne",
-//                  copyright = "(c) 2013, 2014 by Brockmann Consult",
-//                  description = "Wrapper for MPH CHL pixel operator")
+@OperatorMetadata(alias = "Diversity.MPH.CHL",
+                  version = "1.3.1",
+                  authors = "Olaf Danne",
+                  copyright = "(c) 2013, 2014 by Brockmann Consult",
+                  description = "Wrapper for MPH CHL pixel operator")
 public class MphChlMasterOp extends Operator {
 
     @Parameter(defaultValue = "not (l1_flags.LAND_OCEAN or l1_flags.INVALID)",
@@ -134,7 +135,7 @@ public class MphChlMasterOp extends Operator {
     private Product createMphChlPixelProduct(HashMap<String, Object> mphChlParams) {
         Map<String, Product> sourceProducts = new HashMap<>(1);
         sourceProducts.put("sourceProduct", sourceProduct);
-        return GPF.createProduct("Diversity.MPH.CHL.Pixel", mphChlParams, sourceProducts);
+        return GPF.createProduct("MERIS.MPH", mphChlParams, sourceProducts);
     }
 
 
