@@ -163,7 +163,7 @@ public class MphChlOp extends PixelOperator {
 
         if (calculateExponential) {
             mph_chl = computeChlExponential(mph_1);
-            if (mph_0 < chlThreshForFloatFlag) {
+            if (mph_chl < chlThreshForFloatFlag) {
                 immersed_cyano = 1;
             } else {
                 floating_flag = true;
