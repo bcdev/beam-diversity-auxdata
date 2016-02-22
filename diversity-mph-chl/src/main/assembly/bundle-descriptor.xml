@@ -1,0 +1,48 @@
+<bundleDescriptor>
+    <bundleName>mph</bundleName>
+    <bundleVersion>1.3.5</bundleVersion>
+
+    <processorDescriptors>
+        <processorDescriptor>
+            <executableName>idepix-mph</executableName>
+            <processorName>Diversity MPH with Idepix</processorName>
+            <processorVersion>1.3.5</processorVersion>
+            <outputFormats>NetCDF,GeoTIFF,BEAM-DIMAP</outputFormats>
+			
+			<parameterDescriptors>
+               
+			    <parameterDescriptor>
+                    <name>validPixelExpression</name>
+                    <type>string</type>
+                    <description>Expression defining pixels considered for processing</description>
+                    <defaultValue>not (l1_flags.LAND_OCEAN or l1_flags.INVALID)
+                    </defaultValue>
+                </parameterDescriptor>
+			   
+			    <parameterDescriptor>
+                    <name>cyanoMaxValue</name>
+                    <type>string</type>
+                    <description>Maximum chlorophyll, arithmetically higher values are capped
+                    </description>
+                    <defaultValue>1000.0</defaultValue>
+                </parameterDescriptor>
+			   
+			    <parameterDescriptor>
+                    <name>chlThreshForFloatFlag</name>
+                    <type>string</type>
+                    <description>Chlorophyll threshold, above which all cyanobacteria dominated waters are float
+                    </description>
+                    <defaultValue>350.0</defaultValue>
+                </parameterDescriptor>
+			   
+                <parameterDescriptor>
+                    <name>exportMph</name>
+                    <type>boolean</type>
+                    <description>Switch to true to write 'mph' band</description>
+                    <defaultValue>false</defaultValue>
+                </parameterDescriptor>
+			</parameterDescriptors>	
+        </processorDescriptor>
+
+    </processorDescriptors>
+</bundleDescriptor>

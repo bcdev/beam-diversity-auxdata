@@ -6,6 +6,7 @@
 'Lake-Chiemsee'
 'Lake-Como'
 'Lake-Ginebra'
+'Lake-Ijsselmeer'
 'Lake-Iseo'
 'Lake-Larga'
 'Lake-Lucerne'

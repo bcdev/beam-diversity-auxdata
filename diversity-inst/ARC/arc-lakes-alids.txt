@@ -111,6 +111,7 @@
 'Lake-Hungtze' : '0109'
 'Lake-Huron' : '0005'
 'Lake-Hyargas' : '0121'
+'Lake-Ijsselmeer' : '0144'
 'Lake-Iliamna' : '0062'
 'Lake-Inari' : '0144'
 'Lake-Island' : '0174'

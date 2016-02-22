@@ -16,8 +16,18 @@ def getMonth(year):
 
 # manually specify regions to process here. If full set of > 300 lakes shall be re-processed, read from files and
 # use notation as in 'lakes_products.py'
-regions = ['Lake-Balaton']
+
+#regions = ['Lake-Balaton']
 #regions = ['Lake-Bogoria', 'Lake-Elmenteita', 'Lake-Nakuru', 'Lake-Tuusulanjarvi', 'Lake-Ulemiste']
+
+# read the regions for the spare lakes:
+regionsFile = open("./wkt/lakes-regions-spare.txt","r")
+regions = []
+for line in regionsFile:
+    name = line.strip().replace('\'', '')
+    regions.append(name)
+
+regions = ['Lake-Ijsselmeer']
 
 DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
 # before starting, check if WKT files are available
@@ -28,7 +38,8 @@ for region in regions:
         raise IOError('Unable to access ' + boxWktFile)
 
 inputs = ['dummy']
-hosts = [('localhost', 8)]
+#hosts = [('localhost', 8)]
+hosts = [('localhost', 16)]
 
 pm = PMonitor(inputs, request='geo_child_products', logdir='log', hosts=hosts, script='template.py')
 

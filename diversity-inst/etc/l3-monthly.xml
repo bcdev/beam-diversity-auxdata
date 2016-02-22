@@ -130,7 +130,9 @@
             <variables>
               <variable>
                   <name>chl_mph</name>
-                  <expr>cloud_classif_flags.F_MIXED_PIXEL ? NaN : (chl &gt; 1000.0 ? 1000.0 : chl)</expr>
+                 <expr>cloud_classif_flags.F_MIXED_PIXEL ? NaN : (chl &gt; 1000.0 ? 1000.0 : chl)</expr>
+                 <!-- todo: we have valid chl (and other) values for shallow pixels (shallow = 1), why? The fix below doesn't work, why not??  -->
+                 <!-- <expr>cloud_classif_flags.F_MIXED_PIXEL or shallow == 1.0 ? NaN : (chl &gt; 1000.0 ? 1000.0 : chl)</expr> -->
               </variable>
 
               <variable>

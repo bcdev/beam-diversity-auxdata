@@ -6,7 +6,7 @@ from auxdata import ratio490Threshold, arcAuxdata
 
 years = ['2002', '2003', '2004', '2005', '2006', '2007', '2008', '2009', '2010', '2011', '2012']
 #years = ['2004','2010']
-#years = ['2005']
+#years = ['2008']
 allMonths = ['01', '02', '03', '04', '05', '06', '07', '08', '09', '10', '11', '12']
 
 def getMonth(year):
@@ -38,12 +38,22 @@ for line in southRegionsFile:
 regions = northRegions + southRegions
 
 ### definition of single lakes for testing - overwrites regions from files above ###
-regions = ['Lake-Balaton']
+#regions = ['Lake-Bogoria', 'Lake-Balaton']
+#regions = ['Lake-Balaton']
 #regions = ['Lake-Bear']
 #regions = ['Lake-Aral']
 #regions = ['Lake-Elmenteita']
 #regions = ['Lake-Bogoria', 'Lake-Elmenteita', 'Lake-Nakuru', 'Lake-Tuusulanjarvi', 'Lake-Ulemiste']
 ### end of test lakes
+
+# read the regions for the spare lakes:
+regionsFile = open("./wkt/lakes-regions-spare.txt","r")
+regions = []
+for line in regionsFile:
+    name = line.strip().replace('\'', '')
+    regions.append(name)
+
+regions = ['Lake-Ijsselmeer']
 
 DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
 # before starting, check if WKT files are available. 
