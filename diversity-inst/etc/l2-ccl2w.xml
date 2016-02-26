@@ -122,7 +122,7 @@
     <wps:Input>
       <ows:Identifier>calvalus.hadoop.mapreduce.map.failures.maxpercent</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>0</wps:LiteralData>
+        <wps:LiteralData>1</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>
@@ -134,7 +134,7 @@
     <wps:Input>
       <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>cc</wps:LiteralData>
+        <wps:LiteralData>lc</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>

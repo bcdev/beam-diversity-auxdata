@@ -1,0 +1,28 @@
+HOW TO 'REGISTER' AND PROCESS A SINGLE NEW LAKE
+-----------------------------------------------
+
+1. get shapefile set (.wkt, .shp,...) from KS, DO, whoever
+2. for later use, copy this to fs1:\projects\ongoing\Diversity\workspace\WP4\auxiliary\SWBD-300lakes
+3. create polygon file 'Lake-<name>' in ../diversity_inst/wkt and copy the polygon from the 
+wkt file (e.g. ESACCI-LC-L4-SAR-WB-300m-v2-0_MUGGELSEE.wkt) in there.
+(NOTE: If for whatever reason we have only a .shp file, first process 'convert_shp_wkt' from 'produce_divaux.py' received from DO)
+(NOTE: for a lot of new lakes, use script ../diversity_inst/wkt/generate_lake_list_for_processing.sh appropriately)
+4. add entry in ../diversity_inst/wkt/lakes-<hemisphere>-regions.txt
+5. add entry in ../diversity_inst/wkt/lakes-polygons.txt  
+(NOTE: for a lot of new lakes, again use script ../diversity_inst/wkt/generate_lake_list_for_processing.sh appropriately)
+6. add entry in ../diversity_inst/ARC/arc-lakes-alids.txt:
+	- if no ARC available for this lake, enter ID '0000' and also add entry in lakes-NO_ALID.txt
+	- if ARC available, enter corresponding netcdf file names in alid-nc-list.txt
+		(ARC files need to be in /mnt/hdfs/calvalus/projects/diversity/aux)
+7. adapt and run appropriate 'geochilds' python script for the lake 
+8. adapt and run appropriate 'shallow' python script for the lake 
+9. create 'shallow extent' mask as described in 'how_to_create_shallow_extent_tif.txt'
+10. adapt and run appropriate L2/L3 python script for the lake
+11. generate output directory structure on ftp server (bcserver8):
+	- log in as hadoop on cvfeeder00
+	- ssh olafd@bcserver8
+	- use 'generate_lakes_tree.py' in '/data/ftp/diversity/data/prototype_products/inland-waters_perennial'.
+		(NOTE: most commands on bcserver8 will require sudo)
+11. transfer results to ftp with rsync:
+	- go back to cvfeeder00ll
+	- adapt and run 'copy_lakes_to_ftp.py' in /home/hadoop/diversity-inst

@@ -1,0 +1,32 @@
+HOW TO 'REGISTER' AND PROCESS A SINGLE OR SEVERAL NEW LAKE(S) (2)
+-----------------------------------------------
+
+1. get shapefile set (.wkt, .shp,...) from KS, DO, whoever
+2. for later use, copy this to fs1:\projects\ongoing\Diversity\workspace\WP4\auxiliary\SWBD-300lakes
+3. to obtain the shape files, open the 'real' shapefiles *.shp (several at once!) from fs1 in OpenJump and 
+   save as 'Datensatz speichern als...' with name 'Lake-XXX.shape'
+4. copy the 'Lake-XXX.shape' files to $HOME/diversity-lakes-inst/wkt on master00 on Calvalus
+5. after copying them there, change from Polygon to Multipolygon with:
+## sed -i -- 's/POLYGON ((/MULTIPOLYGON (((/g' *.shape
+## sed -i -- 's/))/)))/g' *.shape
+--> make sure you do NOT do this for lakes you already did (e.g. do it in a working subdir)
+6. add entry in ../diversity_inst/wkt/lakes-<hemisphere>-regions.txt
+(NOTE: for a lot of new lakes, again use script ../diversity_inst/wkt/generate_lake_list_for_processing.sh appropriately)
+7. add entry in correct ARC file in ../diversity_inst/ARC:
+	- if no ARC available for this lake, add entry in lakes-NO_ALID.txt
+	- if ARC available, enter lake in arc-lakes-alids.txt and also in corresponding netcdf file names in alid-nc-list.txt
+		(ARC files need to be also in /mnt/hdfs/calvalus/projects/diversity/aux)
+8. adapt and run appropriate 'geo_child_products.py' python script for the lake(s) 
+9. adapt and run appropriate L2/L3 'lake_products.py' python script for the lake(s)
+10. generate output directory structure on ftp server (bcserver8):
+	- log in as hadoop on cvfeeder00
+	- ssh olafd@bcserver8
+	- use 'generate_lakes_tree.py' in '/data/ftp/diversity/data/olafd'.
+		(NOTE: most commands on bcserver8 will require sudo)
+11. transfer results to ftp with rsync:
+	- go back to cvfeeder00
+	- adapt and run 'copy_lakes_to_ftp.py' in /home/hadoop/diversity-inst
+12. make final zips
+	- go back to olafd@bcserver8
+	- use 'make_sparelakes_final_zips.py' in '/data/ftp/diversity/data/olafd'.
+	

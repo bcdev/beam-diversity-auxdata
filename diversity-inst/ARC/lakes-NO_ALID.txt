@@ -19,6 +19,7 @@
 'Lake-Logipi'
 'Lake-Lower_seal'
 'Lake-Maracaibo'
+'Lake-Muggelsee'
 'Lake-Matano'
 'Lake-Minto'
 'Lake-Nakuru'

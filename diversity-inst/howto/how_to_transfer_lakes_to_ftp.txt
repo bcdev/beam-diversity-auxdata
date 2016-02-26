@@ -1,0 +1,21 @@
+LAKES FTP
+
+DO LIKE THIS:
+- log in as hadoop on cvfeeder00
+- there, log in as olafd/bckermit on bcserver8
+- on bcserver8 as olafd for every lake, everything must be done as sudo:
+
+	- sudo mkdir <lake>
+	- sudo mkdir <lake>/l3-10y
+	- sudo mkdir <lake>/l3-yearly
+		for year in [2002,...,2012]:
+			- sudo mkdir <lake>/l3-yearly/year
+	- sudo mkdir <lake>/l3-monthly
+		for year in [2002,...,2012]:
+			- sudo mkdir <lake>/l3-monthly/year
+				for year in [01,...,12]:
+					- sudo mkdir <lake>/l3-monthly/year/month
+	sudo chown -R diversity <lake>
+	sudo chmod -R a+rx <lake>
+	
+Then use Uwe's python rsync script with ssh olafd instead of uwe

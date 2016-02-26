@@ -12,6 +12,7 @@
 'Lake-Lucerne'
 'Lake-Maggiore'
 'Lake-Markermeer'
+'Lake-Muggelsee'
 'Lake-Naivasha'
 'Lake-Naknek'
 'Lake-Oulujarvi'

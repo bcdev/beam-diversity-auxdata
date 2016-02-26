@@ -27,7 +27,8 @@ for line in regionsFile:
     name = line.strip().replace('\'', '')
     regions.append(name)
 
-regions = ['Lake-Ijsselmeer']
+#regions = ['Lake-Ijsselmeer']
+regions = ['Lake-Muggelsee']
 
 DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
 # before starting, check if WKT files are available

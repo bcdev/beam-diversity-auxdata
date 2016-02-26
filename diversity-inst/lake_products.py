@@ -53,7 +53,31 @@ for line in regionsFile:
     name = line.strip().replace('\'', '')
     regions.append(name)
 
-regions = ['Lake-Ijsselmeer']
+#regions = ['Lake-Ijsselmeer']
+regions = [
+    'Lake-Bisina',
+    'Lake-Brienz',
+    'Lake-Chiemsee',
+    'Lake-Chiquita',
+    'Lake-Emborcacao',
+    'Lake-Ginebra',
+    'Lake-Great_salt',
+    'Lake-Ijsselmeer',
+    'Lake-Iseo',
+    'Lake-Lucerne',
+    'Lake-Markermeer',
+    'Lake-Muggelsee',
+    'Lake-Naivasha',
+    'Lake-Rogaguado',
+    'Lake-Scutari',
+    'Lake-Sempach',
+    'Lake-Thun',
+    'Lake-Trasimeno',
+    'Lake-Zug',
+    'Lake-Zurich'
+]
+
+regions = ['Lake-Markermeer']
 
 DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
 # before starting, check if WKT files are available. 

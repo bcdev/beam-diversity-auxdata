@@ -1,0 +1,14 @@
+up to now a manual procedure for EVERY lake... --> TODO: make this automatic!
+
+1. take final result from lake shallow processing, e.g. :
+/mnt/hdfs/calvalus/projects/diversity/prototype/Lake-Winnebago/l3-shallow-post-tiff/L2_of_Lake-Winnebago-shallow_2008-05-01_2008-10-30.tif
+2. copy to local, open in Visat
+3. import in Visat corresponding extent shapefile, e.g.
+fs1:\projects\ongoing\Diversity\workspace\WP4\auxiliary\SWBD-300lakes\ESACCI-LC-L4-SAR-WB-300m-v2-0_WINNEBAGO.shp
+4. in the L2_of_Lake-Winnebago-shallow_2008-05-01_2008-10-30.tif product, add new band 'extent' with band arithmetic:
+- select 'Show masks' only. Only data source is now 'ESACCI-LC-L4-SAR-WB-300m-v2-0_WINNEBAGO'
+- use arithmetic: 'ESACCI-LC-L4-SAR-WB-300m-v2-0_WINNEBAGO' ? 1.0 : 0.0 (which means 1.0 inside lake, 0.0 outside)
+5. export product as tif with name 'Lake-Winnebago_shallow-extent-mask.tif' 
+6. upload this to calvalus into '/mnt/hdfs/calvalus/projects/diversity/aux/shallow_new'
+
+This must be done before standard lakes processing chain is applied to the given lake.
