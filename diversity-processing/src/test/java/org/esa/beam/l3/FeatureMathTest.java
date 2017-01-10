@@ -26,16 +26,13 @@ import org.junit.Test;
 import java.io.IOException;
 import java.io.InputStreamReader;
 
+import static org.esa.beam.l3.AggregatorTestUtils.vec;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertSame;
 
 public class FeatureMathTest {
-
-    static VectorImpl vec(float... values) {
-        return new VectorImpl(values);
-    }
 
     @Test
     public void testConfig() throws Exception {
