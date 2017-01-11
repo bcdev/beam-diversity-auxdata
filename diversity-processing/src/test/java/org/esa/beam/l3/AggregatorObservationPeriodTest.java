@@ -43,12 +43,10 @@ public class AggregatorObservationPeriodTest {
         return ProductData.UTC.parse(date, "yyyy-MM-dd HH:mm:ss").getMJD();
     }
 
-    private BinContext ctx;
     private VariableContext varCtx;
 
     @Before
     public void setUp() throws Exception {
-        ctx = AggregatorTestUtils.createCtx();
         varCtx = new MyVariableContext();
     }
 
@@ -64,6 +62,7 @@ public class AggregatorObservationPeriodTest {
 
     @Test
     public void testAggregate_detailed() throws Exception {
+        BinContext ctx = AggregatorTestUtils.createCtx();
         AggregatorObservationPeriod agg = new AggregatorObservationPeriod(varCtx, "2011-03-04", "first_obs", "last_obs");
 
         VectorImpl svec = vec(42);

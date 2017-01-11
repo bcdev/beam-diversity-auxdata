@@ -41,7 +41,6 @@ import java.util.Arrays;
  */
 public class AggregatorObservationPeriod extends AbstractAggregator {
 
-
     private final int startDay;
 
     AggregatorObservationPeriod(VariableContext varCtx, String startDate, String firstObsName, String lastObsName) {
