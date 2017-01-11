@@ -35,6 +35,7 @@ import static org.esa.beam.l3.AggregatorTestUtils.vec;
 import static org.junit.Assert.assertArrayEquals;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.junit.Assert.fail;
 
 public class AggregatorObservationPeriodTest {
 
@@ -118,7 +119,17 @@ public class AggregatorObservationPeriodTest {
         };
         assertVectorEquals(vec(1.0f, 5.0f), aggregate(bm, multipleProductObs));
 
+        // multiple obs fro single product
+        multipleProductObs = new Observation[][]{
+                {obs(mjd("2011-03-05 11:22:33")),
+                        obs(mjd("2011-03-06 11:22:33"))},
+                {obs(mjd("2011-03-09 11:22:33"))}
+        };
+        try {
+            aggregate(bm, multipleProductObs);
+            fail();
+        } catch (IllegalArgumentException iae) {
+            assertEquals("This aggregator only supports MOSAICKING", iae.getMessage());
+        }
     }
-
-
 }

@@ -36,6 +36,8 @@ import java.util.Arrays;
  * <p>
  * Include offset from the start of the n-day period as a number from 0
  * to (n-1) for both first_obs and last_obs bands (give a value for each pixel)
+ *
+ * Only supported for CompositingType.MOSAICKING.
  */
 public class AggregatorObservationPeriod extends AbstractAggregator {
 
@@ -73,6 +75,9 @@ public class AggregatorObservationPeriod extends AbstractAggregator {
 
     @Override
     public void completeSpatial(BinContext binContext, int numSpatialObs, WritableVector writableVector) {
+        if (numSpatialObs > 1) {
+            throw new IllegalArgumentException("This aggregator only supports MOSAICKING");
+        }
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
