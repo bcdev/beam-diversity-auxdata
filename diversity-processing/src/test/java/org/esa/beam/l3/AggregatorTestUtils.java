@@ -17,11 +17,18 @@
 package org.esa.beam.l3;
 
 import org.esa.beam.binning.BinContext;
+import org.esa.beam.binning.BinManager;
 import org.esa.beam.binning.Observation;
+import org.esa.beam.binning.SpatialBin;
+import org.esa.beam.binning.TemporalBin;
+import org.esa.beam.binning.Vector;
+import org.esa.beam.binning.WritableVector;
 import org.esa.beam.binning.support.ObservationImpl;
 import org.esa.beam.binning.support.VectorImpl;
 
 import java.util.HashMap;
+
+import static org.junit.Assert.assertEquals;
 
 public class AggregatorTestUtils {
 
@@ -56,5 +63,29 @@ public class AggregatorTestUtils {
                 map.put(name, value);
             }
         };
+    }
+
+    public static void assertVectorEquals(Vector expected, Vector actual) {
+        int size = expected.size();
+        assertEquals("vector size", size, actual.size());
+        for (int i = 0; i < size; i++) {
+            assertEquals("vector elem " + i, expected.get(i), actual.get(i), 1E-6);
+        }
+    }
+
+    public static Vector aggregate(BinManager binManager, Observation[][] multipleProductObs) {
+        TemporalBin temporalBin = binManager.createTemporalBin(42);
+        for (Observation[] observations : multipleProductObs) {
+            SpatialBin spatialBin = binManager.createSpatialBin(42);
+            for (Observation observation : observations) {
+                binManager.aggregateSpatialBin(observation, spatialBin);
+            }
+            binManager.completeSpatialBin(spatialBin);
+            binManager.aggregateTemporalBin(spatialBin, temporalBin);
+        }
+        binManager.completeTemporalBin(temporalBin);
+        WritableVector outputVector = binManager.createOutputVector();
+        binManager.computeOutput(temporalBin, outputVector);
+        return outputVector;
     }
 }

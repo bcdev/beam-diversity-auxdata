@@ -17,6 +17,8 @@
 package org.esa.beam.l3;
 
 import org.esa.beam.binning.BinContext;
+import org.esa.beam.binning.BinManager;
+import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.VariableContext;
 import org.esa.beam.binning.support.VectorImpl;
 import org.esa.beam.framework.datamodel.ProductData;
@@ -26,9 +28,13 @@ import org.junit.Test;
 import java.text.ParseException;
 
 import static java.lang.Float.NaN;
+import static org.esa.beam.l3.AggregatorTestUtils.aggregate;
+import static org.esa.beam.l3.AggregatorTestUtils.assertVectorEquals;
 import static org.esa.beam.l3.AggregatorTestUtils.obs;
 import static org.esa.beam.l3.AggregatorTestUtils.vec;
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertArrayEquals;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 
 public class AggregatorObservationPeriodTest {
 
@@ -56,53 +62,25 @@ public class AggregatorObservationPeriodTest {
     }
 
     @Test
-    public void testAggregate_noObs() throws Exception {
+    public void testAggregate_detailed() throws Exception {
         AggregatorObservationPeriod agg = new AggregatorObservationPeriod(varCtx, "2011-03-04", "first_obs", "last_obs");
 
         VectorImpl svec = vec(42);
         VectorImpl tvec = vec(NaN, NaN);
         VectorImpl ovec = vec(NaN, NaN);
-
-
+        /////////////////////////////////////////////
         agg.initSpatial(ctx, svec);
         assertTrue(Float.isNaN(svec.get(0)));
-
-        agg.completeSpatial(ctx, 0, svec);
-        assertTrue(Float.isNaN(svec.get(0)));
-
-
-        agg.initTemporal(ctx, tvec);
-        assertEquals(Float.POSITIVE_INFINITY, tvec.get(0), 0.0f);
-        assertEquals(Float.NEGATIVE_INFINITY, tvec.get(1), 0.0f);
-
-        agg.completeTemporal(ctx, 0, tvec);
-        assertTrue(Float.isNaN(tvec.get(0)));
-        assertTrue(Float.isNaN(tvec.get(1)));
-
-
-        agg.computeOutput(tvec, ovec);
-        assertTrue(Float.isNaN(ovec.get(0)));
-        assertTrue(Float.isNaN(ovec.get(1)));
-    }
-
-    @Test
-    public void testAggregate_withSingleObs() throws Exception {
-        AggregatorObservationPeriod agg = new AggregatorObservationPeriod(varCtx, "2011-03-04", "first_obs", "last_obs");
-
-        VectorImpl svec = vec(42);
-        VectorImpl tvec = vec(NaN, NaN);
-        VectorImpl ovec = vec(NaN, NaN);
-
-
-        agg.initSpatial(ctx, svec);
 
         agg.aggregateSpatial(ctx, obs(mjd("2011-03-05 11:22:33")), svec);
         assertEquals(1, svec.get(0), 0.0f);
 
         agg.completeSpatial(ctx, 1, svec);
-
-
+        assertEquals(1, svec.get(0), 0.0f);
+        /////////////////////////////////////////////
         agg.initTemporal(ctx, tvec);
+        assertEquals(Float.POSITIVE_INFINITY, tvec.get(0), 0.0f);
+        assertEquals(Float.NEGATIVE_INFINITY, tvec.get(1), 0.0f);
 
         agg.aggregateTemporal(ctx, svec, 1, tvec);
         assertEquals(1, tvec.get(0), 0.0f);
@@ -111,52 +89,36 @@ public class AggregatorObservationPeriodTest {
         agg.completeTemporal(ctx, 1, tvec);
         assertEquals(1, tvec.get(0), 0.0f);
         assertEquals(1, tvec.get(1), 0.0f);
-
-
+        /////////////////////////////////////////////
         agg.computeOutput(tvec, ovec);
         assertEquals(1, ovec.get(0), 0.0f);
         assertEquals(1, ovec.get(1), 0.0f);
     }
 
     @Test
-    public void testAggregate_withMultipleObs() throws Exception {
+    public void testAggregate_e2e() throws Exception {
         AggregatorObservationPeriod agg = new AggregatorObservationPeriod(varCtx, "2011-03-04", "first_obs", "last_obs");
+        BinManager bm = new BinManager(varCtx, agg);
 
-        VectorImpl svec = vec(42);
-        VectorImpl tvec = vec(NaN, NaN);
-        VectorImpl ovec = vec(NaN, NaN);
+        // no obs
+        Observation[][] multipleProductObs = new Observation[][]{{}};
+        assertVectorEquals(vec(NaN, NaN), aggregate(bm, multipleProductObs));
 
+        // one obs
+        multipleProductObs = new Observation[][]{
+                {obs(mjd("2011-03-06 11:22:33"))}
+        };
+        assertVectorEquals(vec(2.0f, 2.0f), aggregate(bm, multipleProductObs));
 
-        agg.initSpatial(ctx, svec);
+        // multiple obs
+        multipleProductObs = new Observation[][]{
+                {obs(mjd("2011-03-05 11:22:33"))},
+                {obs(mjd("2011-03-06 11:22:33"))},
+                {obs(mjd("2011-03-09 11:22:33"))}
+        };
+        assertVectorEquals(vec(1.0f, 5.0f), aggregate(bm, multipleProductObs));
 
-        agg.aggregateSpatial(ctx, obs(mjd("2011-03-05 11:22:33")), svec);
-        assertEquals(1, svec.get(0), 0.0f);
-
-        agg.completeSpatial(ctx, 1, svec);
-
-
-        agg.initTemporal(ctx, tvec);
-
-        agg.aggregateTemporal(ctx, vec(1), 1, tvec);
-        assertEquals(1, tvec.get(0), 0.0f);
-        assertEquals(1, tvec.get(1), 0.0f);
-
-        agg.aggregateTemporal(ctx, vec(7), 1, tvec);
-        assertEquals(1, tvec.get(0), 0.0f);
-        assertEquals(7, tvec.get(1), 0.0f);
-
-        agg.aggregateTemporal(ctx, vec(3), 1, tvec);
-        assertEquals(1, tvec.get(0), 0.0f);
-        assertEquals(7, tvec.get(1), 0.0f);
-
-        agg.completeTemporal(ctx, 3, tvec);
-        assertEquals(1, tvec.get(0), 0.0f);
-        assertEquals(7, tvec.get(1), 0.0f);
-
-
-        agg.computeOutput(tvec, ovec);
-        assertEquals(1, ovec.get(0), 0.0f);
-        assertEquals(7, ovec.get(1), 0.0f);
     }
+
 
 }
