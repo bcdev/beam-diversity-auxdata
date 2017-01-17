@@ -27,6 +27,7 @@ import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
 import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.beam.util.StringUtils;
 
 import java.text.ParseException;
 import java.util.Arrays;
@@ -148,7 +149,11 @@ public class AggregatorObservationPeriod extends AbstractAggregator {
         @Override
         public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
             Config config = (Config) aggregatorConfig;
-            return new AggregatorObservationPeriod(varCtx, config.startDate, config.firstObsName, config.lastObsName);
+
+            String firstObsName = StringUtils.isNotNullAndNotEmpty(config.firstObsName) ? config.firstObsName : "first_obs";
+            String lastObsName = StringUtils.isNotNullAndNotEmpty(config.lastObsName) ? config.lastObsName : "last_obs";
+
+            return new AggregatorObservationPeriod(varCtx, config.startDate, firstObsName, lastObsName);
         }
 
         @Override
