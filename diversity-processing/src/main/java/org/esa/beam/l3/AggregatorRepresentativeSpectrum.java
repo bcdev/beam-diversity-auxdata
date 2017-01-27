@@ -48,12 +48,17 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
 
     private final int[] varIndices;
     private final String[] varNames;
+    private final Method method;
 
-    AggregatorRepresentativeSpectrum(VariableContext varCtx, String... varNames) {
+    AggregatorRepresentativeSpectrum(VariableContext varCtx, Method method, String... varNames) {
         super(Descriptor.NAME, varNames, varNames, varNames);
         if (varCtx == null) {
             throw new NullPointerException("varCtx");
         }
+        if (method == null) {
+            throw new NullPointerException("method");
+        }
+        this.method = method;
         varIndices = new int[varNames.length];
         for (int i = 0; i < varNames.length; i++) {
             int varIndex = varCtx.getVariableIndex(varNames[i]);
@@ -143,20 +148,25 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         // i.e. the middle one when values are ordered from low to high
         double[][] allSpectra = new double[numSpectra][varNames.length];
         double[] medianSpectrum = computeMedianSpectrum(data, allSpectra);
-        int bestIndex = -1;
-        double bestAngle = Double.POSITIVE_INFINITY;
-        for (int i = 0; i < numSpectra; i++) {
-            double spectralAngle = computeSpectralAngle(allSpectra[i], medianSpectrum);
-            if (spectralAngle < bestAngle) {
-                bestAngle = spectralAngle;
-                bestIndex = i;
-            }
-        }
+        int bestIndex = findBest(allSpectra, medianSpectrum);
         if (bestIndex > -1) {
             for (int i = 0; i < varNames.length; i++) {
                 temporalVector.set(i, (float) allSpectra[bestIndex][i]);
             }
         }
+    }
+
+    private int findBest(double[][] allSpectra, double[] medianSpectrum) {
+        int bestIndex = -1;
+        double bestValue = Double.POSITIVE_INFINITY;
+        for (int i = 0; i < allSpectra.length; i++) {
+            double value = method.compute(allSpectra[i], medianSpectrum);
+            if (value < bestValue) {
+                bestValue = value;
+                bestIndex = i;
+            }
+        }
+        return bestIndex;
     }
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -173,6 +183,7 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
     @Override
     public String toString() {
         return "RepresentativeSpectrum{" +
+                "method=" + method +
                 "varNames=" + Arrays.toString(varNames) +
                 "varIndices=" + Arrays.toString(varIndices) +
                 ", spatialFeatureNames=" + Arrays.toString(getSpatialFeatureNames()) +
@@ -183,8 +194,12 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
 
     public static class Config extends AggregatorConfig {
 
-        @Parameter(notEmpty = true, notNull = true, description = "the variables making up the spectra")
+        @Parameter(notEmpty = true, notNull = true, description = "The variables making up the spectra.")
         String[] varNames;
+        @Parameter(notEmpty = true, notNull = true,
+                description = "The method used for finding the best representative spectra",
+                defaultValue = "SpectralAngle")
+        Method method;
 
         public Config() {
             super(Descriptor.NAME);
@@ -193,7 +208,7 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
 
     public static class Descriptor implements AggregatorDescriptor {
 
-        public static final String NAME = "RepresentativeSpectrum";
+        private static final String NAME = "RepresentativeSpectrum";
 
         @Override
         public String getName() {
@@ -203,7 +218,8 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         @Override
         public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
             Config config = (Config) aggregatorConfig;
-            return new AggregatorRepresentativeSpectrum(varCtx, config.varNames);
+            Method method = config.method != null ? config.method : Method.SpectralAngle;
+            return new AggregatorRepresentativeSpectrum(varCtx, method, config.varNames);
         }
 
         @Override
@@ -239,25 +255,112 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         return medianSpectrum;
     }
 
-    static double computeSpectralAngle(double[] refSpectrum, double[] medianSpectrum) {
-        double sumXY = 0;
-        double sumXX = 0;
-        double sumYY = 0;
-        for (int i = 0; i < medianSpectrum.length; i++) {
-            double x = medianSpectrum[i];
-            double y = refSpectrum[i];
-            sumXX += x * x;
-            sumYY += y * y;
-            sumXY += x * y;
-        }
-        return acos(sumXY / (sqrt(sumXX) * sqrt(sumYY)));
-    }
-
     static float computeMedian(float... values) {
         if (values.length % 2 == 0) {
             return (values[values.length / 2] + values[values.length / 2 - 1]) / 2;
         } else {
             return values[values.length / 2];
         }
+    }
+
+    private static double mean(double sum, int n) {
+        if (sum == 0) {
+            return 0;
+        } else {
+            return sum / n;
+        }
+
+    }
+
+    enum Method {
+        SpectralAngle {
+            @Override
+            public double compute(double[] spectrum, double[] medianSpectrum) {
+                double sumXY = 0;
+                double sumXX = 0;
+                double sumYY = 0;
+                for (int i = 0; i < spectrum.length; i++) {
+                    double x = medianSpectrum[i];
+                    double y = spectrum[i];
+                    sumXX += x * x;
+                    sumYY += y * y;
+                    sumXY += x * y;
+                }
+                return acos(sumXY / (sqrt(sumXX) * sqrt(sumYY)));
+            }
+        },
+        AbsoluteDifference {
+            @Override
+            public double compute(double[] spectrum, double[] medianSpectrum) {
+                double sum = 0;
+                for (int i = 0; i < spectrum.length; i++) {
+                    double x = medianSpectrum[i];
+                    double y = spectrum[i];
+                    sum += Math.abs((x - y) / y);
+                }
+                if (sum > 0) {
+                    return sum / spectrum.length;
+                }
+                return mean(sum, spectrum.length);
+            }
+        },
+        RMSDifference {
+            @Override
+            public double compute(double[] spectrum, double[] medianSpectrum) {
+                double sum = 0;
+                for (int i = 0; i < spectrum.length; i++) {
+                    double x = medianSpectrum[i];
+                    double y = spectrum[i];
+                    double difference = x - y;
+                    sum += difference * difference;
+                }
+                if (sum > 0) {
+                    return Math.sqrt(sum / spectrum.length);
+                }
+                return sum;
+            }
+        },
+        Bias {
+            @Override
+            public double compute(double[] spectrum, double[] medianSpectrum) {
+                double sum = 0;
+                for (int i = 0; i < spectrum.length; i++) {
+                    double x = medianSpectrum[i];
+                    double y = spectrum[i];
+                    sum += (x - y) / y;
+                }
+                return mean(sum, spectrum.length);
+            }
+        },
+        CoeffOfDetermination {
+            @Override
+            public double compute(double[] spectrum, double[] medianSpectrum) {
+                double sumX = 0;
+                double sumY = 0;
+                for (int i = 0; i < spectrum.length; i++) {
+                    double x = medianSpectrum[i];
+                    double y = spectrum[i];
+                    sumX += x;
+                    sumY += y;
+                }
+                final double meanX = mean(sumX, spectrum.length);
+                final double meanY = mean(sumY, spectrum.length);
+                double sumXXYY = 0;
+                double sumXX2 = 0;
+                double sumYY2 = 0;
+                for (int i = 0; i < spectrum.length; i++) {
+                    double x = medianSpectrum[i];
+                    double y = spectrum[i];
+                    final double xx = x - meanX;
+                    final double yy = y - meanY;
+                    sumXXYY += xx * yy;
+                    sumXX2 += xx * xx;
+                    sumYY2 += yy * yy;
+                }
+                return (sumXXYY * sumXXYY) / (sumXX2 * sumYY2);
+            }
+        };
+
+        public abstract double compute(double[] spectrum, double[] medianSpectrum);
     }
 }
