@@ -25,7 +25,6 @@ import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.VariableContext;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
-import org.esa.beam.binning.aggregators.AggregatorAverage;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.StringUtils;
 
@@ -170,7 +169,7 @@ public class AggregatorMapping extends AbstractAggregator {
 
         @Override
         public AggregatorConfig createConfig() {
-            return new AggregatorAverage.Config();
+            return new AggregatorMapping.Config();
         }
 
         @Override
