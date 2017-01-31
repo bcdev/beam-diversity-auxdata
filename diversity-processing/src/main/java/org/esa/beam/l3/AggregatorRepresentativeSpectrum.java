@@ -79,7 +79,7 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
     }
 
     private static String[] createNames(String prefix, String...varNames) {
-        ArrayList<String> featureNames = new ArrayList<String>(varNames.length);
+        ArrayList<String> featureNames = new ArrayList<>(varNames.length);
         for (final String varName : varNames) {
             if (prefix.length() > 0) {
                 featureNames.add(prefix + "_" + varName);
