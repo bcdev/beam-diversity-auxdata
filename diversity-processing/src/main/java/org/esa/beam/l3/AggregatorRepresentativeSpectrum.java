@@ -27,7 +27,9 @@ import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
 import org.esa.beam.binning.support.GrowableVector;
 import org.esa.beam.framework.gpf.annotations.Parameter;
+import org.esa.beam.util.StringUtils;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 
 import static java.lang.Math.acos;
@@ -50,13 +52,19 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
     private final String[] varNames;
     private final Method method;
 
-    AggregatorRepresentativeSpectrum(VariableContext varCtx, Method method, String... varNames) {
-        super(Descriptor.NAME, varNames, varNames, varNames);
+    AggregatorRepresentativeSpectrum(VariableContext varCtx, Method method, String targetPrefix, String... varNames) {
+        super(Descriptor.NAME,
+              createNames(targetPrefix, varNames),
+              createNames(targetPrefix, varNames),
+              createNames(targetPrefix, varNames));
         if (varCtx == null) {
             throw new NullPointerException("varCtx");
         }
         if (method == null) {
             throw new NullPointerException("method");
+        }
+        if (targetPrefix == null) {
+            throw new NullPointerException("targetPrefix");
         }
         this.method = method;
         varIndices = new int[varNames.length];
@@ -69,6 +77,20 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         }
         this.varNames = varNames;
     }
+
+    private static String[] createNames(String prefix, String...varNames) {
+        ArrayList<String> featureNames = new ArrayList<String>(varNames.length);
+        for (final String varName : varNames) {
+            if (prefix.length() > 0) {
+                featureNames.add(prefix + "_" + varName);
+            } else {
+                featureNames.add(varName);
+            }
+        }
+        return featureNames.toArray(new String[featureNames.size()]);
+    }
+
+
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -196,6 +218,8 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
 
         @Parameter(notEmpty = true, notNull = true, description = "The variables making up the spectra.")
         String[] varNames;
+        @Parameter(label = "Target band name prefix (optional)", description = "The name prefix for the resulting bands. If empty, the source band name is used.")
+        String targetPrefix;
         @Parameter(notEmpty = true, notNull = true,
                 description = "The method used for finding the best representative spectra",
                 defaultValue = "SpectralAngle")
@@ -219,7 +243,9 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
             Config config = (Config) aggregatorConfig;
             Method method = config.method != null ? config.method : Method.SpectralAngle;
-            return new AggregatorRepresentativeSpectrum(varCtx, method, config.varNames);
+            String targetPrefix = StringUtils.isNotNullAndNotEmpty(config.targetPrefix) ? config.targetPrefix : "";
+
+            return new AggregatorRepresentativeSpectrum(varCtx, method, targetPrefix, config.varNames);
         }
 
         @Override

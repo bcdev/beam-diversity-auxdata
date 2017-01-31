@@ -150,7 +150,7 @@ public class AggregatorRepresentativeSpectrumTest {
 
     @Test
     public void testMetadata() {
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "r1", "r2", "r3");
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", "r1", "r2", "r3");
 
         assertArrayEquals(new String[]{"r1", "r2", "r3"}, agg.getSpatialFeatureNames());
         assertArrayEquals(new String[]{"r1", "r2", "r3"}, agg.getTemporalFeatureNames());
@@ -158,8 +158,17 @@ public class AggregatorRepresentativeSpectrumTest {
     }
 
     @Test
+    public void testMetadata_prefix() {
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "foo", "r1", "r2", "r3");
+
+        assertArrayEquals(new String[]{"foo_r1", "foo_r2", "foo_r3"}, agg.getSpatialFeatureNames());
+        assertArrayEquals(new String[]{"foo_r1", "foo_r2", "foo_r3"}, agg.getTemporalFeatureNames());
+        assertArrayEquals(new String[]{"foo_r1", "foo_r2", "foo_r3"}, agg.getOutputFeatureNames());
+    }
+
+    @Test
     public void testAggregate_e2e_SpectralAngle() throws Exception {
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "r1", "r2", "r3");
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", "r1", "r2", "r3");
         BinManager bm = new BinManager(varCtx, agg);
 
         // 0 obs
@@ -190,7 +199,7 @@ public class AggregatorRepresentativeSpectrumTest {
 
     @Test
     public void testAggregate_e2e_AbsoluteDifference() throws Exception {
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.AbsoluteDifference, "r1", "r2", "r3");
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.AbsoluteDifference, "", "r1", "r2", "r3");
         BinManager bm = new BinManager(varCtx, agg);
 
         // 0 obs
@@ -221,7 +230,7 @@ public class AggregatorRepresentativeSpectrumTest {
 
     @Test
     public void testAggregate_e2e_RMSDifference() throws Exception {
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.RMSDifference, "r1", "r2", "r3");
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.RMSDifference, "", "r1", "r2", "r3");
         BinManager bm = new BinManager(varCtx, agg);
 
         // 0 obs
