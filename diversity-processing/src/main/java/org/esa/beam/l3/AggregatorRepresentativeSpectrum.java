@@ -306,8 +306,8 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
                 double sumXX = 0;
                 double sumYY = 0;
                 for (int i = 0; i < spectrum.length; i++) {
-                    double x = medianSpectrum[i];
-                    double y = spectrum[i];
+                    double x = spectrum[i];
+                    double y = medianSpectrum[i];
                     sumXX += x * x;
                     sumYY += y * y;
                     sumXY += x * y;
@@ -320,8 +320,8 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
             public double compute(double[] spectrum, double[] medianSpectrum) {
                 double sum = 0;
                 for (int i = 0; i < spectrum.length; i++) {
-                    double x = medianSpectrum[i];
-                    double y = spectrum[i];
+                    double x = spectrum[i];
+                    double y = medianSpectrum[i];
                     sum += Math.abs((x - y) / y);
                 }
                 if (sum > 0) {
@@ -335,8 +335,8 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
             public double compute(double[] spectrum, double[] medianSpectrum) {
                 double sum = 0;
                 for (int i = 0; i < spectrum.length; i++) {
-                    double x = medianSpectrum[i];
-                    double y = spectrum[i];
+                    double x = spectrum[i];
+                    double y = medianSpectrum[i];
                     double difference = x - y;
                     sum += difference * difference;
                 }
@@ -351,11 +351,11 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
             public double compute(double[] spectrum, double[] medianSpectrum) {
                 double sum = 0;
                 for (int i = 0; i < spectrum.length; i++) {
-                    double x = medianSpectrum[i];
-                    double y = spectrum[i];
+                    double x = spectrum[i];
+                    double y = medianSpectrum[i];
                     sum += (x - y) / y;
                 }
-                return mean(sum, spectrum.length);
+                return Math.abs(mean(sum, spectrum.length));
             }
         },
         CoeffOfDetermination {
@@ -364,8 +364,8 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
                 double sumX = 0;
                 double sumY = 0;
                 for (int i = 0; i < spectrum.length; i++) {
-                    double x = medianSpectrum[i];
-                    double y = spectrum[i];
+                    double x = spectrum[i];
+                    double y = medianSpectrum[i];
                     sumX += x;
                     sumY += y;
                 }
@@ -375,15 +375,15 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
                 double sumXX2 = 0;
                 double sumYY2 = 0;
                 for (int i = 0; i < spectrum.length; i++) {
-                    double x = medianSpectrum[i];
-                    double y = spectrum[i];
+                    double x = spectrum[i];
+                    double y = medianSpectrum[i];
                     final double xx = x - meanX;
                     final double yy = y - meanY;
                     sumXXYY += xx * yy;
                     sumXX2 += xx * xx;
                     sumYY2 += yy * yy;
                 }
-                return (sumXXYY * sumXXYY) / (sumXX2 * sumYY2);
+                return 1 - ((sumXXYY * sumXXYY) / (sumXX2 * sumYY2));
             }
         };
 
