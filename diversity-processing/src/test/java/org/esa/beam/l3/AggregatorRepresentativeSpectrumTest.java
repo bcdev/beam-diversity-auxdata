@@ -102,11 +102,11 @@ public class AggregatorRepresentativeSpectrumTest {
         double[] medianSpectrum = {2, 3, 4};
         AggregatorRepresentativeSpectrum.Method method = AggregatorRepresentativeSpectrum.Method.AbsoluteDifference;
         double value = method.compute(refSpectrum, medianSpectrum);
-        assertEquals(0.33730158730158727, value, 1E-5);
+        assertEquals(0.5277777777777778, value, 1E-5);
 
         medianSpectrum = new double[]{1, 3, 7};
         value = method.compute(refSpectrum, medianSpectrum);
-        assertEquals(0.3055555555555555, value, 1E-5);
+        assertEquals(0.7777777777777778, value, 1E-5);
     }
 
     @Test
@@ -128,11 +128,11 @@ public class AggregatorRepresentativeSpectrumTest {
         double[] medianSpectrum = {2, 3, 4};
         AggregatorRepresentativeSpectrum.Method method = AggregatorRepresentativeSpectrum.Method.Bias;
         double value = method.compute(refSpectrum, medianSpectrum);
-        assertEquals(-0.33730158730158727, value, 1E-5);
+        assertEquals(0.5277777777777778, value, 1E-5);
 
         medianSpectrum = new double[]{1, 3, 7};
         value = method.compute(refSpectrum, medianSpectrum);
-        assertEquals(-0.3055555555555555, value, 1E-5);
+        assertEquals(0.7777777777777778, value, 1E-5);
     }
 
     @Test
@@ -141,11 +141,11 @@ public class AggregatorRepresentativeSpectrumTest {
         double[] medianSpectrum = {2, 3, 4};
         AggregatorRepresentativeSpectrum.Method method = AggregatorRepresentativeSpectrum.Method.CoeffOfDetermination;
         double value = method.compute(refSpectrum, medianSpectrum);
-        assertEquals(0.9230769230769231, value, 1E-5);
+        assertEquals(0.07692307692307687, value, 1E-5);
 
         medianSpectrum = new double[]{1, 3, 7};
         value = method.compute(refSpectrum, medianSpectrum);
-        assertEquals(0.9917582417582417, value, 1E-5);
+        assertEquals(0.008241758241758323, value, 1E-5);
     }
 
     @Test
@@ -217,7 +217,7 @@ public class AggregatorRepresentativeSpectrumTest {
                 {obsNT(1, 3, 7)},
                 {obsNT(2, 3, 5)}
         };
-        assertVectorEquals(vec(2, 3, 5), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
 
         // 3 obs: best SpectralAngle using median
         multipleProductObs = new Observation[][]{
