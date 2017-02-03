@@ -161,9 +161,9 @@ public class AggregatorRepresentativeSpectrumTest {
     public void testMetadata_prefix() {
         Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "foo", "r1", "r2", "r3");
 
-        assertArrayEquals(new String[]{"foo_r1", "foo_r2", "foo_r3"}, agg.getSpatialFeatureNames());
-        assertArrayEquals(new String[]{"foo_r1", "foo_r2", "foo_r3"}, agg.getTemporalFeatureNames());
-        assertArrayEquals(new String[]{"foo_r1", "foo_r2", "foo_r3"}, agg.getOutputFeatureNames());
+        assertArrayEquals(new String[]{"r1_foo", "r2_foo", "r3_foo"}, agg.getSpatialFeatureNames());
+        assertArrayEquals(new String[]{"r1_foo", "r2_foo", "r3_foo"}, agg.getTemporalFeatureNames());
+        assertArrayEquals(new String[]{"r1_foo", "r2_foo", "r3_foo"}, agg.getOutputFeatureNames());
     }
 
     @Test

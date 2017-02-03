@@ -52,19 +52,16 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
     private final String[] varNames;
     private final Method method;
 
-    AggregatorRepresentativeSpectrum(VariableContext varCtx, Method method, String targetPrefix, String... varNames) {
+    AggregatorRepresentativeSpectrum(VariableContext varCtx, Method method, String targetSuffix, String... varNames) {
         super(Descriptor.NAME,
-              createNames(targetPrefix, varNames),
-              createNames(targetPrefix, varNames),
-              createNames(targetPrefix, varNames));
+              createNames(targetSuffix, varNames),
+              createNames(targetSuffix, varNames),
+              createNames(targetSuffix, varNames));
         if (varCtx == null) {
             throw new NullPointerException("varCtx");
         }
         if (method == null) {
             throw new NullPointerException("method");
-        }
-        if (targetPrefix == null) {
-            throw new NullPointerException("targetPrefix");
         }
         this.method = method;
         varIndices = new int[varNames.length];
@@ -78,11 +75,11 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         this.varNames = varNames;
     }
 
-    private static String[] createNames(String prefix, String...varNames) {
+    private static String[] createNames(String suffix, String...varNames) {
         ArrayList<String> featureNames = new ArrayList<>(varNames.length);
         for (final String varName : varNames) {
-            if (prefix.length() > 0) {
-                featureNames.add(prefix + "_" + varName);
+            if (suffix != null && suffix.length() > 0) {
+                featureNames.add(varName + "_" + suffix);
             } else {
                 featureNames.add(varName);
             }
@@ -218,8 +215,9 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
 
         @Parameter(notEmpty = true, notNull = true, description = "The variables making up the spectra.")
         String[] varNames;
-        @Parameter(label = "Target band name prefix (optional)", description = "The name prefix for the resulting bands. If empty, the source band name is used.")
-        String targetPrefix;
+        @Parameter(label = "Target band name suffix (optional)",
+                description = "The name suffix for the resulting bands. If empty, the source band names are used.")
+        String targetSuffix;
         @Parameter(notEmpty = true, notNull = true,
                 description = "The method used for finding the best representative spectra",
                 defaultValue = "SpectralAngle")
@@ -243,9 +241,9 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
             Config config = (Config) aggregatorConfig;
             Method method = config.method != null ? config.method : Method.SpectralAngle;
-            String targetPrefix = StringUtils.isNotNullAndNotEmpty(config.targetPrefix) ? config.targetPrefix : "";
+            String targetSuffix = StringUtils.isNotNullAndNotEmpty(config.targetSuffix) ? config.targetSuffix : "";
 
-            return new AggregatorRepresentativeSpectrum(varCtx, method, targetPrefix, config.varNames);
+            return new AggregatorRepresentativeSpectrum(varCtx, method, targetSuffix, config.varNames);
         }
 
         @Override
