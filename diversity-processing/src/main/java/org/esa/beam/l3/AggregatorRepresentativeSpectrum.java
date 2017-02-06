@@ -260,7 +260,8 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         @Override
         public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
             Config config = (Config) aggregatorConfig;
-            return config.varNames;
+            String targetSuffix = StringUtils.isNotNullAndNotEmpty(config.targetSuffix) ? config.targetSuffix : "";
+            return createNames(targetSuffix, config.varNames);
         }
     }
 
