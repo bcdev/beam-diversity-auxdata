@@ -127,11 +127,11 @@
             <artifactId>beam-netcdf</artifactId>
             <version>${beam.version}</version>
         </dependency>
-        <dependency>
-            <groupId>org.esa.beam</groupId>
-            <artifactId>beam-proba-v-reader</artifactId>
-            <version>${beam.version}</version>
-        </dependency>
+        <!--<dependency>-->
+            <!--<groupId>org.esa.beam</groupId>-->
+            <!--<artifactId>beam-proba-v-reader</artifactId>-->
+            <!--<version>${beam.version}</version>-->
+        <!--</dependency>-->
         <dependency>
             <groupId>org.esa.beam</groupId>
             <artifactId>beam-collocation</artifactId>
