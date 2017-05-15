@@ -26,12 +26,13 @@ import org.esa.beam.binning.VariableContext;
 import org.esa.beam.binning.Vector;
 import org.esa.beam.binning.WritableVector;
 import org.esa.beam.binning.support.GrowableVector;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.esa.beam.framework.gpf.annotations.Parameter;
 import org.esa.beam.util.StringUtils;
 
+import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.List;
 
 import static java.lang.Math.acos;
 import static java.lang.Math.sqrt;
@@ -49,21 +50,32 @@ import static java.lang.Math.sqrt;
  */
 public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
 
+    private final int startDay;
+
+    private final Method method;
     private final int[] varIndices;
     private final String[] varNames;
     private final String[] searchVarNames;
-    private final Method method;
 
-    AggregatorRepresentativeSpectrum(VariableContext varCtx, Method method, String targetSuffix, String[] varNames, String[] searchVarNames) {
+    AggregatorRepresentativeSpectrum(VariableContext varCtx, String startDate, String bestObsDateName, Method method, String targetSuffix, String[] varNames, String[] searchVarNames) {
         super(Descriptor.NAME,
-              createNames(targetSuffix, varNames),
-              createNames(targetSuffix, varNames),
-              createNames(targetSuffix, varNames));
+              createNames(bestObsDateName != null ? "day" : null, targetSuffix, varNames),
+              createNames(bestObsDateName, targetSuffix, varNames),
+              createNames(bestObsDateName, targetSuffix, varNames));
         if (varCtx == null) {
             throw new NullPointerException("varCtx");
         }
         if (method == null) {
             throw new NullPointerException("method");
+        }
+        if (bestObsDateName != null){
+            try {
+                this.startDay = ProductData.UTC.parse(startDate, "yyyy-MM-dd").getDaysFraction();
+            } catch (ParseException e) {
+                throw new IllegalArgumentException(e);
+            }
+        } else {
+            this.startDay = -1;
         }
         this.method = method;
         varIndices = new int[varNames.length];
@@ -78,14 +90,17 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         this.searchVarNames = searchVarNames;
     }
 
-    private static String[] createNames(String suffix, String... varNames) {
-        ArrayList<String> featureNames = new ArrayList<>(varNames.length);
+    private static String[] createNames(String dateName, String suffix, String... varNames) {
+        ArrayList<String> featureNames = new ArrayList<>(varNames.length+1);
         for (final String varName : varNames) {
             if (suffix != null && suffix.length() > 0) {
                 featureNames.add(varName + "_" + suffix);
             } else {
                 featureNames.add(varName);
             }
+        }
+        if (dateName != null) {
+            featureNames.add(dateName);
         }
         return featureNames.toArray(new String[featureNames.size()]);
     }
@@ -98,6 +113,9 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         for (int i = 0; i < varIndices.length; i++) {
             writableVector.set(i, Float.NaN);
         }
+        if (startDay != -1) {
+            writableVector.set(varIndices.length, Float.NaN);
+        }
     }
 
     @Override
@@ -106,13 +124,18 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
             float value = observation.get(varIndices[i]);
             if (Float.isNaN(value)) {
                 // if any value isNaN, throw away the complete spectra
-                for (int j = 0; j < i; j++) {
+                for (int j = 0; j < writableVector.size(); j++) {
                     writableVector.set(j, Float.NaN);
                 }
                 return;
             } else {
                 writableVector.set(i, value);
             }
+        }
+        if (startDay != -1) {
+            double mjd = observation.getMJD();
+            int day = (int) (mjd - startDay);
+            writableVector.set(varIndices.length, day);            
         }
     }
 
@@ -131,6 +154,10 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
             writableVector.set(i, Float.NaN);
             binContext.put(varNames[i], new GrowableVector(10));
         }
+        if (startDay != -1) {
+            writableVector.set(varNames.length, Float.NaN);
+            binContext.put("day", new GrowableVector(10));
+        }
     }
 
     @Override
@@ -140,6 +167,10 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
             for (int i = 0; i < varNames.length; i++) {
                 GrowableVector measurementsVec = binContext.get(varNames[i]);
                 measurementsVec.add(spatialVector.get(i));
+            }
+            if (startDay != -1) {
+                GrowableVector measurementsVec = binContext.get("day");
+                measurementsVec.add(spatialVector.get(varNames.length)); 
             }
         }
     }
@@ -155,6 +186,10 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
             for (int i = 0; i < varNames.length; i++) {
                 GrowableVector measurementsVec = binContext.get(varNames[i]);
                 temporalVector.set(i, measurementsVec.get(0));
+            }
+            if (startDay != -1) {
+                GrowableVector measurementsVec = binContext.get("day");
+                temporalVector.set(varNames.length, measurementsVec.get(0));
             }
             return;
         }
@@ -174,6 +209,10 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
             for (int i = 0; i < varNames.length; i++) {
                 GrowableVector measurementsVec = binContext.get(varNames[i]);
                 temporalVector.set(i, measurementsVec.get(bestSpectraIndex));
+            }
+            if (startDay != -1) {
+                GrowableVector measurementsVec = binContext.get("day");
+                temporalVector.set(varNames.length, measurementsVec.get(bestSpectraIndex));
             }
         }
     }
@@ -195,7 +234,7 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
 
     @Override
     public void computeOutput(Vector temporalVector, WritableVector outputVector) {
-        for (int i = 0; i < varIndices.length; i++) {
+        for (int i = 0; i < temporalVector.size(); i++) {
             outputVector.set(i, temporalVector.get(i));
         }
     }
@@ -228,6 +267,10 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
                 description = "The method used for finding the best representative spectra",
                 defaultValue = "SpectralAngle")
         Method method;
+        @Parameter(notEmpty = true, notNull = true, description = "First day in format 'YYYY-MM-DD'")
+        String startDate;
+        @Parameter(defaultValue = "best_obs")
+        String bestObsDateName;
 
         public Config() {
             super(Descriptor.NAME);
@@ -260,7 +303,9 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
                 searchVarNames = config.searchVarNames;
             }
 
-            return new AggregatorRepresentativeSpectrum(varCtx, method, targetSuffix, config.varNames, searchVarNames);
+            String bestObsDateName = StringUtils.isNotNullAndNotEmpty(config.bestObsDateName) ? config.bestObsDateName : null;
+            
+            return new AggregatorRepresentativeSpectrum(varCtx, config.startDate, bestObsDateName, method, targetSuffix, config.varNames, searchVarNames);
         }
 
         @Override
@@ -278,7 +323,9 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         public String[] getTargetVarNames(AggregatorConfig aggregatorConfig) {
             Config config = (Config) aggregatorConfig;
             String targetSuffix = StringUtils.isNotNullAndNotEmpty(config.targetSuffix) ? config.targetSuffix : "";
-            return createNames(targetSuffix, config.varNames);
+            String dateName = StringUtils.isNotNullAndNotEmpty(config.bestObsDateName) ? config.bestObsDateName : null;
+            
+            return createNames(dateName, targetSuffix, config.varNames);
         }
     }
 

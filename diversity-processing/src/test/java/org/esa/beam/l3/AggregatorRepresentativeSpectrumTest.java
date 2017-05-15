@@ -27,16 +27,19 @@ import org.esa.beam.binning.BinManager;
 import org.esa.beam.binning.Observation;
 import org.esa.beam.binning.VariableContext;
 import org.esa.beam.binning.operator.AggregatorConfigDomConverter;
+import org.esa.beam.framework.datamodel.ProductData;
 import org.junit.Before;
 import org.junit.Test;
 
 import java.io.StringReader;
+import java.text.ParseException;
 
 import static java.lang.Float.NaN;
 import static org.esa.beam.l3.AggregatorRepresentativeSpectrum.computeMedian;
 import static org.esa.beam.l3.AggregatorRepresentativeSpectrum.computeMedianSpectrum;
 import static org.esa.beam.l3.AggregatorTestUtils.aggregate;
 import static org.esa.beam.l3.AggregatorTestUtils.assertVectorEquals;
+import static org.esa.beam.l3.AggregatorTestUtils.obs;
 import static org.esa.beam.l3.AggregatorTestUtils.obsNT;
 import static org.esa.beam.l3.AggregatorTestUtils.vec;
 import static org.junit.Assert.assertArrayEquals;
@@ -151,7 +154,7 @@ public class AggregatorRepresentativeSpectrumTest {
     @Test
     public void testMetadata() {
         String[] varNames = {"r1", "r2", "r3"};
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", varNames, varNames);
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, "", null, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", varNames, varNames);
 
         assertArrayEquals(new String[]{"r1", "r2", "r3"}, agg.getSpatialFeatureNames());
         assertArrayEquals(new String[]{"r1", "r2", "r3"}, agg.getTemporalFeatureNames());
@@ -161,7 +164,7 @@ public class AggregatorRepresentativeSpectrumTest {
     @Test
     public void testMetadata_prefix() {
         String[] varNames = {"r1", "r2", "r3"};
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "foo", varNames, varNames);
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, "", null, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "foo", varNames, varNames);
 
         assertArrayEquals(new String[]{"r1_foo", "r2_foo", "r3_foo"}, agg.getSpatialFeatureNames());
         assertArrayEquals(new String[]{"r1_foo", "r2_foo", "r3_foo"}, agg.getTemporalFeatureNames());
@@ -169,10 +172,10 @@ public class AggregatorRepresentativeSpectrumTest {
     }
 
     @Test
-    public void testAggregate_e2e_SpectralAngle() throws Exception {
+    public void testAggregate_e2e_SpectralAngle_withSearchVars() throws Exception {
         String[] varNames = {"r1", "r1a", "r2", "r3"};
         String[] searchVarNames = {"r1", "r2", "r3"};
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", varNames, searchVarNames);
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, "", null, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", varNames, searchVarNames);
         BinManager bm = new BinManager(varCtx, agg);
 
         // 0 obs
@@ -200,12 +203,76 @@ public class AggregatorRepresentativeSpectrumTest {
         };
         assertVectorEquals(vec(1, 99, 3, 7), aggregate(bm, multipleProductObs));
     }
+    
+    @Test
+    public void testAggregate_e2e_SpectralAngle_widthDate() throws Exception {
+        String[] varNames = {"r1", "r2", "r3"};
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, "2011-03-04", "theBestDate", AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", varNames, varNames);
+        BinManager bm = new BinManager(varCtx, agg);
+
+        // 0 obs
+        Observation[][] multipleProductObs = new Observation[][]{{}};
+        assertVectorEquals(vec(NaN, NaN, NaN, NaN), aggregate(bm, multipleProductObs));
+
+        // 1 obs
+        multipleProductObs = new Observation[][]{
+                {obs(mjd("2011-03-06 11:22:33"),1, 99, 3, 7)}
+        };
+        assertVectorEquals(vec(1, 3, 7, 2), aggregate(bm, multipleProductObs));
+
+        // 2 obs: best SpectralAngle using mean
+        multipleProductObs = new Observation[][]{
+                {obs(mjd("2011-03-05 11:22:33"),1, 99, 3, 7)},
+                {obs(mjd("2011-03-07 21:01:33"),2, 99, 3, 5)}
+        };
+        assertVectorEquals(vec(1, 3, 7, 1), aggregate(bm, multipleProductObs));
+
+        // 3 obs: best SpectralAngle using median
+        multipleProductObs = new Observation[][]{
+                {obs(mjd("2011-03-05 11:22:33"),1, 99, 1.5f, 4)},
+                {obs(mjd("2011-03-06 11:22:33"),2, 99, 3, 5)},
+                {obs(mjd("2011-03-07 11:22:33"),1, 99, 3, 7)},
+        };
+        assertVectorEquals(vec(1, 3, 7, 3), aggregate(bm, multipleProductObs));
+    }
+    
+    @Test
+    public void testAggregate_e2e_SpectralAngle() throws Exception {
+        String[] varNames = {"r1", "r2", "r3"};
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, "", null, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", varNames, varNames);
+        BinManager bm = new BinManager(varCtx, agg);
+
+        // 0 obs
+        Observation[][] multipleProductObs = new Observation[][]{{}};
+        assertVectorEquals(vec(NaN, NaN, NaN), aggregate(bm, multipleProductObs));
+
+        // 1 obs
+        multipleProductObs = new Observation[][]{
+                {obsNT(1, 99, 3, 7)}
+        };
+        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+
+        // 2 obs: best SpectralAngle using mean
+        multipleProductObs = new Observation[][]{
+                {obsNT(1, 99, 3, 7)},
+                {obsNT(2, 99, 3, 5)}
+        };
+        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+
+        // 3 obs: best SpectralAngle using median
+        multipleProductObs = new Observation[][]{
+                {obsNT(1, 99, 1.5f, 4)},
+                {obsNT(2, 99, 3, 5)},
+                {obsNT(1, 99, 3, 7)},
+        };
+        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+    }
 
     @Test
     public void testAggregate_e2e_AbsoluteDifference() throws Exception {
         String[] varNames = {"r1", "r1a", "r2", "r3"};
         String[] searchVarNames = {"r1", "r2", "r3"};
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.AbsoluteDifference, "", varNames, searchVarNames);
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, "", null, AggregatorRepresentativeSpectrum.Method.AbsoluteDifference, "", varNames, searchVarNames);
         BinManager bm = new BinManager(varCtx, agg);
 
         // 0 obs
@@ -238,7 +305,7 @@ public class AggregatorRepresentativeSpectrumTest {
     public void testAggregate_e2e_RMSDifference() throws Exception {
         String[] varNames = {"r1", "r1a", "r2", "r3"};
         String[] searchVarNames = {"r1", "r2", "r3"};
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.RMSDifference, "", varNames, searchVarNames);
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, "", null, AggregatorRepresentativeSpectrum.Method.RMSDifference, "", varNames, searchVarNames);
         BinManager bm = new BinManager(varCtx, agg);
 
         // 0 obs
@@ -284,9 +351,13 @@ public class AggregatorRepresentativeSpectrumTest {
         assertArrayEquals(new String[]{"r1", "r2"}, config.varNames);
     }
 
-    private XppDom createDom(String xml) {
+    private static XppDom createDom(String xml) {
         XppDomWriter domWriter = new XppDomWriter();
         new HierarchicalStreamCopier().copy(new XppReader(new StringReader(xml)), domWriter);
         return domWriter.getConfiguration();
+    }
+    
+    private static double mjd(String date) throws ParseException {
+        return ProductData.UTC.parse(date, "yyyy-MM-dd HH:mm:ss").getMJD();
     }
 }
