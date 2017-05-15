@@ -50,7 +50,7 @@ public class AggregatorRepresentativeSpectrumTest {
 
     @Before
     public void setUp() throws Exception {
-        varCtx = new MyVariableContext("r1", "r2", "r3");
+        varCtx = new MyVariableContext("r1", "r1a", "r2", "r3");
     }
 
     @Test
@@ -150,7 +150,8 @@ public class AggregatorRepresentativeSpectrumTest {
 
     @Test
     public void testMetadata() {
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", "r1", "r2", "r3");
+        String[] varNames = {"r1", "r2", "r3"};
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", varNames, varNames);
 
         assertArrayEquals(new String[]{"r1", "r2", "r3"}, agg.getSpatialFeatureNames());
         assertArrayEquals(new String[]{"r1", "r2", "r3"}, agg.getTemporalFeatureNames());
@@ -159,7 +160,8 @@ public class AggregatorRepresentativeSpectrumTest {
 
     @Test
     public void testMetadata_prefix() {
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "foo", "r1", "r2", "r3");
+        String[] varNames = {"r1", "r2", "r3"};
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "foo", varNames, varNames);
 
         assertArrayEquals(new String[]{"r1_foo", "r2_foo", "r3_foo"}, agg.getSpatialFeatureNames());
         assertArrayEquals(new String[]{"r1_foo", "r2_foo", "r3_foo"}, agg.getTemporalFeatureNames());
@@ -168,99 +170,105 @@ public class AggregatorRepresentativeSpectrumTest {
 
     @Test
     public void testAggregate_e2e_SpectralAngle() throws Exception {
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", "r1", "r2", "r3");
+        String[] varNames = {"r1", "r1a", "r2", "r3"};
+        String[] searchVarNames = {"r1", "r2", "r3"};
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.SpectralAngle, "", varNames, searchVarNames);
         BinManager bm = new BinManager(varCtx, agg);
 
         // 0 obs
         Observation[][] multipleProductObs = new Observation[][]{{}};
-        assertVectorEquals(vec(NaN, NaN, NaN), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(NaN, NaN, NaN, NaN), aggregate(bm, multipleProductObs));
 
         // 1 obs
         multipleProductObs = new Observation[][]{
-                {obsNT(1, 3, 7)}
+                {obsNT(1, 99, 3, 7)}
         };
-        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(1, 99, 3, 7), aggregate(bm, multipleProductObs));
 
         // 2 obs: best SpectralAngle using mean
         multipleProductObs = new Observation[][]{
-                {obsNT(1, 3, 7)},
-                {obsNT(2, 3, 5)}
+                {obsNT(1, 99, 3, 7)},
+                {obsNT(2, 99, 3, 5)}
         };
-        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(1, 99, 3, 7), aggregate(bm, multipleProductObs));
 
         // 3 obs: best SpectralAngle using median
         multipleProductObs = new Observation[][]{
-                {obsNT(1, 1.5f, 4)},
-                {obsNT(2, 3, 5)},
-                {obsNT(1, 3, 7)},
+                {obsNT(1, 99, 1.5f, 4)},
+                {obsNT(2, 99, 3, 5)},
+                {obsNT(1, 99, 3, 7)},
         };
-        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(1, 99, 3, 7), aggregate(bm, multipleProductObs));
     }
 
     @Test
     public void testAggregate_e2e_AbsoluteDifference() throws Exception {
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.AbsoluteDifference, "", "r1", "r2", "r3");
+        String[] varNames = {"r1", "r1a", "r2", "r3"};
+        String[] searchVarNames = {"r1", "r2", "r3"};
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.AbsoluteDifference, "", varNames, searchVarNames);
         BinManager bm = new BinManager(varCtx, agg);
 
         // 0 obs
         Observation[][] multipleProductObs = new Observation[][]{{}};
-        assertVectorEquals(vec(NaN, NaN, NaN), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(NaN, NaN, NaN, NaN), aggregate(bm, multipleProductObs));
 
         // 1 obs
         multipleProductObs = new Observation[][]{
-                {obsNT(1, 3, 7)}
+                {obsNT(1, 99, 3, 7)}
         };
-        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(1, 99, 3, 7), aggregate(bm, multipleProductObs));
 
         // 2 obs: best SpectralAngle using mean
         multipleProductObs = new Observation[][]{
-                {obsNT(1, 3, 7)},
-                {obsNT(2, 3, 5)}
+                {obsNT(1, 99, 3, 7)},
+                {obsNT(2, 99, 3, 5)}
         };
-        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(1, 99, 3, 7), aggregate(bm, multipleProductObs));
 
         // 3 obs: best SpectralAngle using median
         multipleProductObs = new Observation[][]{
-                {obsNT(1, 1.5f, 4)},
-                {obsNT(2, 3, 5)},
-                {obsNT(1, 3, 7)},
+                {obsNT(1, 99, 1.5f, 4)},
+                {obsNT(2, 99, 3, 5)},
+                {obsNT(1, 99, 3, 7)},
         };
-        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(1, 99, 3, 7), aggregate(bm, multipleProductObs));
     }
 
     @Test
     public void testAggregate_e2e_RMSDifference() throws Exception {
-        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.RMSDifference, "", "r1", "r2", "r3");
+        String[] varNames = {"r1", "r1a", "r2", "r3"};
+        String[] searchVarNames = {"r1", "r2", "r3"};
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, AggregatorRepresentativeSpectrum.Method.RMSDifference, "", varNames, searchVarNames);
         BinManager bm = new BinManager(varCtx, agg);
 
         // 0 obs
         Observation[][] multipleProductObs = new Observation[][]{{}};
-        assertVectorEquals(vec(NaN, NaN, NaN), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(NaN, NaN, NaN, NaN), aggregate(bm, multipleProductObs));
 
         // 1 obs
         multipleProductObs = new Observation[][]{
-                {obsNT(1, 3, 7)}
+                {obsNT(1, 99, 3, 7)}
         };
-        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(1, 99, 3, 7), aggregate(bm, multipleProductObs));
 
         // 2 obs: best SpectralAngle using mean
         multipleProductObs = new Observation[][]{
-                {obsNT(1, 3, 7)},
-                {obsNT(2, 3, 5)}
+                {obsNT(1, 99, 3, 7)},
+                {obsNT(2, 99, 3, 5)}
         };
-        assertVectorEquals(vec(1, 3, 7), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(1, 99, 3, 7), aggregate(bm, multipleProductObs));
 
         // 3 obs: best SpectralAngle using median
         multipleProductObs = new Observation[][]{
-                {obsNT(1, 1.5f, 4)},
-                {obsNT(2, 3, 5)},
-                {obsNT(1, 3, 7)},
+                {obsNT(1, 99, 1.5f, 4)},
+                {obsNT(2, 99, 3, 5)},
+                {obsNT(1, 99, 3, 7)},
         };
-        assertVectorEquals(vec(2, 3, 5), aggregate(bm, multipleProductObs));
+        assertVectorEquals(vec(2, 99, 3, 5), aggregate(bm, multipleProductObs));
     }
 
     @Test
-    public void testDescriptor() throws Exception {
+    public void testDescriptorReading() throws Exception {
         String aggregatorDOM  = "<aggregators><aggregator>" +
                 "  <type>RepresentativeSpectrum</type>" +
                 "  <varNames>r1,r2</varNames>" +

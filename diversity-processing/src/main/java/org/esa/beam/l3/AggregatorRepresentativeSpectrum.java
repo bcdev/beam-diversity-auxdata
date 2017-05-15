@@ -31,6 +31,7 @@ import org.esa.beam.util.StringUtils;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 import static java.lang.Math.acos;
 import static java.lang.Math.sqrt;
@@ -50,9 +51,10 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
 
     private final int[] varIndices;
     private final String[] varNames;
+    private final String[] searchVarNames;
     private final Method method;
 
-    AggregatorRepresentativeSpectrum(VariableContext varCtx, Method method, String targetSuffix, String... varNames) {
+    AggregatorRepresentativeSpectrum(VariableContext varCtx, Method method, String targetSuffix, String[] varNames, String[] searchVarNames) {
         super(Descriptor.NAME,
               createNames(targetSuffix, varNames),
               createNames(targetSuffix, varNames),
@@ -68,14 +70,15 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         for (int i = 0; i < varNames.length; i++) {
             int varIndex = varCtx.getVariableIndex(varNames[i]);
             if (varIndex < 0) {
-                throw new IllegalArgumentException("setIndexes[" + i + "] < 0");
+                throw new IllegalArgumentException("varNames[" + i + "] '" + varNames[i] + "' does not exist");
             }
             varIndices[i] = varIndex;
         }
         this.varNames = varNames;
+        this.searchVarNames = searchVarNames;
     }
 
-    private static String[] createNames(String suffix, String...varNames) {
+    private static String[] createNames(String suffix, String... varNames) {
         ArrayList<String> featureNames = new ArrayList<>(varNames.length);
         for (final String varName : varNames) {
             if (suffix != null && suffix.length() > 0) {
@@ -86,7 +89,6 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         }
         return featureNames.toArray(new String[featureNames.size()]);
     }
-
 
 
     ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -156,26 +158,27 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
             }
             return;
         }
-        float[][] data = new float[varNames.length][0];
-        for (int i = 0; i < varNames.length; i++) {
-            GrowableVector vector = binContext.get(varNames[i]);
+        float[][] data = new float[searchVarNames.length][0];
+        for (int i = 0; i < searchVarNames.length; i++) {
+            GrowableVector vector = binContext.get(searchVarNames[i]);
             data[i] = vector.getElements();
         }
-        // I would calculate the median spectrum (as an intermediary step) as the spectrum of per-band median values.
+        // Calculate the median spectrum (as an intermediary step) as the spectrum of per-band median values.
         // For a set of 1 or 2 observations the median is the mean.
         // For 3 or more observations the median is the central value,
         // i.e. the middle one when values are ordered from low to high
-        double[][] allSpectra = new double[numSpectra][varNames.length];
+        double[][] allSpectra = new double[numSpectra][searchVarNames.length];
         double[] medianSpectrum = computeMedianSpectrum(data, allSpectra);
-        int bestIndex = findBest(allSpectra, medianSpectrum);
-        if (bestIndex > -1) {
+        int bestSpectraIndex = findBestSpectra(allSpectra, medianSpectrum);
+        if (bestSpectraIndex > -1) {
             for (int i = 0; i < varNames.length; i++) {
-                temporalVector.set(i, (float) allSpectra[bestIndex][i]);
+                GrowableVector measurementsVec = binContext.get(varNames[i]);
+                temporalVector.set(i, measurementsVec.get(bestSpectraIndex));
             }
         }
     }
 
-    private int findBest(double[][] allSpectra, double[] medianSpectrum) {
+    private int findBestSpectra(double[][] allSpectra, double[] medianSpectrum) {
         int bestIndex = -1;
         double bestValue = Double.POSITIVE_INFINITY;
         for (int i = 0; i < allSpectra.length; i++) {
@@ -215,6 +218,9 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
 
         @Parameter(notEmpty = true, notNull = true, description = "The variables making up the spectra.")
         String[] varNames;
+        @Parameter(description = "The variables used to find the best representative spectra. " +
+                "If given it must be a subset of 'varNames', if not all variables from 'varNames' will be used.")
+        String[] searchVarNames;
         @Parameter(label = "Target band name suffix (optional)",
                 description = "The name suffix for the resulting bands. If empty, the source band names are used.")
         String targetSuffix;
@@ -240,10 +246,21 @@ public class AggregatorRepresentativeSpectrum extends AbstractAggregator {
         @Override
         public Aggregator createAggregator(VariableContext varCtx, AggregatorConfig aggregatorConfig) {
             Config config = (Config) aggregatorConfig;
+            if (config.varNames == null || config.varNames.length == 0) {
+                throw new IllegalArgumentException("'varNames is a required parameter'");
+            }
             Method method = config.method != null ? config.method : Method.SpectralAngle;
             String targetSuffix = StringUtils.isNotNullAndNotEmpty(config.targetSuffix) ? config.targetSuffix : "";
+            String[] searchVarNames= config.varNames;
+            boolean searchVarNamesGiven = config.searchVarNames != null && config.searchVarNames.length > 0;
+            if (searchVarNamesGiven) {
+                if (!Arrays.asList(config.varNames).containsAll(Arrays.asList(config.searchVarNames))) {
+                    throw new IllegalArgumentException("'searchVarNames' must be a subset of 'varNames'.");
+                }
+                searchVarNames = config.searchVarNames;
+            }
 
-            return new AggregatorRepresentativeSpectrum(varCtx, method, targetSuffix, config.varNames);
+            return new AggregatorRepresentativeSpectrum(varCtx, method, targetSuffix, config.varNames, searchVarNames);
         }
 
         @Override
