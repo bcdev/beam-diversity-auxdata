@@ -172,6 +172,16 @@ public class AggregatorRepresentativeSpectrumTest {
     }
 
     @Test
+    public void testMetadata_date() {
+        String[] varNames = {"r1", "r2", "r3"};
+        Aggregator agg = new AggregatorRepresentativeSpectrum(varCtx, "2002-01-01", "super_date", AggregatorRepresentativeSpectrum.Method.SpectralAngle, "foo", varNames, varNames);
+
+        assertArrayEquals(new String[]{"r1_foo", "r2_foo", "r3_foo", "day"}, agg.getSpatialFeatureNames());
+        assertArrayEquals(new String[]{"r1_foo", "r2_foo", "r3_foo", "super_date"}, agg.getTemporalFeatureNames());
+        assertArrayEquals(new String[]{"r1_foo", "r2_foo", "r3_foo", "super_date"}, agg.getOutputFeatureNames());
+    }
+    
+    @Test
     public void testAggregate_e2e_SpectralAngle_withSearchVars() throws Exception {
         String[] varNames = {"r1", "r1a", "r2", "r3"};
         String[] searchVarNames = {"r1", "r2", "r3"};
