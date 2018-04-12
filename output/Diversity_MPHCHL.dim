@@ -1,0 +1,281 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<Dimap_Document name="Diversity_MPHCHL.dim">
+    <Metadata_Id>
+        <METADATA_FORMAT version="2.11.0">DIMAP</METADATA_FORMAT>
+        <METADATA_PROFILE>BEAM-DATAMODEL-V1</METADATA_PROFILE>
+    </Metadata_Id>
+    <Dataset_Id>
+        <DATASET_SERIES>BEAM-PRODUCT</DATASET_SERIES>
+        <DATASET_NAME>Diversity_MPHCHL</DATASET_NAME>
+    </Dataset_Id>
+    <Production>
+        <DATASET_PRODUCER_NAME />
+        <PRODUCT_TYPE>org.esa.beam.diversity.mph_chl.MphChlOp</PRODUCT_TYPE>
+    </Production>
+    <Flag_Coding name="mph_chl_flags">
+        <Flag>
+            <Flag_Name>mph_cyano</Flag_Name>
+            <Flag_Index>1</Flag_Index>
+            <Flag_description>Cyanobacteria dominated waters</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>mph_floating</Flag_Name>
+            <Flag_Index>2</Flag_Index>
+            <Flag_description>Floating vegetation or cyanobacteria on water surface</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>mph_adjacency</Flag_Name>
+            <Flag_Index>4</Flag_Index>
+            <Flag_description>Pixel suspect of adjacency effects</Flag_description>
+        </Flag>
+    </Flag_Coding>
+    <Flag_Coding name="l1_flags">
+        <Flag>
+            <Flag_Name>LAND_OCEAN</Flag_Name>
+            <Flag_Index>16</Flag_Index>
+            <Flag_description>Pixel is over land, not ocean.</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>INVALID</Flag_Name>
+            <Flag_Index>128</Flag_Index>
+            <Flag_description>Pixel is invalid.</Flag_description>
+        </Flag>
+    </Flag_Coding>
+    <Flag_Coding name="cloud_classif_flags">
+        <Flag>
+            <Flag_Name>F_CLOUD</Flag_Name>
+            <Flag_Index>1</Flag_Index>
+            <Flag_description>none</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>F_CLOUD_BUFFER</Flag_Name>
+            <Flag_Index>2048</Flag_Index>
+            <Flag_description>none</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>F_CLOUD_SHADOW</Flag_Name>
+            <Flag_Index>4096</Flag_Index>
+            <Flag_description>none</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>F_LAND</Flag_Name>
+            <Flag_Index>8192</Flag_Index>
+            <Flag_description>none</Flag_description>
+        </Flag>
+        <Flag>
+            <Flag_Name>F_MIXED_PIXEL</Flag_Name>
+            <Flag_Index>32768</Flag_Index>
+            <Flag_description>none</Flag_description>
+        </Flag>
+    </Flag_Coding>
+    <Raster_Dimensions>
+        <NCOLS>2</NCOLS>
+        <NROWS>2</NROWS>
+        <NBANDS>8</NBANDS>
+    </Raster_Dimensions>
+    <Data_Access>
+        <DATA_FILE_FORMAT>ENVI</DATA_FILE_FORMAT>
+        <DATA_FILE_FORMAT_DESC>ENVI File Format</DATA_FILE_FORMAT_DESC>
+        <DATA_FILE_ORGANISATION>BAND_SEPARATE</DATA_FILE_ORGANISATION>
+        <Data_File>
+            <DATA_FILE_PATH href="Diversity_MPHCHL.data/chl.hdr" />
+            <BAND_INDEX>0</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="Diversity_MPHCHL.data/immersed_cyanobacteria.hdr" />
+            <BAND_INDEX>1</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="Diversity_MPHCHL.data/floating_cyanobacteria.hdr" />
+            <BAND_INDEX>2</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="Diversity_MPHCHL.data/floating_vegetation.hdr" />
+            <BAND_INDEX>3</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="Diversity_MPHCHL.data/mph.hdr" />
+            <BAND_INDEX>4</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="Diversity_MPHCHL.data/mph_chl_flags.hdr" />
+            <BAND_INDEX>5</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="Diversity_MPHCHL.data/l1_flags.hdr" />
+            <BAND_INDEX>6</BAND_INDEX>
+        </Data_File>
+        <Data_File>
+            <DATA_FILE_PATH href="Diversity_MPHCHL.data/cloud_classif_flags.hdr" />
+            <BAND_INDEX>7</BAND_INDEX>
+        </Data_File>
+    </Data_Access>
+    <Masks>
+        <Mask type="Maths">
+            <NAME value="mph_cyano" />
+            <DESCRIPTION value="Cyanobacteria dominated waters" />
+            <COLOR red="0" green="255" blue="255" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <EXPRESSION value="mph_chl_flags.CYANO" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="mph_floating" />
+            <DESCRIPTION value="Floating vegetation or cyanobacteria on water surface" />
+            <COLOR red="0" green="255" blue="0" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <EXPRESSION value="mph_chl_flags.FLOATING" />
+        </Mask>
+        <Mask type="Maths">
+            <NAME value="mph_adjacency" />
+            <DESCRIPTION value="Pixel suspect of adjacency effects" />
+            <COLOR red="255" green="0" blue="0" alpha="255" />
+            <TRANSPARENCY value="0.5" />
+            <EXPRESSION value="mph_chl_flags.ADJACENCY" />
+        </Mask>
+    </Masks>
+    <Image_Interpretation>
+        <Spectral_Band_Info>
+            <BAND_INDEX>0</BAND_INDEX>
+            <BAND_DESCRIPTION />
+            <BAND_NAME>chl</BAND_NAME>
+            <DATA_TYPE>float32</DATA_TYPE>
+            <PHYSICAL_UNIT>mg/m^3</PHYSICAL_UNIT>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>NaN</NO_DATA_VALUE>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>1</BAND_INDEX>
+            <BAND_DESCRIPTION />
+            <BAND_NAME>immersed_cyanobacteria</BAND_NAME>
+            <DATA_TYPE>int8</DATA_TYPE>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>2</BAND_INDEX>
+            <BAND_DESCRIPTION />
+            <BAND_NAME>floating_cyanobacteria</BAND_NAME>
+            <DATA_TYPE>int8</DATA_TYPE>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>3</BAND_INDEX>
+            <BAND_DESCRIPTION />
+            <BAND_NAME>floating_vegetation</BAND_NAME>
+            <DATA_TYPE>int8</DATA_TYPE>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>4</BAND_INDEX>
+            <BAND_DESCRIPTION />
+            <BAND_NAME>mph</BAND_NAME>
+            <DATA_TYPE>float32</DATA_TYPE>
+            <PHYSICAL_UNIT>dl</PHYSICAL_UNIT>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>NaN</NO_DATA_VALUE>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>5</BAND_INDEX>
+            <BAND_DESCRIPTION />
+            <BAND_NAME>mph_chl_flags</BAND_NAME>
+            <DATA_TYPE>int8</DATA_TYPE>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <FLAG_CODING_NAME>mph_chl_flags</FLAG_CODING_NAME>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>6</BAND_INDEX>
+            <BAND_DESCRIPTION />
+            <BAND_NAME>l1_flags</BAND_NAME>
+            <DATA_TYPE>int32</DATA_TYPE>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <FLAG_CODING_NAME>l1_flags</FLAG_CODING_NAME>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>
+        </Spectral_Band_Info>
+        <Spectral_Band_Info>
+            <BAND_INDEX>7</BAND_INDEX>
+            <BAND_DESCRIPTION />
+            <BAND_NAME>cloud_classif_flags</BAND_NAME>
+            <DATA_TYPE>int32</DATA_TYPE>
+            <SOLAR_FLUX>0.0</SOLAR_FLUX>
+            <BAND_WAVELEN>0.0</BAND_WAVELEN>
+            <BANDWIDTH>0.0</BANDWIDTH>
+            <FLAG_CODING_NAME>cloud_classif_flags</FLAG_CODING_NAME>
+            <SCALING_FACTOR>1.0</SCALING_FACTOR>
+            <SCALING_OFFSET>0.0</SCALING_OFFSET>
+            <LOG10_SCALED>false</LOG10_SCALED>
+            <NO_DATA_VALUE_USED>false</NO_DATA_VALUE_USED>
+            <NO_DATA_VALUE>0.0</NO_DATA_VALUE>
+        </Spectral_Band_Info>
+    </Image_Interpretation>
+    <Dataset_Sources>
+        <MDElem name="metadata">
+            <MDElem name="Processing_Graph">
+                <MDElem name="node.0">
+                    <MDATTR name="id" type="ascii" mode="rw">MERIS.MPH$15BCF03D108</MDATTR>
+                    <MDATTR name="operator" type="ascii" mode="rw">MERIS.MPH</MDATTR>
+                    <MDATTR name="moduleName" type="ascii" mode="rw">beam-diversity-mph_chl</MDATTR>
+                    <MDATTR name="moduleVersion" type="ascii" mode="rw">1.3.4-SNAPSHOT</MDATTR>
+                    <MDATTR name="purpose" type="ascii" mode="rw">Computes maximum peak height of chlorophyll</MDATTR>
+                    <MDATTR name="authors" type="ascii" mode="rw">Mark William Matthews, Daniel Odermatt, Tom Block</MDATTR>
+                    <MDATTR name="version" type="ascii" mode="rw">1.3.3</MDATTR>
+                    <MDATTR name="copyright" type="ascii" mode="rw">(c) 2013, 2014 by Brockmann Consult</MDATTR>
+                    <MDATTR name="processingTime" type="ascii" mode="rw">2017-05-03T15:53:05.734Z</MDATTR>
+                    <MDElem name="sources">
+                        <MDATTR name="sourceProduct" type="ascii" mode="rw">product:Meris L1B BRR</MDATTR>
+                    </MDElem>
+                    <MDElem name="parameters">
+                        <MDATTR name="exportMph" type="ascii">true</MDATTR>
+                        <MDATTR name="cyanoMaxValue" type="ascii">1000.0</MDATTR>
+                        <MDATTR name="chlThreshForFloatFlag" type="ascii">350.0</MDATTR>
+                        <MDATTR name="validPixelExpression" type="ascii">not (l1_flags.LAND_OCEAN or l1_flags.INVALID)</MDATTR>
+                    </MDElem>
+                </MDElem>
+            </MDElem>
+        </MDElem>
+    </Dataset_Sources>
+</Dimap_Document>
