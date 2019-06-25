@@ -19,3 +19,12 @@ DO LIKE THIS:
 	sudo chmod -R a+rx <lake>
 	
 Then use Uwe's python rsync script with ssh olafd instead of uwe
+
+
+UPDATE 20171218:
+- log in as hadoop on cvfeeder00
+- there, log in with ssh as olafd/f********r on bcserver8 !!!
+
+UPDATE 20190625:
+- log in as olaf on cvfeeder00
+- there, log in with ssh as olafd/f********r on bcserver8 !!!

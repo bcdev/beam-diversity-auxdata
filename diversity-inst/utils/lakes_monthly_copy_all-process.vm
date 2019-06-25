@@ -1,0 +1,20 @@
+#!/bin/bash
+
+year="$parameters.year"
+month="$parameters.month"
+
+#[[
+
+echo "year: $year"
+echo "month: $month"
+#lakesDir=/calvalus/projects/diversity/lakes-WB/existing_lakes
+#lakesDir=/calvalus/projects/diversity/lakes-WB
+lakesDir=/calvalus/projects/diversity/prototype
+monthliesDir=/calvalus/projects/diversity/monthly/$year/$month
+hadoop fs -mkdir -p $monthliesDir/blacklisted
+for lake in `hadoop fs -ls $lakesDir |awk '{ print $8 }'`; do
+    echo "hadoop fs -cp $lake/l3-monthly/${year}/${month}-L3-1/*.tif $monthliesDir"
+    hadoop fs -cp $lake/l3-monthly/${year}/${month}-L3-1/*.tif $monthliesDir
+done
+
+]]#

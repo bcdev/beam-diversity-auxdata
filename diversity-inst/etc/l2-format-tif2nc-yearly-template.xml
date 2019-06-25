@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<wps:Execute service="WPS"
+             version="1.0.0"
+             xmlns:wps="http://www.opengis.net/wps/1.0.0"
+             xmlns:ows="http://www.opengis.net/ows/1.1"
+             xmlns:xlink="http://www.w3.org/1999/xlink"
+	      >
+
+  <ows:Identifier>L2F</ows:Identifier>
+
+  <wps:DataInputs>
+    <wps:Input>
+      <ows:Identifier>productionName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>tif2nc-yearly-format-${year}-${region}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.output.dir</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${output}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>processorBundleName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>diversity</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>processorBundleVersion</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>3.1-SNAPSHOT</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+ 
+      <wps:Input>
+            <ows:Identifier>outputFormat</ows:Identifier>
+            <wps:Data>
+                <wps:LiteralData>NetCDF4-BEAM</wps:LiteralData>
+            </wps:Data>
+        </wps:Input>
+    
+    <wps:Input>
+      <ows:Identifier>inputPath</ows:Identifier>
+         <wps:Data>
+<!--
+            <wps:LiteralData>${input}/${year}/L2_of_Lake.*${year}-01.*.seq$</wps:LiteralData>
+-->    
+        <wps:LiteralData>${input}/L2_of_Lake.*${year}-01.*.seq$</wps:LiteralData>
+         </wps:Data>
+    </wps:Input>
+
+     <wps:Input>
+      <ows:Identifier>minDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${minDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>maxDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${maxDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.system.beam.pixelGeoCoding.useTiling</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>true</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+      <wps:Input>
+        <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
+        <wps:Data>
+      <wps:LiteralData>default</wps:LiteralData>
+        </wps:Data>
+      </wps:Input>
+  </wps:DataInputs>
+
+</wps:Execute>

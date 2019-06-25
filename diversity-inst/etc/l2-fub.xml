@@ -18,7 +18,10 @@
     <wps:Input>
       <ows:Identifier>processorBundleName</ows:Identifier>
       <wps:Data>
+	<!--
         <wps:LiteralData>fub-wew</wps:LiteralData>
+-->
+        <wps:LiteralData>beam-wew-water</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>
@@ -121,7 +124,7 @@
     <wps:Input>
       <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>lc</wps:LiteralData>
+        <wps:LiteralData>other</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>

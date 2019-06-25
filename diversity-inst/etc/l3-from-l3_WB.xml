@@ -1,0 +1,292 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<wps:Execute service="WPS"
+             version="1.0.0"
+             xmlns:wps="http://www.opengis.net/wps/1.0.0"
+             xmlns:ows="http://www.opengis.net/ows/1.1"
+             xmlns:xlink="http://www.w3.org/1999/xlink">
+
+  <ows:Identifier>L3</ows:Identifier>
+
+  <wps:DataInputs>
+
+    <wps:Input>
+      <ows:Identifier>productionName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Diversity l3 Multi-${period} ${region}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>minDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${startDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+   <wps:Input>
+      <ows:Identifier>maxDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${stopDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>periodLength</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${period}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>regionWKT</ows:Identifier> 
+      <wps:Data>
+        <wps:LiteralData>${wkt}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>inputPath</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${input}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.input.format</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${outputFormat}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.output.dir</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${output}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.output.prefix</ows:Identifier>
+      <wps:Data>                
+        <wps:LiteralData>${region}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.reducers</ows:Identifier>
+      <wps:Data>                
+        <wps:LiteralData>1</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.output.format</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${outputFormat}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.output.compression</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>none</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>processorBundleName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>diversity</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>processorBundleVersion</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>3.0-SNAPSHOT</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>    
+    
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.parameters</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData>
+          <parameters>
+            <compositingType>MOSAICKING</compositingType>
+            <planetaryGrid>org.esa.beam.binning.support.PlateCarreeGrid</planetaryGrid>
+            <numRows>64800</numRows>
+            <superSampling>1</superSampling>
+
+            <aggregators>
+              <aggregator>
+                <type>AVG</type>
+                <varName>chl_mph_mean</varName>
+              </aggregator>
+
+              <aggregator>
+                <type>AVG</type>
+                <varName>chl_fub_mean</varName>
+              </aggregator>
+
+              <aggregator>
+                <type>AVG</type>
+                <varName>cdom_fub_mean</varName>
+              </aggregator>
+
+              <aggregator>
+                <type>AVG</type>
+                <varName>tsm_cc_mean</varName>
+              </aggregator>
+
+              <aggregator>
+                <type>AVG</type>
+                <varName>turbidity_cc_mean</varName>
+              </aggregator>
+
+              <aggregator>
+                <type>AVG</type>
+                <varName>immersed_cyanobacteria_mean</varName>
+              </aggregator>
+              <aggregator>
+                <type>AVG</type>
+                <varName>floating_cyanobacteria_mean</varName>
+              </aggregator>
+              <aggregator>
+                <type>AVG</type>
+                <varName>floating_vegetation_mean</varName>
+              </aggregator>
+	      
+              <aggregator>
+                <type>AVG</type>
+                <varName>num_obs</varName>
+		        <outputCounts>true</outputCounts>
+              </aggregator>
+              <aggregator>
+                <type>AVG</type>
+                <varName>lswt_d_mean</varName>
+              </aggregator>
+              <aggregator>
+                <type>AVG</type>
+                <varName>lswt_n_mean</varName>
+              </aggregator>
+              <aggregator>
+                <type>AVG</type>
+                <varName>shallow</varName>
+              </aggregator>
+
+	      <aggregator>
+                <type>MAJORITY_CLASS</type>
+                <varName>owt_cc_dominant_class_mode</varName>
+            <classes>1,2,3,4,5,6,7</classes>
+              </aggregator>
+
+              <!-- KS 20171122: -->
+              <aggregator>
+	        <type>MIN_MAX</type>
+	        <varName>chl_mph_max</varName>
+              </aggregator>
+              <aggregator>
+	        <type>MIN_MAX</type>
+	        <varName>chl_fub_max</varName>
+              </aggregator>
+             <!-- end KS 20171122: -->
+
+            </aggregators>
+            <postProcessor>
+              <type>Math</type>
+              <variables>
+                  <variable><name>num_obs</name><expr>nan(shallow_mean) ? -1 : num_obs_mean * num_obs_counts</expr></variable>
+                  <variable><name>chl_mph_max</name><expr>chl_mph_max_max</expr></variable>
+                  <variable><name>chl_mph_mean</name><expr>chl_mph_mean_mean</expr></variable>
+                  <variable><name>chl_mph_sigma</name><expr>chl_mph_mean_sigma</expr></variable>
+                  <variable><name>chl_fub_max</name><expr>chl_fub_max_max</expr></variable>
+                  <variable><name>chl_fub_mean</name><expr>chl_fub_mean_mean</expr></variable>
+                  <variable><name>chl_fub_sigma</name><expr>chl_fub_mean_sigma</expr></variable>
+                  <variable><name>cdom_fub_mean</name><expr>cdom_fub_mean_mean</expr></variable>
+                  <variable><name>cdom_fub_sigma</name><expr>cdom_fub_mean_sigma</expr></variable>
+                  <variable><name>tsm_cc_mean</name><expr>tsm_cc_mean_mean</expr></variable>
+                  <variable><name>tsm_cc_sigma</name><expr>tsm_cc_mean_sigma</expr></variable>
+                  <variable><name>turbidity_cc_mean</name><expr>turbidity_cc_mean_mean</expr></variable>
+                  <variable><name>turbidity_cc_sigma</name><expr>turbidity_cc_mean_sigma</expr></variable>
+                  <variable><name>immersed_cyanobacteria_mean</name><expr>immersed_cyanobacteria_mean_mean</expr></variable>
+                  <variable><name>immersed_cyanobacteria_sigma</name><expr>immersed_cyanobacteria_mean_sigma</expr></variable>
+                  <variable><name>floating_cyanobacteria_mean</name><expr>floating_cyanobacteria_mean_mean</expr></variable>
+                  <variable><name>floating_cyanobacteria_sigma</name><expr>floating_cyanobacteria_mean_sigma</expr></variable>
+                  <variable><name>floating_vegetation_mean</name><expr>floating_vegetation_mean_mean</expr></variable>
+                  <variable><name>floating_vegetation_sigma</name><expr>floating_vegetation_mean_sigma</expr></variable>
+                  <variable><name>owt_cc_dominant_class_mode</name><expr>owt_cc_dominant_class_mode_majority_class</expr></variable>
+                  <variable><name>lswt_d_mean</name><expr>lswt_d_mean_mean</expr></variable>
+                  <variable><name>lswt_d_sigma</name><expr>lswt_d_mean_sigma</expr></variable>
+                  <variable><name>lswt_n_mean</name><expr>lswt_n_mean_mean</expr></variable>
+                  <variable><name>lswt_n_sigma</name><expr>lswt_n_mean_sigma</expr></variable>
+                  <variable><name>shallow</name><expr>shallow_mean</expr></variable>
+              </variables>
+            </postProcessor>
+            
+          </parameters>
+        </wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+    
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.format.parameters</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData>
+          <parameters>
+              <productCustomizer>
+                  <type>ObsPasses</type>
+                  <writeNumObs>true</writeNumObs>
+                  <writeNumPasses>false</writeNumPasses>
+              </productCustomizer>
+          </parameters>
+        </wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.memory.mb</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>2816</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.java.opts</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>-Djava.awt.headless=true -Xmx2560M</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+     <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.reduce.java.opts</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>-Djava.awt.headless=true -Xmx2560M</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>other</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.priority</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>HIGH</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.reduce.slowstart.completedmaps</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>0.9</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.task.timeout</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>7200000</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.fs.permissions.umask-mode</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>002</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+  </wps:DataInputs>
+
+</wps:Execute>

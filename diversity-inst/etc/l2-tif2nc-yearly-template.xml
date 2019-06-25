@@ -1,0 +1,138 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<wps:Execute service="WPS"
+             version="1.0.0"
+             xmlns:wps="http://www.opengis.net/wps/1.0.0"
+             xmlns:ows="http://www.opengis.net/ows/1.1"
+             xmlns:xlink="http://www.w3.org/1999/xlink">
+
+  <ows:Identifier>L2</ows:Identifier>
+
+  <wps:DataInputs>
+    <wps:Input>
+      <ows:Identifier>productionName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Diversity tif2nc ${year} ${region}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>processorBundleName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>diversity</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>processorBundleVersion</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>3.1-SNAPSHOT</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>processorName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Tiff2Nc4Op</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.output.dir</ows:Identifier>
+      <wps:Data>
+        <wps:Reference xlink:href="hdfs://calvalus${output}" />
+<!--
+        <wps:LiteralData>${output}</wps:LiteralData>
+-->    
+  </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>inputPath</ows:Identifier>
+      <wps:Data>
+         <wps:LiteralData>${input}/${region}/l3-yearly/${year}-L3-1/Lake.*${year}-01.*.tif$</wps:LiteralData>
+<!--
+     <wps:LiteralData>/calvalus/projects/diversity/lakes-test/Lake-Aberdeen/l3-yearly/2008-L3-1/Lake-Aberdeen_2008-01-01_2008-12-31.tif$</wps:LiteralData>
+-->    
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>minDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${minDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>maxDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${maxDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>processorParameters</ows:Identifier>
+      <wps:Data>
+         <wps:ComplexData>
+                    <parameters>
+<!--
+                        <outputRad2Refl>true</outputRad2Refl>
+-->
+                    </parameters>
+          </wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.resume</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>true</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.system.beam.reader.tileHeight</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>16</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.system.beam.reader.tileWidth</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>*</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.priority</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>NORMAL</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
+      <wps:Data>
+<!--
+        <wps:LiteralData>test</wps:LiteralData>
+-->    
+    <wps:LiteralData>default</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+     <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.failures.maxpercent</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>2</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.java.opts</ows:Identifier>
+      <wps:Data><wps:LiteralData>-Djava.awt.headless=true -Xmx1536M</wps:LiteralData></wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.memory.mb</ows:Identifier>
+      <wps:Data><wps:LiteralData>2048</wps:LiteralData></wps:Data>
+    </wps:Input>
+
+  </wps:DataInputs>
+
+</wps:Execute>
+

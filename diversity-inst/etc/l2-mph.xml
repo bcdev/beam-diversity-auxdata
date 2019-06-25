@@ -24,7 +24,7 @@
     <wps:Input>
       <ows:Identifier>processorBundleVersion</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>2.0-SNAPSHOT</wps:LiteralData>
+        <wps:LiteralData>2.1.1-SNAPSHOT</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>
@@ -115,7 +115,7 @@
     <wps:Input>
       <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>lc</wps:LiteralData>
+        <wps:LiteralData>other</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>

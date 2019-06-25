@@ -1,0 +1,213 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes" ?>
+
+<wps:Execute service="WPS"
+             version="1.0.0"
+             xmlns:wps="http://www.opengis.net/wps/1.0.0"
+             xmlns:ows="http://www.opengis.net/ows/1.1"
+             xmlns:xlink="http://www.w3.org/1999/xlink">
+
+  <ows:Identifier>L3</ows:Identifier>
+
+  <wps:DataInputs>
+
+    <wps:Input>
+      <ows:Identifier>productionName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>Diversity l3 Mosaic - ${period} ${region} ${band}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>minDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${startDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+   <wps:Input>
+      <ows:Identifier>maxDate</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${stopDate}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>periodLength</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${period}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>regionWKT</ows:Identifier> 
+      <wps:Data>
+        <wps:LiteralData>${wkt}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>inputPath</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${input}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.input.format</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${inputFormat}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.output.dir</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${output}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+     <wps:Input>
+      <ows:Identifier>calvalus.output.format</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>${outputFormat}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.output.prefix</ows:Identifier>
+      <wps:Data>                
+        <wps:LiteralData>${region}-${band}</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.reducers</ows:Identifier>
+      <wps:Data>                
+        <wps:LiteralData>1</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.output.compression</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>none</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>processorBundleName</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>diversity</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>processorBundleVersion</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>3.0-SNAPSHOT</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>    
+    
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.parameters</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData>
+          <parameters>
+            <compositingType>MOSAICKING</compositingType>
+            <planetaryGrid>org.esa.beam.binning.support.PlateCarreeGrid</planetaryGrid>
+            <numRows>64800</numRows>
+            <superSampling>1</superSampling>
+
+            <aggregators>
+              <aggregator>
+                <type>AVG</type>
+                <varName>cdom_fub_mean</varName>
+              </aggregator>
+            </aggregators>
+
+            <postProcessor>
+              <type>Math</type>
+              <variables>
+                  <variable><name>cdom_fub_mean</name><expr>cdom_fub_mean_mean</expr></variable>
+              </variables>
+            </postProcessor>
+            
+          </parameters>
+        </wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+    
+    <wps:Input>
+      <ows:Identifier>calvalus.l3.format.parameters</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData>
+          <parameters>
+              <productCustomizer>
+                  <type>ObsPasses</type>
+                  <writeNumObs>false</writeNumObs>
+                  <writeNumPasses>false</writeNumPasses>
+              </productCustomizer>
+          </parameters>
+        </wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.memory.mb</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>2816</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.map.java.opts</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>-Djava.awt.headless=true -Xmx2560M</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+     <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.reduce.java.opts</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>-Djava.awt.headless=true -Xmx2560M</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>other</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.job.priority</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>HIGH</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.reduce.slowstart.completedmaps</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>0.9</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.mapreduce.task.timeout</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>7200000</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>calvalus.hadoop.fs.permissions.umask-mode</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>002</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+  </wps:DataInputs>
+
+</wps:Execute>

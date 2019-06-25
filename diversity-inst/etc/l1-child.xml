@@ -49,7 +49,8 @@
       <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
       <wps:Data>
         <!-- <wps:LiteralData>default</wps:LiteralData> -->
-        <wps:LiteralData>lc</wps:LiteralData>
+        <!-- <wps:LiteralData>lc</wps:LiteralData> -->
+        <wps:LiteralData>other</wps:LiteralData>
       </wps:Data>
     </wps:Input>
     <wps:Input>
@@ -63,6 +64,13 @@
       <ows:Identifier>inputPath</ows:Identifier> 
       <wps:Data>
         <wps:LiteralData>${input}/.*/.*N1$</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+
+    <wps:Input>
+      <ows:Identifier>geoInventory</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>/calvalus/geoInventory/MER_FSG_1P_v2013</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 

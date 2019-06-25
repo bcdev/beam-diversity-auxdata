@@ -17,19 +17,29 @@ def getMonth(year):
     return allMonths
 
 # read the regions from Northern and Southern hemisphere:
-northRegionsFile = open("./wkt/lakes-north-regions.txt","r")
+#northRegionsFile = open("./wkt/lakes-north-regions.txt","r")
 #northRegionsFile = open("./wkt/lakes-north-regions_DtoM.txt","r")
 #northRegionsFile = open("./wkt/lakes-north-regions_AtoM.txt","r")
 #northRegionsFile = open("./wkt/lakes-north-regions_NtoZ.txt","r")
+#northRegionsFile = open("./wkt/lakes-regions-repro2016-51_100_NORTH.txt","r")
+#northRegionsFile = open("./wkt/lakes-regions-repro2016-151_200_NORTH.txt","r")
+#northRegionsFile = open("./wkt/lakes-regions-repro2016-201_250_NORTH.txt","r")
+#northRegionsFile = open("./wkt/lakes-regions-repro2016-251_300_NORTH.txt","r")
+northRegionsFile = open("./wkt/lakes-regions-repro2016-301_347_NORTH.txt","r")
 northRegions = []
 for line in northRegionsFile:
     name = line.strip().replace('\'', '')
     northRegions.append(name)
 
-southRegionsFile = open("./wkt/lakes-south-regions.txt","r")
+#southRegionsFile = open("./wkt/lakes-south-regions.txt","r")
 #southRegionsFile = open("./wkt/lakes-south-regions_DtoM.txt","r")
 #southRegionsFile = open("./wkt/lakes-south-regions_AtoM.txt","r")
 #southRegionsFile = open("./wkt/lakes-south-regions_NtoZ.txt","r")
+#southRegionsFile = open("./wkt/lakes-regions-repro2016-51_100_SOUTH.txt","r")
+#southRegionsFile = open("./wkt/lakes-regions-repro2016-151_200_SOUTH.txt","r")
+#southRegionsFile = open("./wkt/lakes-regions-repro2016-201_250_SOUTH.txt","r")
+#southRegionsFile = open("./wkt/lakes-regions-repro2016-251_300_SOUTH.txt","r")
+southRegionsFile = open("./wkt/lakes-regions-repro2016-301_347_SOUTH.txt","r")
 southRegions = []
 for line in southRegionsFile:
     name = line.strip().replace('\'', '')
@@ -37,47 +47,35 @@ for line in southRegionsFile:
 
 regions = northRegions + southRegions
 
-### definition of single lakes for testing - overwrites regions from files above ###
-#regions = ['Lake-Bogoria', 'Lake-Balaton']
-#regions = ['Lake-Balaton']
-#regions = ['Lake-Bear']
-#regions = ['Lake-Aral']
-#regions = ['Lake-Elmenteita']
-#regions = ['Lake-Bogoria', 'Lake-Elmenteita', 'Lake-Nakuru', 'Lake-Tuusulanjarvi', 'Lake-Ulemiste']
-### end of test lakes
-
-# read the regions for the spare lakes:
-regionsFile = open("./wkt/lakes-regions-spare.txt","r")
+# reprocessing for Worlsbank 2017:
+regionsFile = open("./wkt/lakes-WB-regions-repro2017.txt","r")
 regions = []
 for line in regionsFile:
     name = line.strip().replace('\'', '')
     regions.append(name)
 
-#regions = ['Lake-Ijsselmeer']
-regions = [
-    'Lake-Bisina',
-    'Lake-Brienz',
-    'Lake-Chiemsee',
-    'Lake-Chiquita',
-    'Lake-Emborcacao',
-    'Lake-Ginebra',
-    'Lake-Great_salt',
-    'Lake-Ijsselmeer',
-    'Lake-Iseo',
-    'Lake-Lucerne',
-    'Lake-Markermeer',
-    'Lake-Muggelsee',
-    'Lake-Naivasha',
-    'Lake-Rogaguado',
-    'Lake-Scutari',
-    'Lake-Sempach',
-    'Lake-Thun',
-    'Lake-Trasimeno',
-    'Lake-Zug',
-    'Lake-Zurich'
-]
 
-regions = ['Lake-Markermeer']
+
+### definition of single lakes for testing - overwrites regions from files above ###
+#regions = ['Lake-MareGrande','Lake-Veneta']  # request KS/DO, 20170711
+#regions = ['Lake-Maracaibo']  # test of shallow fix, KS/DO, 20171123
+#regions = ['Lake-Comacchio']  # shallow fix, 20180306
+#regions = ['Lake-Constance']  # test of shallow fix, KS/DO, 20171123
+#regions = ['Lake-Razelm']  # forgotten to process after shallow fix, DO, 20180204
+#regions = ['Lake-Er']  # empty on Calvalus, no idea why
+#regions = ['Lake-Erie','Lake-Gavkhouni','Lake-Veneta','Lake-Winnipegosis']  # empty on Calvalus, no idea why
+#regions = ['Lake-Fagnano','Lake-Llanquihue','Lake-Nahuel_huapi']  # empty on Calvalus, no idea why
+#regions = ['Lake-Kyaring','Lake-Kyoga']  # better polygons, 20180403
+regions = ['Lake-Kyoga']  # better polygons, 20180403
+### end of test lakes
+
+# read the regions for the spare lakes:
+#regionsFile = open("./wkt/lakes-regions-spare.txt","r")
+#regions = []
+#for line in regionsFile:
+#    name = line.strip().replace('\'', '')
+#    regions.append(name)
+
 
 DIVERSITY_INST_DIR = os.environ['DIVERSITY_INST']
 # before starting, check if WKT files are available. 
@@ -99,7 +97,10 @@ hosts = [('localhost', 16)]
 #   , simulation=True
 pm = PMonitor(inputs, request='lake_products', logdir='log', hosts=hosts, script='template.py')
 
-BASE = '/calvalus/projects/diversity/prototype/'
+#BASE = '/calvalus/projects/diversity/prototype/'
+# reprocessing of 77 lakes for Worldbank 2017:
+#BASE = '/calvalus/projects/diversity/lakes-WB/'
+BASE = '/calvalus/projects/diversity/lakes-WB/existing_lakes/'
 
 for region in regions:
     shapeWktFile = 'wkt/' + region + '.shape'

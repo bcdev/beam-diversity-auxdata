@@ -1,0 +1,58 @@
+#!/bin/bash
+
+### DOES NOT WORK AS DESIRED - TODO - 20180411
+
+lakesDir="$parameters.lakes_dir"
+band="$parameters.band"
+year="$parameters.year"
+month="$parameters.month"
+
+#[[
+
+DIVERSITY_PYTHON=./diversity-python 
+export LD_LIBRARY_PATH="${DIVERSITY_PYTHON}"
+export PYTHONPATH="${DIVERSITY_PYTHON}"
+
+echo "pwd: $PWD"
+echo "lakesDir: $lakesDir"
+echo "band: $band"
+echo "year: $year"
+echo "month: $month"
+#print 'calling copy_monthlies.py: ', $band, ', ', $year, ', ', $month
+#python ./copy_monthlies.py ${lakes_dir} ${band} ${year} ${month}
+#python ./copy_monthlies.py ${band} ${year} ${month}
+python ./copy_monthlies.py ${band} ${year} ${month} >> test.txt
+
+echo "hadoop fs -ls /calvalus/projects/diversity/prototype/Lake-Abe/l3-decade-L3-1/Lake-Abe_2003-01-01_2011-12-31.tif"
+hadoop fs -ls /calvalus/projects/diversity/prototype/Lake-Abe/l3-decade-L3-1/Lake-Abe_2003-01-01_2011-12-31.tif
+
+echo "hadoop fs -cp /calvalus/projects/diversity/prototype/Lake-Abe/l3-decade-L3-1/Lake-Abe_2003-01-01_2011-12-31.tif /calvalus/projects/diversity/delete_me/muell.tif"
+hadoop fs -cp /calvalus/projects/diversity/prototype/Lake-Abe/l3-decade-L3-1/Lake-Abe_2003-01-01_2011-12-31.tif /calvalus/projects/diversity/delete_me/muell.tif
+
+#filename="$1"
+#blacklistDir=/calvalus/projects/diversity/blacklists-by-param/${band}_blacklists
+blacklistDir=/calvalus/projects/diversity/blacklists-by-param/test_blacklists
+for filename in `hadoop fs -ls $blacklistDir/*txt |awk '{ print $8 }'`; do
+    echo "blacklist filename: $filename"
+    #while read -r line
+    #do
+    #    blackdate="$line"
+    #    echo "Date read from file - $blackdate"
+    #done < "$filename"
+done
+
+filename=/calvalus/projects/diversity/blacklists-by-param/test_blacklists/blacklist_Lake-Abe_chl_mph_mean.txt
+echo "blacklist filename: $filename"
+mkdir -p $PWD/tmp
+hadoop fs -cp  $filename $PWD/tmp
+filename=$PWD/tmp/blacklist_Lake-Abe_chl_mph_mean.txt
+echo "blacklist filename local: $filename"
+
+#while read -r line
+#do
+#    blackdate="$line"
+#    echo "Date read from file - $blackdate"
+#done < "$filename"
+#hadoop fs -rm $filename  
+
+]]#

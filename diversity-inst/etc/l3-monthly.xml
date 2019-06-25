@@ -125,14 +125,17 @@
             <planetaryGrid>org.esa.beam.binning.support.PlateCarreeGrid</planetaryGrid>
             <numRows>64800</numRows>
             <superSampling>1</superSampling>
-            
+
+<!--            
             <maskExpr>not (l1_flags.INVALID or cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_SNOW_ICE ) and shallow == 0 and sun_zenith &lt; 70 </maskExpr>
+-->    
+            <!-- DO 20171116: -->
+	    <maskExpr>not (l1_flags.INVALID or cloud_classif_flags.F_LAND or cloud_classif_flags.F_CLOUD or cloud_classif_flags.F_CLOUD_BUFFER or cloud_classif_flags.F_CLOUD_SHADOW or cloud_classif_flags.F_SNOW_ICE ) and not (shallow == 1) and sun_zenith &lt; 70 </maskExpr>
+
             <variables>
               <variable>
                   <name>chl_mph</name>
                  <expr>cloud_classif_flags.F_MIXED_PIXEL ? NaN : (chl &gt; 1000.0 ? 1000.0 : chl)</expr>
-                 <!-- todo: we have valid chl (and other) values for shallow pixels (shallow = 1), why? The fix below doesn't work, why not??  -->
-                 <!-- <expr>cloud_classif_flags.F_MIXED_PIXEL or shallow == 1.0 ? NaN : (chl &gt; 1000.0 ? 1000.0 : chl)</expr> -->
               </variable>
 
               <variable>
@@ -184,16 +187,17 @@
                 <type>AVG</type>
                 <varName>chl_fub</varName>
               </aggregator>
+
               <aggregator>
                 <type>AVG</type>
                 <varName>cdom_fub</varName>
               </aggregator>
 
-          <aggregator>
+              <aggregator>
                 <type>AVG</type>
                 <varName>tsm_cc</varName>
               </aggregator>
-          <aggregator>
+              <aggregator>
                 <type>AVG</type>
                 <varName>turbidity_cc</varName>
               </aggregator>
@@ -279,7 +283,7 @@
     <wps:Input>
       <ows:Identifier>calvalus.hadoop.mapreduce.job.queuename</ows:Identifier>
       <wps:Data>
-        <wps:LiteralData>lc</wps:LiteralData>
+        <wps:LiteralData>other</wps:LiteralData>
       </wps:Data>
     </wps:Input>
 
